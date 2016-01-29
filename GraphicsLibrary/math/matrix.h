@@ -63,6 +63,14 @@ public:
 			return m_matrix[2*(y-1)+(x-1)];
 		}
 	}
+	inline matrix2D<class T_type> operator*(const matrix2D& _rhs){
+			matrix2D<class T_type> return_m;
+			return_m.m_matrix[0] = this->m_matrix[0] * _rhs.m_matrix[0] + this->m_matrix[1] * _rhs.m_matrix[2];
+			return_m.m_matrix[0] = this->m_matrix[0] * _rhs.m_matrix[2] + this->m_matrix[1] * _rhs.m_matrix[3];
+			return_m.m_matrix[0] = this->m_matrix[2] * _rhs.m_matrix[0] + this->m_matrix[3] * _rhs.m_matrix[2];
+			return_m.m_matrix[0] = this->m_matrix[2] * _rhs.m_matrix[0] + this->m_matrix[3] * _rhs.m_matrix[2];
+			return return_m;
+	}
 public:
 	T_type* m_matrix;
 };
