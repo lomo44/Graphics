@@ -82,7 +82,15 @@ float joint_rot = 0.0f;
 // TODO: Add additional joint parameters here
 //////////////////////////////////////////////////////
 
+// ---------------------------------------------------
+template<class t> struct vector2D{
+	t x;
+	t y;
+};
 
+typedef vector2D<int> vector2Di;
+typedef vector2D<float> vector2Df;
+typedef vector2D<double> vector2Dd;
 
 // ***********  FUNCTION HEADER DECLARATIONS ****************
 
@@ -105,7 +113,8 @@ void GLUI_Control(int id);
 // Functions to help draw the object
 void drawSquare(float size);
 void drawLeg();
-
+void drawCircle(float _radius, int segcount);
+void drawPolygon(vector2Df* _float, int _NumberofPoint);
 // Return the current system clock (in seconds)
 double getTime();
 
@@ -306,10 +315,8 @@ void display(void)
     ///////////////////////////////////////////////////////////
 
     // Draw our hinged object
-    const float BODY_WIDTH = 30.0f;
-    const float BODY_LENGTH = 50.0f;
-    const float ARM_LENGTH = 50.0f;
-    const float ARM_WIDTH = 10.0f;
+    const float BODY_WIDTH = 300.0f;
+    const float BODY_LENGTH = 500.0f;
 
     // Push the current transformation matrix on the stack
     glPushMatrix();
@@ -321,17 +328,22 @@ void display(void)
 
             // Set the colour to green
             glColor3f(0.0, 1.0, 0.0);
-
+            vector2Df* body = new vector2Df[6];
+            body[0].x = -1;body[0].y = 10;
+            body[1].x = 1;body[1].y = 10;
+            body[2].x = 3;body[2].y = 0;
+            body[3].x = 1;body[3].y = -3;
+            body[4].x = -1;body[4].y = -3;
+            body[5].x = -3;body[5].y = 0;
             // Draw the square for the body
             drawSquare(1.0);
         glPopMatrix();
-        glLoadIdentity();
         glPushMatrix();
         	glTranslatef(-10,0,0);
         	drawLeg();
         	glTranslatef(20,0,0);
         	drawLeg();
-        	glPopMatrix();
+        glPopMatrix();
     // Retrieve the previous state of the transformation stack
     glPopMatrix();
 
@@ -374,13 +386,18 @@ void drawLeg()
 			glScalef(torso_width,torso_length,1);
 			drawSquare(1.0);
 		glPopMatrix();
+    	glColor3f(0,0,0);
+    	drawCircle(6,30);
 		glTranslatef(0.0f,-torso_length+leg_width,0.0f);
-		drawCircle(10,30);
-		glRotatef(leg_startangle+joint_rot,0,0,1);
-		glTranslatef(0.0f,-leg_length/2,1);
-		glScalef(leg_width,leg_length,1);
-		glColor3f(1.0f,0.0f,1.0f);
-		drawSquare(1.0);
+		glPushMatrix();
+			glRotatef(leg_startangle+joint_rot,0,0,1);
+			glTranslatef(0.0f,-leg_length/2,1);
+			glScalef(leg_width,leg_length,1);
+			glColor3f(1.0f,0.0f,1.0f);
+			drawSquare(1.0);
+		glPopMatrix();
+		glColor3f(0,0,0);
+		drawCircle(6,30);
 	glPopMatrix();
 }
 
@@ -396,4 +413,14 @@ void drawCircle(float _radius, int segcount){
 	}
 	glEnd();
 }
+
+void drawPolygon(vector2Df* _float, int _NumberofPoint){
+	glBegin(GL_POLYGON);
+	for(int i = 0; i <= _NumberofPoint; i++){
+		glVertex2d(_float[i].x,_float[i].y);
+	}
+	glEnd();
+}
+
+
 
