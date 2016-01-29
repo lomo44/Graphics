@@ -11,7 +11,7 @@
 #include <iostream>
 #include <string>
 #include <stdlib.h>
-#include <math>
+#include <cmath>
 #include <memory>
 
 template<class T_type> class matrix3D {
@@ -28,7 +28,7 @@ public:
 			return NULL;
 		}
 		else{
-			return ms_matrix[3*(y-1)+(x-1)];
+			return m_matrix[3*(y-1)+(x-1)];
 		}
 	}
 	inline matrix3D<class T_type> operator*(const matrix3D& _rhs){
@@ -60,7 +60,7 @@ public:
 			return NULL;
 		}
 		else{
-			return ms_matrix[2*(y-1)+(x-1)];
+			return m_matrix[2*(y-1)+(x-1)];
 		}
 	}
 public:
@@ -75,7 +75,7 @@ public:
 		m_matrix = _matrix;
 	}
 	virtual ~matrix4D(){
-		delete _matrix;
+		delete m_matrix;
 	}
 	inline T_type matrix4D<class T_type>::getXY(int x, int y){
 		if(m_matrix == NULL){
@@ -117,8 +117,8 @@ template<class T_type> inline matrix3D<T_type> getHomogeneousRotationalMatrix(T_
 
 template<class T_type> inline matrix3D<T_type> getHomogeneousScallingMatrix(T_type _power){
 	T_type* matrix = new T_type[9];
-	matrix[0] = _power
-	matrix[1] = 0
+	matrix[0] = _power;
+	matrix[1] = 0;
 	matrix[2] = 0;
 	matrix[3] = 0;
 	matrix[4] = _power;

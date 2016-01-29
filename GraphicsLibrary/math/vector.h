@@ -60,7 +60,7 @@ template<class T_type> class vector2D{
 		_new.y = this->y + _rhs.y;
 		return _new;
 	}
-	inline vector2D<class T_type> operator+(const vector2D<class T_type>& _rhs){
+	inline vector2D<class T_type> operator-(const vector2D<class T_type>& _rhs){
 		vector2D<class T_type> _new = new vector2D<class T_type>;
 		_new.x = this->x - _rhs.x;
 		_new.y = this->y - _rhs.y;
