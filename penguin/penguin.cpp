@@ -77,7 +77,9 @@ int animation_frame = 0;      // Specify current frame of animation
 const float JOINT_MIN = -45.0f;
 const float JOINT_MAX =  45.0f;
 float joint_rot = 0.0f;
-
+// Draw our hinged object
+const float BODY_WIDTH = 30.0f;
+const float BODY_LENGTH = 50.0f;
 //////////////////////////////////////////////////////
 // TODO: Add additional joint parameters here
 //////////////////////////////////////////////////////
@@ -114,7 +116,11 @@ void GLUI_Control(int id);
 void drawSquare(float size);
 void drawLeg();
 void drawCircle(float _radius, int segcount);
+void drawCircleFilled(float _radius, int segcount);
 void drawPolygon(vector2Df* _float, int _NumberofPoint);
+void drawBody();
+void drawWing();
+void drawHead();
 // Return the current system clock (in seconds)
 double getTime();
 
@@ -314,35 +320,24 @@ void display(void)
     //   render the individual body parts.
     ///////////////////////////////////////////////////////////
 
-    // Draw our hinged object
-    const float BODY_WIDTH = 300.0f;
-    const float BODY_LENGTH = 500.0f;
+
 
     // Push the current transformation matrix on the stack
     glPushMatrix();
-
-        // Draw the 'body'
-        glPushMatrix();
-            // Scale square to size of body
-            glScalef(BODY_WIDTH, BODY_LENGTH, 1.0);
-
-            // Set the colour to green
-            glColor3f(0.0, 1.0, 0.0);
-            vector2Df* body = new vector2Df[6];
-            body[0].x = -1;body[0].y = 10;
-            body[1].x = 1;body[1].y = 10;
-            body[2].x = 3;body[2].y = 0;
-            body[3].x = 1;body[3].y = -3;
-            body[4].x = -1;body[4].y = -3;
-            body[5].x = -3;body[5].y = 0;
-            // Draw the square for the body
-            drawSquare(1.0);
-        glPopMatrix();
-        glPushMatrix();
-        	glTranslatef(-10,0,0);
-        	drawLeg();
-        	glTranslatef(20,0,0);
-        	drawLeg();
+    	drawBody();        // Draw the 'body'
+    	glPushMatrix();
+    		glTranslatef(0,BODY_LENGTH*5,0);
+    		drawHead();
+    	glPopMatrix();
+    	glPushMatrix();
+    	glTranslatef(5,BODY_LENGTH*3,0);
+    	drawWing();
+    	glPopMatrix();
+    	glPushMatrix();
+        glTranslatef(-10,-BODY_LENGTH*2,0);
+       	drawLeg();
+        glTranslatef(20,0,0);
+        drawLeg();
         glPopMatrix();
     // Retrieve the previous state of the transformation stack
     glPopMatrix();
@@ -413,13 +408,91 @@ void drawCircle(float _radius, int segcount){
 	}
 	glEnd();
 }
+void drawCircleFilled(float _radius, int segcount){
+	glBegin(GL_POLYGON);
+	float theta = 0;
+	float delta = 2 * PI/segcount;
+	for(int i = 0; i <= segcount; i++){
+		float x = _radius * cos(theta);
+		float y = _radius * sin(theta);
+		glVertex2d(x,y);
+		theta += delta;
+	}
+	glEnd();
+}
+
+void drawBody(){
+	glPushMatrix();
+		// Scale square to size of body
+		glScalef(BODY_WIDTH, BODY_LENGTH, 1.0);
+		// Set the colour to green
+		glColor3f(0.0, 1.0, 0.0);
+		vector2Df* body = new vector2Df[6];
+		body[0].x = -1;body[0].y = 5;
+		body[1].x = 1;body[1].y = 5;
+		body[2].x = 3;body[2].y = 0;
+		body[3].x = 1;body[3].y = -3;
+		body[4].x = -1;body[4].y = -3;
+		body[5].x = -3;body[5].y = 0;
+		glColor3f(0.5,0.5,0.5);
+		drawPolygon(body,6);
+		// Draw the square for the body
+	glPopMatrix();
+}
+
+void drawHead(){
+	const float head_anlge = 0;
+	glPushMatrix();
+		glRotatef(head_anlge + joint_rot, 0, 0, 1);
+		glPushMatrix();
+			vector2Df* head = new vector2Df[5];
+			head[0].x = 1;head[0].y = 0.5;
+			head[1].x = -0.1;head[1].y = 1;
+			head[2].x = -1;head[2].y = 0.5;
+			head[3].x = -1.2;head[3].y = -1.2;
+			head[4].x = 1.2;head[4].y = -1.2;
+			glScalef(40,40,1);
+			glTranslatef(0,1,0);
+			glColor3f(0.5,0.7,0.2);
+			drawPolygon(head,5);
+			glTranslatef(-0.5,0.2,0);
+			glColor3f(1.0,1.0,1.0);
+			drawCircleFilled(0.2,10);
+			glTranslatef(-0.1,0,0);
+			glColor3f(0.0,0.0,0.0);
+			drawCircleFilled(0.1,10);
+		glPopMatrix();
+		glColor3f(1.0,1.0,1.0);
+		drawCircle(6,30);
+	glPopMatrix();
+}
 
 void drawPolygon(vector2Df* _float, int _NumberofPoint){
 	glBegin(GL_POLYGON);
-	for(int i = 0; i <= _NumberofPoint; i++){
-		glVertex2d(_float[i].x,_float[i].y);
+	for(int i = 0; i < _NumberofPoint; i++){
+		glVertex2f(_float[i].x,_float[i].y);
 	}
 	glEnd();
+}
+
+void drawWing(){
+	const float wing_startangle = -90;
+	glPushMatrix();
+		glRotatef(wing_startangle + joint_rot,0,0,1);
+		glPushMatrix();
+			glTranslatef(0,-5,0);
+			glScalef(10,10,1);
+			vector2Df* pset = new vector2Df[4];
+			pset[0].x = 1;pset[0].y = 2;
+			pset[1].x = -1;pset[1].y = 2.1;
+			pset[2].x = -0.5;pset[2].y = -2 -abs(joint_rot)>>1;
+			pset[3].x = 0.75;pset[3].y = -2 -abs(joint_rot)>>1;
+			glColor3f(0,0,0);
+			drawPolygon(pset,4);
+		glPopMatrix();
+		glColor3f(1,1,1);
+		drawCircle(6,30);
+	glPopMatrix();
 }
 
 
