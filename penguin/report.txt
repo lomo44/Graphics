@@ -1,0 +1,38 @@
+CSC418 Assignment 1 Report
+
+Part 1 Introduction
+
+The assignment 1 is not the first time that I program with a graphic library. In
+the ECE297 course, I've a map project with EasyGL written by one of the ECE pro
+fessor and I expected the whole experience should be similar. However, the state
+properties of OpenGL actually complex my development process, but after getting
+use to it, I started to understand the process. The whole program was written
+within 10 hours of working time.
+
+Part 2 Design Phase
+
+The design phase is actually the hardest part in this assignment. We were only
+given a rough drawing of the penguin, no other specific information was given.
+Therefore I need to use my imagination to draw the penguin as closely as possible
+to the drawing.
+
+The method that I use is some kind linear mapping, where I selected the approximate
+center of the body and the build up a Euclidean coordinate system for there. I
+roughly measured all the relative vertices and rotation point that were shown in
+the system.Record and categorize them in to different group according to the body
+part they belong to.
+
+After the mapping, I started to design some of the basic interfaces that I need
+for the drawing. I found that the body, the head ,and the mouth of the penguin are
+irregular polygon, so I define drawPolygon as the basic drawing API for the body
+and the mouth. For the circles, I modified the drawPolygon algorithm and approximate
+circle with multi-polygons, called drawCircle and drawCircleFilled corresponding to
+filling or not filling the circle. I have accommodate the original drawSquare
+method from the started code just so that I do not need to re-design any API that
+related to rectangle.In order to pass coordinates into the method, I design a vector
+structure that could be pass into the method as an array.
+
+The body of the penguin is a six-side irregular polygon, which could be drawn
+using drawPolygon method. Similarly, the head of the penguin is a five-side polygon
+which can also be drawn using drawPolygon method. Any irregular 4-side polygon such
+as the wings and the mouth are drawn using the drawPolygon method too.
