@@ -17,10 +17,11 @@ Therefore I need to use my imagination to draw the penguin as closely as possibl
 to the drawing.
 
 The method that I use is some kind linear mapping, where I selected the approximate
-center of the body and the build up a Euclidean coordinate system for there. I
+center of the body part and the build up a Euclidean coordinate system for there. I
 roughly measured all the relative vertices and rotation point that were shown in
 the system.Record and categorize them in to different group according to the body
-part they belong to.
+part they belong to. All the body part were measure in the same scale so that
+the size relationship can be maintained.
 
 After the mapping, I started to design some of the basic interfaces that I need
 for the drawing. I found that the body, the head ,and the mouth of the penguin are
@@ -36,3 +37,43 @@ The body of the penguin is a six-side irregular polygon, which could be drawn
 using drawPolygon method. Similarly, the head of the penguin is a five-side polygon
 which can also be drawn using drawPolygon method. Any irregular 4-side polygon such
 as the wings and the mouth are drawn using the drawPolygon method too.
+
+Since the assignment requires animation for the penguin, all of the drawing
+api such as drawBody, drawHead, and drawWing were drawing on the rotational point
+instead of the actual center of the part.Such decision is mad because of real
+world analogy. In real world, it would be ridiculous to assemble a machine base
+on their center of mass instead of the actual connection of the part.
+
+To understand the relationship between each part, we need to find the relative
+distance between each main body part. For simplicity, we use body as the basic reference,
+and measure the distance between the center of the body, and the rotation point
+of each main body part. This translation relationship could be used in the next part.
+Other part such as eyes, mouth, and legs, their position is fixed according to head
+and body.
+
+
+Part 3 transformation
+
+Since during the design phase, the parameter and the coordinates of each part
+were measure and set, therefore the unity size of each part is fixed and I would
+not need to worry about scaling each part during the transformation phase.
+
+The whole drawing of the penguin is divided into several different part. Since
+the penguin as a whole need to move both X direction and Y direction, we should
+translate the origin corresponding to the animation. Then, after the translation
+of the full body, to make the drawing bigger and easier to work with, we scale
+it uniformly. The whole matrix now is ready for drawing and thus we push the
+current matrix onto the stack.
+
+First We draw the body by calling drawBody(), which is a simple
+drawPolygon() method call. Since the operation of drawing the body should not
+affect future operation, at the entrance point of the operation, we push the current
+matrix into the stack. Such consideration is used on every other body drawing
+method.
+
+Next, we translate up to draw the head. Within the drawHead() method, we first
+rotate the whole head to the animation angle, and then translate to the real center
+of dravity to draw the head. After the head is draw, we then translate again to the
+point that we need to draw the mouth. In drawMouth(), upper mouth is draw first,
+and we translate the origin down to draw the upper mouth. The amount that the
+lower mouth translate is depends on the animation.
