@@ -28,6 +28,8 @@
 		but we're leaving that here in case you want to try building
 		on windows on your own.
 
+
+// 												Zhuang Li..
 ***********************************************************/
 
 #ifdef _WIN32
