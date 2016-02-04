@@ -73,7 +73,42 @@ method.
 
 Next, we translate up to draw the head. Within the drawHead() method, we first
 rotate the whole head to the animation angle, and then translate to the real center
-of dravity to draw the head. After the head is draw, we then translate again to the
+of gravity to draw the head. After the head is draw, we then translate again to the
 point that we need to draw the mouth. In drawMouth(), upper mouth is draw first,
-and we translate the origin down to draw the upper mouth. The amount that the
-lower mouth translate is depends on the animation.
+and we translate the origin down to draw the lower mouth. The amount that the
+lower mouth translate is depends on the animation. After the mouth is drawn, we
+translate slightly to draw the eyes by using the drawCircle() method.To make the
+mouth move up and down, simply translate the lower mouth down and up each frame.
+
+After drawing the whole head, we draw the wing. The wing that the penguin has
+is designed as a irregular four-side polygon. We create a method called drawWing()
+to draw the wing of the penguin on its rotational axis. Since the assignment ask
+us to animate the expansion of the wing, we need to vertically stretch it. I thougt
+about stretching the wing by translate the drawing center up and apply a Y-scaling
+matrix to it, but it is not efficient. Since the component would be redrawn everytime
+the OpenGL Display() function is called, we only need to increase the height of the
+wing during the animation.
+
+Finally, we draw the leg. Since the left leg and the right leg is similar, we
+only need one method to draw it, call drawLeg(). This methods takes four parameters
+which are starting angles and moving angles of both left and right leg. These
+parameters are used when we are doing animations. The leg contains two rectangle
+connected by a rotational axis, the upper part is called "torso", the lower part
+called "leg". Torso is connected with a rotational axis to the body. To draw the
+leg, we first translate the drawing center to the rotational axis, then we call
+drawLeg() method. The method first rotate the leg by its starting angle, and the
+extra angle that are needed for the animation. Then, we translate the drawing center
+down to the actual center of mass that the torso should be drawn. Using the current
+rotated and translated matrix, we apply similar procedure to draw the leg under
+the torso, so that it can move along with the movement of the leg. After drawing
+the right leg, we back to the matrix that body reside, then we translate to the
+rotational point of the left leg, doing similar procedure. The whole penguin was
+drawn after two legs complete.
+
+Part 5 Conclusion.
+
+It is not a easy task to program with OpenGL due to the rawness of the interface
+given. I believe that after several assignment, we would have created an library
+that integrate several operation. This assignment really help me understand the
+importance of the sequence that transformation need to consider, and also the
+mechanism that OpenGL works under.
