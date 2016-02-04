@@ -84,7 +84,7 @@ template<class T_type> inline vector2D<T_type> crossproduct2D(vector2D<T_type> _
 	return_vec.y = _v1.y*_v2.x;
 	return return_vec;
 }
-template<class T_type> inline vector3D<T_type> crossproduct(vector3D<T_type> _v1, vector3D<T_type> _v2){
+template<class T_type> inline vector3D<T_type> crossproduct3D(vector3D<T_type> _v1, vector3D<T_type> _v2){
 	vector3D<T_type> return_vec = new vector3D<T_type>;
 	return_vec.x = _v1.y*_v2.z-_v1.z*_v2.y;
 	return_vec.y = _v1.z*_v2.x-_v1.x*_v2.z;

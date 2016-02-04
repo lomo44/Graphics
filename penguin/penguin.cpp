@@ -37,7 +37,7 @@
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <GL/glut.h>
-#include <glui.h>
+#include <GL/glui.h>
 
 #include <stdio.h>
 #include <stdlib.h>

@@ -16,6 +16,7 @@ public:
 	virtual void transform(double _x, double _y) = 0;
 	virtual void rotation(double _degree);
 	virtual void shear(double _c);
+
 };
 
 #endif /* GEOMETRYOBJECT_H_ */
