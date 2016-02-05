@@ -1,0 +1,114 @@
+CSC418 Assignment 1 Report
+
+Part 1 Introduction
+
+The assignment 1 is not the first time that I program with a graphic library. In
+the ECE297 course, I've a map project with EasyGL written by one of the ECE pro
+fessor and I expected the whole experience should be similar. However, the state
+properties of OpenGL actually complex my development process, but after getting
+use to it, I started to understand the process. The whole program was written
+within 10 hours of working time.
+
+Part 2 Design Phase
+
+The design phase is actually the hardest part in this assignment. We were only
+given a rough drawing of the penguin, no other specific information was given.
+Therefore I need to use my imagination to draw the penguin as closely as possible
+to the drawing.
+
+The method that I use is some kind linear mapping, where I selected the approximate
+center of the body part and the build up a Euclidean coordinate system for there. I
+roughly measured all the relative vertices and rotation point that were shown in
+the system.Record and categorize them in to different group according to the body
+part they belong to. All the body part were measure in the same scale so that
+the size relationship can be maintained.
+
+After the mapping, I started to design some of the basic interfaces that I need
+for the drawing. I found that the body, the head ,and the mouth of the penguin are
+irregular polygon, so I define drawPolygon as the basic drawing API for the body
+and the mouth. For the circles, I modified the drawPolygon algorithm and approximate
+circle with multi-polygons, called drawCircle and drawCircleFilled corresponding to
+filling or not filling the circle. I have accommodate the original drawSquare
+method from the started code just so that I do not need to re-design any API that
+related to rectangle.In order to pass coordinates into the method, I design a vector
+structure that could be pass into the method as an array.
+
+The body of the penguin is a six-side irregular polygon, which could be drawn
+using drawPolygon method. Similarly, the head of the penguin is a five-side polygon
+which can also be drawn using drawPolygon method. Any irregular 4-side polygon such
+as the wings and the mouth are drawn using the drawPolygon method too.
+
+Since the assignment requires animation for the penguin, all of the drawing
+api such as drawBody, drawHead, and drawWing were drawing on the rotational point
+instead of the actual center of the part.Such decision is mad because of real
+world analogy. In real world, it would be ridiculous to assemble a machine base
+on their center of mass instead of the actual connection of the part.
+
+To understand the relationship between each part, we need to find the relative
+distance between each main body part. For simplicity, we use body as the basic reference,
+and measure the distance between the center of the body, and the rotation point
+of each main body part. This translation relationship could be used in the next part.
+Other part such as eyes, mouth, and legs, their position is fixed according to head
+and body.
+
+
+Part 3 transformation
+
+Since during the design phase, the parameter and the coordinates of each part
+were measure and set, therefore the unity size of each part is fixed and I would
+not need to worry about scaling each part during the transformation phase.
+
+The whole drawing of the penguin is divided into several different part. Since
+the penguin as a whole need to move both X direction and Y direction, we should
+translate the origin corresponding to the animation. Then, after the translation
+of the full body, to make the drawing bigger and easier to work with, we scale
+it uniformly. The whole matrix now is ready for drawing and thus we push the
+current matrix onto the stack.
+
+First We draw the body by calling drawBody(), which is a simple
+drawPolygon() method call. Since the operation of drawing the body should not
+affect future operation, at the entrance point of the operation, we push the current
+matrix into the stack. Such consideration is used on every other body drawing
+method.
+
+Next, we translate up to draw the head. Within the drawHead() method, we first
+rotate the whole head to the animation angle, and then translate to the real center
+of gravity to draw the head. After the head is draw, we then translate again to the
+point that we need to draw the mouth. In drawMouth(), upper mouth is draw first,
+and we translate the origin down to draw the lower mouth. The amount that the
+lower mouth translate is depends on the animation. After the mouth is drawn, we
+translate slightly to draw the eyes by using the drawCircle() method.To make the
+mouth move up and down, simply translate the lower mouth down and up each frame.
+
+After drawing the whole head, we draw the wing. The wing that the penguin has
+is designed as a irregular four-side polygon. We create a method called drawWing()
+to draw the wing of the penguin on its rotational axis. Since the assignment ask
+us to animate the expansion of the wing, we need to vertically stretch it. I thougt
+about stretching the wing by translate the drawing center up and apply a Y-scaling
+matrix to it, but it is not efficient. Since the component would be redrawn everytime
+the OpenGL Display() function is called, we only need to increase the height of the
+wing during the animation.
+
+Finally, we draw the leg. Since the left leg and the right leg is similar, we
+only need one method to draw it, call drawLeg(). This methods takes four parameters
+which are starting angles and moving angles of both left and right leg. These
+parameters are used when we are doing animations. The leg contains two rectangle
+connected by a rotational axis, the upper part is called "torso", the lower part
+called "leg". Torso is connected with a rotational axis to the body. To draw the
+leg, we first translate the drawing center to the rotational axis, then we call
+drawLeg() method. The method first rotate the leg by its starting angle, and the
+extra angle that are needed for the animation. Then, we translate the drawing center
+down to the actual center of mass that the torso should be drawn. Using the current
+rotated and translated matrix, we apply similar procedure to draw the leg under
+the torso, so that it can move along with the movement of the leg. After drawing
+the right leg, we back to the matrix that body reside, then we translate to the
+rotational point of the left leg, doing similar procedure. The whole penguin was
+drawn after two legs complete.
+
+Part 5 Conclusion.
+
+It is not a easy task to program with OpenGL due to the rawness of the interface
+given. I believe that after several assignment, we would have created an library
+that integrate several operation. This assignment really help me understand the
+importance of the sequence that transformation need to consider, and also the
+mechanism that OpenGL works under.
