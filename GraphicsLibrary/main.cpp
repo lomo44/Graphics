@@ -5,9 +5,4 @@
  *      Author: c5lizhua
  */
 #include <iostream>
-int main(){
-	std::cout<<"w"<<std::endl;
-	return 0;
-}
-
 

@@ -146,11 +146,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\GraphicsLibrary\GeometryObject.h" />
-    <ClInclude Include="..\..\GraphicsLibrary\math\matrix.h" />
-    <ClInclude Include="..\..\GraphicsLibrary\math\vector.h" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="GraphicLibrary.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

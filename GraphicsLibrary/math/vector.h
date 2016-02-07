@@ -30,7 +30,6 @@ template<class T_type> class vector4D{
 		return _new;
 	}
 };
-
 template<class T_type> class vector3D{
 	T_type x;
 	T_type y;
@@ -50,7 +49,6 @@ template<class T_type> class vector3D{
 		return _new;
 	}
 };
-
 template<class T_type> class vector2D{
 	T_type x;
 	T_type y;
@@ -67,8 +65,6 @@ template<class T_type> class vector2D{
 		return _new;
 	}
 };
-
-
 template<class T_type> inline T_type dotproduct2D(vector2D<T_type> _v1,vector2D<T_type> _v2){
 	return _v1.x * _v2.x + _v1.y*_v2.y;
 }
