@@ -221,8 +221,13 @@ enum GeometricObjectType {
 	Geo_Polygons,
 };
 
-/*Global Variable*/
+enum GeoPlatformType {
+	OpenGL,
+};
 
+/*Global Variable*/
+void ReshapWrapper(int width, int height);
+void RenderWrapper();
 class GeometricObject {
 public:
 	GeometricObject();
@@ -240,12 +245,26 @@ private:
 
 class GeometricObjectRenderer {
 public:
+	GeometricObjectRenderer() {};
+	~GeometricObjectRenderer() {};
+	virtual void Reshape(int width, int height) = 0;
+	virtual void Initialization() = 0;
 	void Render();
-	void Reshape();
 	void ClearStack();
 private:
 	std::queue<GeometricObject> m_drawstack;
 };
+
+class GLObjectRenderer : public GeometricObjectRenderer {
+public:
+	GLObjectRenderer() {};
+	~GLObjectRenderer() {};
+	void Reshape(int width, int height);
+	void Initialization();
+};
+
+
+
 
 class GeometricObjectFactory {
 public:
@@ -264,30 +283,130 @@ struct WindowAttribute {
 
 class WindowsController {
 public:
-	WindowsController();
-	virtual ~WindowsController();
-	virtual void InitializeWindow() = 0;
-	virtual int CreateAWindow(const WindowAttribute& _new) = 0;
+	WindowsController() {};
+	virtual ~WindowsController() {};
+	virtual void Initialization() const = 0;
+	virtual int CreateAWindow(const WindowAttribute& _new) const = 0;
 };
 
 class GLUTWindowsController : public WindowsController {
 public:
-	GLUTWindowsController();
-	virtual ~GLUTWindowsController();
-	void Initialize();
-	int CreateAWindow(const WindowAttribute& _new);
+	GLUTWindowsController() {};
+	virtual ~GLUTWindowsController() {};
+	void Initialization() const;
+	int CreateAWindow(const WindowAttribute& _new) const;
 private:
-	GeometricObjectRenderer m_Renderer;
 	std::vector<int> m_WindowList;
 };
 
+class MainController {
+public:
+	MainController() {};
+	virtual ~MainController() {};
+	virtual void Initialization() = 0;
+	virtual int CreateNewWindow(const WindowAttribute& _new) = 0;
+	virtual void MainLoop() = 0;
+};
 
-GLUTWindowsController* g_GlutWindowsController;
+class GLMainController : public MainController {
+public:
+	GLMainController() {};
+	~GLMainController() {};
+	void Initialization();
+	int CreateNewWindow(const WindowAttribute& _new);
+	void MainLoop();
+private:
+	GLUTWindowsController m_windowController;
+	GLObjectRenderer m_ObjectRenderer;
+};
 
 
+GeometricObjectRenderer* g_Renderer;
+MainController* g_MainController;
+
+void RenderWrapper() {
+	g_Renderer->Render();
+}
+
+void ReshapeWrapper(int w, int h) {
+	g_Renderer->Reshape(w, h);
+}
 /*global variable*/
+MainController* GraphicLibraryInit(GeoPlatformType _type) {
+	if (_type == OpenGL) {
+		g_MainController = new GLMainController();
+		g_MainController->Initialization();
+		return g_MainController;
+	}
+	else {
+		return NULL;
+	}
+}
 
 int main() {
-	std::cout << "Hellow World" << std::endl;
+	WindowAttribute newwindow;
+	newwindow.name = "ww";
+	newwindow.pos_x = 0;
+	newwindow.pos_y = 0;
+	newwindow.size_x = 300;
+	newwindow.size_y = 300;
+	MainController* controller = GraphicLibraryInit(OpenGL);
+	controller->CreateNewWindow(newwindow);
+	controller->MainLoop();
 	return 0;
+}
+
+
+// Function Implementation
+
+int GLUTWindowsController::CreateAWindow(const WindowAttribute& _new) const {
+	
+	// Create window
+	glutInitWindowPosition(_new.pos_x, _new.pos_y);
+	glutInitWindowSize(_new.size_x, _new.size_y);
+	int windowID = glutCreateWindow(_new.name.c_str());
+	return windowID;
+}
+
+void GLUTWindowsController::Initialization() const{
+	// Set video mode: double-buffered, color, depth-buffered
+	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+}
+
+void GLObjectRenderer::Reshape(int width, int height){
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluOrtho2D(-width / 2, width / 2, -height / 2, height / 2);
+	glViewport(0, 0, width, height);
+}
+
+void GLObjectRenderer::Initialization()
+{
+	int argc = 0;
+	char* argv[1];
+	argv[0] = "";
+	glutInit(&argc, argv);
+}
+
+void GeometricObjectRenderer::Render(){
+}
+
+void GLMainController::Initialization()
+{
+	g_Renderer = &m_ObjectRenderer;
+	g_Renderer->Initialization();
+	m_windowController.Initialization();
+}
+
+int GLMainController::CreateNewWindow(const WindowAttribute& _new)
+{
+	return m_windowController.CreateAWindow(_new);
+
+}
+
+void GLMainController::MainLoop()
+{
+	glutReshapeFunc(ReshapeWrapper);
+	glutDisplayFunc(RenderWrapper);
+	glutMainLoop();
 }
