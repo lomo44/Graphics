@@ -146,7 +146,29 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="GraphicLibrary.cpp" />
+    <ClCompile Include="GeometricObject.cpp" />
+    <ClCompile Include="GeometricObjectRenderer.cpp" />
+    <ClCompile Include="GLMainController.cpp" />
+    <ClCompile Include="GlobalVariable.cpp" />
+    <ClCompile Include="GLObjectRenderer.cpp" />
+    <ClCompile Include="GLUTWindowsController.cpp" />
+    <ClCompile Include="Main.cpp" />
+    <ClCompile Include="MainController.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="CommonType.h" />
+    <ClInclude Include="GeometricObject.h" />
+    <ClInclude Include="GeometricObjectFactory.h" />
+    <ClInclude Include="GeometricObjectRenderer.h" />
+    <ClInclude Include="GLMainController.h" />
+    <ClInclude Include="GlobalVariable.h" />
+    <ClInclude Include="GLObjectRenderer.h" />
+    <ClInclude Include="GLUTWindowsController.h" />
+    <ClInclude Include="GraphicLibrary.h" />
+    <ClInclude Include="MainController.h" />
+    <ClInclude Include="Matrix.h" />
+    <ClInclude Include="Vector.h" />
+    <ClInclude Include="WindowsController.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

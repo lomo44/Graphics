@@ -13,10 +13,102 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\Math">
+      <UniqueIdentifier>{f98b0367-56b0-4900-be2d-4fe1be86eac7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\GeometricObject">
+      <UniqueIdentifier>{91da082b-6024-4d1d-b3a8-5899ca5b51b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\GeometricObject">
+      <UniqueIdentifier>{8fe55d5a-2b0e-4b00-9bbb-cc0620fffd23}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\GeometricObjectRenderer">
+      <UniqueIdentifier>{8d6757d1-5e26-421e-b022-d0ba87c6f698}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\GeometricObjectRenderer">
+      <UniqueIdentifier>{5ba0a121-8a09-41b8-8de3-97573d566e78}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\WindowsController">
+      <UniqueIdentifier>{c0f82fdc-4c36-4157-879e-e7a3c3f811a9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\WindowsController">
+      <UniqueIdentifier>{0867e508-b963-4ae0-a339-67692e5ae8db}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\MainController">
+      <UniqueIdentifier>{6299437f-35e1-4544-8cf2-2c59a1dd7c0e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\MainController">
+      <UniqueIdentifier>{45d014c3-fd76-4550-ac1f-c7a65bdadab2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\GeometricObjectFactory">
+      <UniqueIdentifier>{3773b62f-30c0-4fdf-ac92-b614bd8f561d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="GraphicLibrary.cpp">
+    <ClCompile Include="GeometricObject.cpp">
+      <Filter>Source Files\GeometricObject</Filter>
+    </ClCompile>
+    <ClCompile Include="GeometricObjectRenderer.cpp">
+      <Filter>Source Files\GeometricObjectRenderer</Filter>
+    </ClCompile>
+    <ClCompile Include="GLObjectRenderer.cpp">
+      <Filter>Source Files\GeometricObjectRenderer</Filter>
+    </ClCompile>
+    <ClCompile Include="GLUTWindowsController.cpp">
+      <Filter>Source Files\WindowsController</Filter>
+    </ClCompile>
+    <ClCompile Include="MainController.cpp">
+      <Filter>Source Files\MainController</Filter>
+    </ClCompile>
+    <ClCompile Include="GLMainController.cpp">
+      <Filter>Source Files\MainController</Filter>
+    </ClCompile>
+    <ClCompile Include="GlobalVariable.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Main.cpp">
       <Filter>Resource Files</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="CommonType.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Vector.h">
+      <Filter>Header Files\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Matrix.h">
+      <Filter>Header Files\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="GeometricObject.h">
+      <Filter>Header Files\GeometricObject</Filter>
+    </ClInclude>
+    <ClInclude Include="GeometricObjectRenderer.h">
+      <Filter>Header Files\GeometricObjectRenderer</Filter>
+    </ClInclude>
+    <ClInclude Include="GLObjectRenderer.h">
+      <Filter>Header Files\GeometricObjectRenderer</Filter>
+    </ClInclude>
+    <ClInclude Include="WindowsController.h">
+      <Filter>Header Files\WindowsController</Filter>
+    </ClInclude>
+    <ClInclude Include="GLUTWindowsController.h">
+      <Filter>Header Files\WindowsController</Filter>
+    </ClInclude>
+    <ClInclude Include="MainController.h">
+      <Filter>Header Files\MainController</Filter>
+    </ClInclude>
+    <ClInclude Include="GLMainController.h">
+      <Filter>Header Files\MainController</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicLibrary.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeometricObjectFactory.h">
+      <Filter>Header Files\GeometricObjectFactory</Filter>
+    </ClInclude>
+    <ClInclude Include="GlobalVariable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
