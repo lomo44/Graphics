@@ -102,20 +102,20 @@ const float MOUTH_MOVING_MIN = 0;
 const float MOUTH_MOVING_MAX = 0.5;
 float mouth_move = 0.0f;
 
-const float LEFT_TORSO_ROTATE_MIN = 0;
-const float LEFT_TORSO_ROTATE_MAX = 90;
+const float LEFT_TORSO_ROTATE_MIN = -180;
+const float LEFT_TORSO_ROTATE_MAX = 180;
 float left_torso_rotate = 0.0f;
 
-const float RIGHT_TORSO_ROTATE_MIN = 0;
-const float RIGHT_TORSO_ROTATE_MAX = 90;
+const float RIGHT_TORSO_ROTATE_MIN = -180;
+const float RIGHT_TORSO_ROTATE_MAX = 180;
 float right_torso_rotate = 0.0f;
 
-const float LEFT_LEG_ROTATE_MIN = -10;
-const float LEFT_LEG_ROTATE_MAX = 30;
+const float LEFT_LEG_ROTATE_MIN = 45;
+const float LEFT_LEG_ROTATE_MAX = 135;
 float left_leg_rotate = 0.0f;
 
-const float RIGHT_LEG_ROTATE_MIN = -10;
-const float RIGHT_LEG_ROTATE_MAX = 30;
+const float RIGHT_LEG_ROTATE_MIN = 45;
+const float RIGHT_LEG_ROTATE_MAX = 135;
 float right_leg_rotate = 0.0f;
 
 bool isleft = true;
@@ -296,12 +296,12 @@ void initGlui()
     GLUI_Spinner *leftleg_spinner
         = glui->add_spinner("L Leg", GLUI_SPINNER_FLOAT, &left_leg_rotate);
     leftleg_spinner->set_speed(0.1);
-    leftleg_spinner->set_float_limits(JOINT_MIN, JOINT_MAX, GLUI_LIMIT_CLAMP);
+    leftleg_spinner->set_float_limits(LEFT_LEG_ROTATE_MIN, LEFT_LEG_ROTATE_MAX, GLUI_LIMIT_CLAMP);
 
     GLUI_Spinner *rightleg_spinner
         = glui->add_spinner("R Leg", GLUI_SPINNER_FLOAT, &right_leg_rotate);
     rightleg_spinner->set_speed(0.1);
-    rightleg_spinner->set_float_limits(JOINT_MIN, JOINT_MAX, GLUI_LIMIT_CLAMP);
+    rightleg_spinner->set_float_limits(RIGHT_LEG_ROTATE_MIN, RIGHT_LEG_ROTATE_MAX, GLUI_LIMIT_CLAMP);
 
     ///////////////////////////////////////////////////////////
     // TODO:
@@ -362,21 +362,16 @@ void animate()
     wing_rotate = wing_rot * WING_ROTATE_MIN + (1- wing_rot) * WING_ROTATE_MAX;
 
     const double torso_rotate_speed = 0.2;
-    const double leg_rot_speed = 2 * torso_rotate_speed;
-    double torso_rot = sin(leg_animation_fram*torso_rotate_speed);
-    double joint_rot_t = (sin(animation_frame*leg_rot_speed) + 1.0) / 2.0;
-    if(torso_rot >0){
-    	left_torso_rotate = torso_rot * LEFT_TORSO_ROTATE_MIN + (1- torso_rot) * LEFT_TORSO_ROTATE_MAX;
-    	left_leg_rotate = joint_rot_t * LEFT_LEG_ROTATE_MIN + (1 - joint_rot_t) * LEFT_LEG_ROTATE_MAX;
-    }
-    else if(torso_rot == 0){
-    	leg_animation_fram = 0;
-    }
-    else{
-    	torso_rot = -torso_rot;
-    	right_torso_rotate = torso_rot * RIGHT_TORSO_ROTATE_MIN + (1- torso_rot) * RIGHT_TORSO_ROTATE_MAX;
-    	right_leg_rotate = joint_rot_t * RIGHT_LEG_ROTATE_MIN + (1 - joint_rot_t) * RIGHT_LEG_ROTATE_MAX;
-    }
+    const double leg_rot_speed = torso_rotate_speed;
+    double torso_rot_left = 10* cos(animation_frame*torso_rotate_speed-10) + 10;
+    double torso_rot_right = 10* sin(animation_frame*torso_rotate_speed) + 10;
+    double joint_rot_t_l = 12.25 * cos(animation_frame * leg_rot_speed -10) + 77.75;
+    double joint_rot_t_r = 12.25 * sin(animation_frame * leg_rot_speed ) + 77.75;
+
+    left_torso_rotate = torso_rot_left;
+    right_torso_rotate = torso_rot_right;
+    left_leg_rotate = joint_rot_t_l;
+    right_leg_rotate = joint_rot_t_r;
 
     ///////////////////////////////////////////////////////////
     // TODO:
@@ -464,9 +459,9 @@ void display(void)
     	glPopMatrix();
     	glPushMatrix();
         	glTranslatef(1,-2.5,0);
-        	drawLeg(-90, right_leg_rotate, 0, right_torso_rotate);
+        	drawLeg(-180, right_leg_rotate, 0, right_torso_rotate);
         	glTranslatef(-1.8,0.1,0);
-        	drawLeg(-90, left_leg_rotate, -90, left_torso_rotate);
+        	drawLeg(-180, left_leg_rotate, 0, left_torso_rotate);
         glPopMatrix();
     // Retrieve the previous state of the transformation stack
     glPopMatrix();
@@ -500,7 +495,7 @@ void drawLeg(float leg_start_angle, float leg_rot, float torso_start_angle, floa
 	glPushMatrix();
 		glRotatef(torso_start_angle+torso_rot,0,0,1);
 		glPushMatrix();
-			glColor3f(1.0f,1.0f,0.0f);
+			glColor3f(1.0f,1.0f,1.0f);
 			glTranslatef(0.0f,-torso_length/2,0.0f);
 			glScalef(torso_width,torso_length,1);
 			drawSquare(1.0);
@@ -512,7 +507,7 @@ void drawLeg(float leg_start_angle, float leg_rot, float torso_start_angle, floa
 			glRotatef(leg_start_angle+leg_rot,0,0,1);
 			glTranslatef(0.0f,-leg_length/2,1);
 			glScalef(leg_width,leg_length,1);
-			glColor3f(1.0f,0.0f,1.0f);
+			glColor3f(0.0f,0.0f,0.0f);
 			drawSquare(1.0);
 		glPopMatrix();
 		glColor3f(0,0,0);
@@ -605,7 +600,7 @@ void drawHead(){
 			head[3].x = -1.2;head[3].y = -1.2;
 			head[4].x = 1.2;head[4].y = -1.2;
 			glTranslatef(0,1,0);
-			glColor3f(0.5,0.7,0.2);
+			glColor3f(0.0,0.0,0.0);
 			drawPolygon(head,5);
 			glTranslatef(-0.5,0.2,0);
 			glColor3f(1.0,1.0,1.0);
