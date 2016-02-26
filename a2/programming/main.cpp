@@ -204,7 +204,87 @@ void writeFrame(char* filename, bool pgm, bool frontBuffer);
 
 
 // ******************** FUNCTIONS ************************
+// *** Class **** //
 
+class drawable{
+public:
+	drawable(){;}
+	virtual ~drawable(){;}
+	void translate(Vector dir){
+		_translate = dir;
+	}
+	void SetReferenceCoordinate(Vector euler){
+		_euler = euler;
+	}
+	void scale(Vector scale){
+		_scale = scale;
+	}
+	void draw(){
+		glPushMatrix();
+			// Adjust Reference Frame ZNZ
+			glRotatef(_euler[0],0,0,1); // Alpha
+			glRotatef(_euler[1],1,0,0); // Beta
+			glRotatef(_euler[2],0,0,1); // Gama
+			glPushMatrix();
+				glScalef(_scale[0],_scale[1],_scale[2]);
+				glTranslatef(_translate[0],_translate[1],_translate[2]);
+				drawObject();
+			glPopMatrix();
+		glPopMatrix();
+	}
+	virtual void drawObject(){;}
+private:
+	Vector POI;
+	Vector _translate;
+	Vector _euler;
+	Vector _scale;
+};
+
+class Polygon : public drawable{
+public:
+	Polygon(){ _vertexlist = NULL, nofv = 0;}
+	virtual ~Polygon(){;}
+	void SetVertex(Vector* vertexlist, int d){
+		_vertexlist = vertexlist;
+		nofv = d;
+	}
+	void drawObject(){
+		glBegin(GL_POLYGON);
+			for(int i = 0; i < nofv; i++){
+				glVertex3f(_vertexlist[i][0],_vertexlist[i][1],_vertexlist[i][2]);
+			}
+		glEnd();
+	}
+protected:
+	Vector* _vertexlist;
+	int nofv;
+};
+
+class ExtrudedPolygon : public Polygon{
+public:
+	ExtrudedPolygon(){depth = 0;}
+	virtual ~ExtrudedPolygon(){;}
+	void SetDepth(float _depth){depth = _depth;}
+	void drawObject(){
+		Polygon:drawObject();
+		for(int i = 0 ; i < nofv-1 ; i++){
+			glBegin(GL_QUADS);
+				glVertex3f(_vertexlist[i][0],_vertexlist[i][1],_vertexlist[i][2]+depth);
+				glVertex3f(_vertexlist[i][0],_vertexlist[i][1],_vertexlist[i][2]);
+				glVertex3f(_vertexlist[i+1][0],_vertexlist[i+1][1],_vertexlist[i+1][2]+depth);
+				glVertex3f(_vertexlist[i+1][0],_vertexlist[i+1][1],_vertexlist[i+1][2]);
+			glEnd();
+		}
+		glBegin(GL_QUADS);
+			glVertex3f(_vertexlist[nofv-1][0],_vertexlist[nofv-1][1],_vertexlist[nofv-1][2]+depth);
+			glVertex3f(_vertexlist[nofv-1][0],_vertexlist[nofv-1][1],_vertexlist[nofv-1][2]);
+			glVertex3f(_vertexlist[0][0],_vertexlist[0][1],_vertexlist[0][2]+depth);
+			glVertex3f(_vertexlist[0][0],_vertexlist[0][1],_vertexlist[0][2]);
+		glEnd();
+	}
+private:
+	float depth;
+};
 
 
 // main() function
@@ -847,7 +927,7 @@ void display(void)
 		glTranslatef(joint_ui_data->getDOF(Keyframe::ROOT_TRANSLATE_X),
 					 joint_ui_data->getDOF(Keyframe::ROOT_TRANSLATE_Y),
 					 joint_ui_data->getDOF(Keyframe::ROOT_TRANSLATE_Z));
-		glRotatef(30.0, 0.0, 1.0, 0.0);
+		//glRotatef(30.0, 0.0, 1.0, 0.0);
 		glRotatef(30.0, 1.0, 0.0, 0.0);
 
 		// determine render style and set glPolygonMode appropriately
@@ -917,25 +997,32 @@ void motion(int x, int y)
 // README: Helper code for drawing a cube
 void drawCube()
 {
+	glColor3f(1,0,0);
 	glBegin(GL_QUADS);
 		// draw front face
 		glVertex3f(-1.0, -1.0, 1.0);
 		glVertex3f( 1.0, -1.0, 1.0);
 		glVertex3f( 1.0,  1.0, 1.0);
 		glVertex3f(-1.0,  1.0, 1.0);
-
+	glEnd();
+	glColor3f(1,0,1);
+	glBegin(GL_QUADS);
 		// draw back face
 		glVertex3f( 1.0, -1.0, -1.0);
 		glVertex3f(-1.0, -1.0, -1.0);
 		glVertex3f(-1.0,  1.0, -1.0);
 		glVertex3f( 1.0,  1.0, -1.0);
-
+	glEnd();
+	glColor3f(0,0,1);
+	glBegin(GL_QUADS);
 		// draw left face
 		glVertex3f(-1.0, -1.0, -1.0);
 		glVertex3f(-1.0, -1.0,  1.0);
 		glVertex3f(-1.0,  1.0,  1.0);
 		glVertex3f(-1.0,  1.0, -1.0);
-
+	glEnd();
+	glColor3f(0,1,0);
+	glBegin(GL_QUADS);
 		// draw right face
 		glVertex3f( 1.0, -1.0,  1.0);
 		glVertex3f( 1.0, -1.0, -1.0);
