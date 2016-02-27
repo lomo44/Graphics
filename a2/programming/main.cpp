@@ -34,7 +34,7 @@
 #ifdef _WIN32
 #include <windows.h>
 #endif
-
+#include <iostream>
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <GL/glut.h>
@@ -44,7 +44,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-
+#include <assert.h>
 #include "keyframe.h"
 #include "timer.h"
 #include "vector.h"
@@ -54,7 +54,7 @@
 
 
 const float PI = 3.14159;
-
+const float RAD = 0.0174532;
 const float SPINNER_SPEED = 0.1;
 
 // --------------- USER INTERFACE VARIABLES -----------------
@@ -75,9 +75,21 @@ GLUI_StaticText* status;	// Status message ("Status: <msg>")
 
 // Camera settings
 bool updateCamZPos = false;
+bool updateCamXYPos = false;
 int  lastX = 0;
 int  lastY = 0;
+int PanningX = 0;
+int PanningY = 0;
 const float ZOOM_SCALE = 0.01;
+const float MOVEMENT_PACE = 0.1;
+
+// Camera Rotation
+bool g_iUpdateCamRotation = false;
+int g_rotationX = 0;
+int g_rotationY = 0;
+float g_fCamRotateX = 0;
+float g_fCamRotateY = 0;
+const float ROTATION_SCALE = 10;
 
 GLdouble camXPos =  0.0;
 GLdouble camYPos =  0.0;
@@ -192,7 +204,7 @@ void animate();
 void display(void);
 void mouse(int button, int state, int x, int y);
 void motion(int x, int y);
-
+void keyboard(unsigned char c, int x, int y);
 
 // Functions to help draw the object
 Vector getInterpolatedJointDOFS(float time);
@@ -228,7 +240,7 @@ public:
 		_translate[1] = y;
 		_translate[2] = z;
 	}
-	void SetReferenceCoordinate(Vector euler){
+	void setReferenceCoordinate(Vector euler){
 		_euler = euler;
 	}
 	void scale(Vector scale){
@@ -245,8 +257,12 @@ public:
 			drawObject();
 		glPopMatrix();
 	}
-	virtual void drawObject(){;}
+	Vector getTranslation(){return _translate;}
+	Vector getReferenceCoord(){return _euler;}
+	Vector getScale(){return _scale;}
+	virtual drawable* clone() = 0;
 private:
+	virtual void drawObject() = 0;
 	Vector _translate;
 	Vector _euler;
 	Vector _scale;
@@ -260,13 +276,6 @@ public:
 		_vertexlist = vertexlist;
 		nofv = d;
 	}
-	void drawObject(){
-		glBegin(GL_POLYGON);
-			for(int i = 0; i < nofv; i++){
-				glVertex3f(_vertexlist[i][0],_vertexlist[i][1],_vertexlist[i][2]);
-			}
-		glEnd();
-	}
 	Polygon* clone(){
 		Polygon* _clone = new Polygon();
 		Vector* _newvec = new Vector[nofv];
@@ -274,47 +283,117 @@ public:
 			_newvec[i] = _vertexlist[i];
 		}
 		_clone->SetVertex(_newvec,nofv);
+		_clone->translate(this->getTranslation());
+		_clone->setReferenceCoordinate(this->getReferenceCoord());
+		_clone->scale(this->getScale());
 		return _clone;
 	}
+	Vector* GetVertexlist(){return _vertexlist;}
+	int GetVertexCount(){return nofv;}
 protected:
+	void drawObject(){
+			glBegin(GL_POLYGON);
+				for(int i = 0; i < nofv; i++){
+					glVertex3f(_vertexlist[i][0],_vertexlist[i][1],_vertexlist[i][2]);
+				}
+			glEnd();
+	}
 	Vector* _vertexlist;
 	int nofv;
 };
-
-class ExtrudedPolygon : public Polygon{
+class LoftedPolygon : public drawable{
+// Note: Lofted Polygon Must Have same number of vertex for each face;
 public:
-	ExtrudedPolygon(){
-		depth = 0;
-		_face = NULL;
+	LoftedPolygon(){
+		_face1 = NULL;
+		_face2 = NULL;
 	}
-	virtual ~ExtrudedPolygon(){delete _face;}
-	void SetDepth(float _depth){
-		depth = _depth;
-		_face = this->clone();
-		_face->translate(0,0,depth);
+	~LoftedPolygon(){
+		delete _face1;
+		delete _face2;
 	}
+	void Setfaces(Polygon* face1, Polygon* face2){
+		_face1 = face1;
+		_face2 = face2;
+	}
+protected:
 	void drawObject(){
-		Polygon:draw();
-		for(int i = 0 ; i < nofv-1 ; i++){
+		Vector* _v1 = _face1->GetVertexlist();
+		Vector* _v2 = _face2->GetVertexlist();
+		int vc1 = _face1->GetVertexCount();
+		int vc2 = _face2->GetVertexCount();
+		assert(vc1 != vc2);
+		_face1->draw();
+		_face2->draw();
+		for(int i = 0; i < vc1; i++){
 			glBegin(GL_QUADS);
-				glVertex3f(_vertexlist[i][0],_vertexlist[i][1],_vertexlist[i][2]+depth);
-				glVertex3f(_vertexlist[i][0],_vertexlist[i][1],_vertexlist[i][2]);
-				glVertex3f(_vertexlist[i+1][0],_vertexlist[i+1][1],_vertexlist[i+1][2]+depth);
-				glVertex3f(_vertexlist[i+1][0],_vertexlist[i+1][1],_vertexlist[i+1][2]);
+				glVertex3f(_v1[i][0],_v1[i][1],_v1[i][2]);
+				glVertex3f(_v2[i][0],_v2[i][1],_v2[i][2]);
+				glVertex3f(_v1[i+1][0],_v1[i+1][1],_v1[i+1][2]);
+				glVertex3f(_v2[i+1][0],_v2[i+1][1],_v2[i+1][2]);
 			glEnd();
 		}
 		glBegin(GL_QUADS);
-			glVertex3f(_vertexlist[nofv-1][0],_vertexlist[nofv-1][1],_vertexlist[nofv-1][2]+depth);
-			glVertex3f(_vertexlist[nofv-1][0],_vertexlist[nofv-1][1],_vertexlist[nofv-1][2]);
-			glVertex3f(_vertexlist[0][0],_vertexlist[0][1],_vertexlist[0][2]+depth);
-			glVertex3f(_vertexlist[0][0],_vertexlist[0][1],_vertexlist[0][2]);
+			glVertex3f(_v1[vc1][0],_v1[vc1][1],_v1[vc1][2]);
+			glVertex3f(_v2[vc1][0],_v2[vc1][1],_v2[vc1][2]);
+			glVertex3f(_v1[0][0],_v1[0][1],_v1[0][2]);
+			glVertex3f(_v2[0][0],_v2[0][1],_v2[0][2]);
 		glEnd();
-		_face->draw();
+	}
+	LoftedPolygon* clone(){
+		LoftedPolygon* _new = new LoftedPolygon();
+		_new->Setfaces(_face1->clone(),_face2->clone());
+		return _new;
+	}
+private:
+	Polygon* _face1;
+	Polygon* _face2;
+};
+class ExtrudedPolygon : public LoftedPolygon{
+public:
+	ExtrudedPolygon(){
+		depth = 0;
+	}
+	~ExtrudedPolygon(){}
+	void SetBase(Polygon* face){
+		Polygon* _newface = face->clone();
+		_newface->translate(0,0,depth);
+		this->Setfaces(face,_newface);
+	}
+	void SetDepth(float _depth){
+		depth = _depth;
+	}
+	void drawObject(){
+		LoftedPolygon::drawObject();
 	}
 private:
 	float depth;
-	Polygon* _face;
 };
+class ReferenceAxis : public drawable{
+private:
+	void drawObject(){
+		glColor3f(1,0,0);
+		glBegin(GL_LINES);
+			glVertex3f(0,0,0);
+			glVertex3f(0,0,1);
+		glEnd();
+		glColor3f(0,1,0);
+		glBegin(GL_LINES);
+			glVertex3f(0,0,0);
+			glVertex3f(0,1,0);
+		glEnd();
+		glColor3f(0,0,1);
+		glBegin(GL_LINES);
+			glVertex3f(0,0,0);
+			glVertex3f(1,0,0);
+		glEnd();
+	}
+public:
+	ReferenceAxis* clone(){
+		return new ReferenceAxis();
+	}
+};
+
 
 
 // main() function
@@ -381,6 +460,7 @@ void initGlut(int argc, char** argv)
     glutDisplayFunc(display);	// Call display whenever new frame needed
 	glutMouseFunc(mouse);		// Call mouse whenever mouse button pressed
 	glutMotionFunc(motion);		// Call motion whenever mouse moves while button pressed
+	glutKeyboardFunc(keyboard);
 }
 
 
@@ -807,6 +887,7 @@ void initGl(void)
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
     glDepthFunc(GL_LESS);
 }
 
@@ -906,7 +987,12 @@ void display(void)
     glLoadIdentity();
 
 	// Specify camera transformation
-	glTranslatef(camXPos, camYPos, camZPos);
+    glTranslatef(camXPos, camYPos, camZPos);
+    glRotatef(g_fCamRotateX,0,1,0);
+    glRotatef(g_fCamRotateY,1,0,0);
+
+
+
 
 
 	// Get the time for the current animation step, if necessary
@@ -994,7 +1080,7 @@ void display(void)
 void mouse(int button, int state, int x, int y)
 {
 	// If the RMB is pressed and dragged then zoom in / out
-	if( button == GLUT_RIGHT_BUTTON )
+	if( button == GLUT_MIDDLE_BUTTON )
 	{
 		if( state == GLUT_DOWN )
 		{
@@ -1005,6 +1091,26 @@ void mouse(int button, int state, int x, int y)
 		else
 		{
 			updateCamZPos = false;
+		}
+	}
+	else if(button == GLUT_RIGHT_BUTTON){
+		if( state == GLUT_DOWN){
+			g_rotationX = x;
+			g_rotationY = y;
+			g_iUpdateCamRotation =true;
+		}
+		else{
+			g_iUpdateCamRotation = false;
+		}
+	}
+	else if(button == GLUT_LEFT_BUTTON){
+		if(state == GLUT_DOWN){
+			PanningX = x;
+			PanningY = y;
+			updateCamXYPos = true;
+		}
+		else{
+			updateCamXYPos = false;
 		}
 	}
 }
@@ -1024,8 +1130,45 @@ void motion(int x, int y)
 		glutSetWindow(windowID);
 		glutPostRedisplay();
 	}
+	if(g_iUpdateCamRotation){
+		g_fCamRotateX += (x-g_rotationX) * RAD * ROTATION_SCALE;
+		g_fCamRotateY += (y-g_rotationY) * RAD * ROTATION_SCALE;
+		g_rotationX = x;
+		g_rotationY = y;
+		glutSetWindow(windowID);
+		glutPostRedisplay();
+	}
+	if(updateCamXYPos){
+		camXPos += (x - PanningX) * ZOOM_SCALE;
+		camYPos -= (y - PanningY) * ZOOM_SCALE;
+		PanningX = x;
+		PanningY = y;
+		glutSetWindow(windowID);
+		glutPostRedisplay();
+	}
 }
 
+void keyboard(unsigned char c, int x, int y){
+	switch(c){
+	case 'w':
+		camZPos += MOVEMENT_PACE;
+		break;
+	case 's':
+		camZPos -= MOVEMENT_PACE;
+		break;
+	case 'a':
+		camXPos -= MOVEMENT_PACE;
+		break;
+	case 'd':
+		camXPos += MOVEMENT_PACE;
+		break;
+	default:
+		std::cout<<"wow"<<std::endl;
+		break;
+	}
+	glutSetWindow(windowID);
+	glutPostRedisplay();
+}
 
 // Draw a unit cube, centered at the current location
 // README: Helper code for drawing a cube
