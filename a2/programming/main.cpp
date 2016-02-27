@@ -208,10 +208,25 @@ void writeFrame(char* filename, bool pgm, bool frontBuffer);
 
 class drawable{
 public:
-	drawable(){;}
+	drawable(){
+		_scale[0] = 1;
+		_scale[1] = 1;
+		_scale[2] = 1;
+		_euler[0] = 0;
+		_euler[1] = 0;
+		_euler[2] = 0;
+		_translate[0] = 0;
+		_translate[1] = 0;
+		_translate[2] = 0;
+	}
 	virtual ~drawable(){;}
 	void translate(Vector dir){
 		_translate = dir;
+	}
+	void translate(float x, float y, float z){
+		_translate [0] = x;
+		_translate[1] = y;
+		_translate[2] = z;
 	}
 	void SetReferenceCoordinate(Vector euler){
 		_euler = euler;
@@ -225,16 +240,13 @@ public:
 			glRotatef(_euler[0],0,0,1); // Alpha
 			glRotatef(_euler[1],1,0,0); // Beta
 			glRotatef(_euler[2],0,0,1); // Gama
-			glPushMatrix();
-				glScalef(_scale[0],_scale[1],_scale[2]);
-				glTranslatef(_translate[0],_translate[1],_translate[2]);
-				drawObject();
-			glPopMatrix();
+			glTranslatef(_translate[0],_translate[1],_translate[2]);
+			glScalef(_scale[0],_scale[1],_scale[2]);
+			drawObject();
 		glPopMatrix();
 	}
 	virtual void drawObject(){;}
 private:
-	Vector POI;
 	Vector _translate;
 	Vector _euler;
 	Vector _scale;
@@ -243,7 +255,7 @@ private:
 class Polygon : public drawable{
 public:
 	Polygon(){ _vertexlist = NULL, nofv = 0;}
-	virtual ~Polygon(){;}
+	virtual ~Polygon(){delete _vertexlist;}
 	void SetVertex(Vector* vertexlist, int d){
 		_vertexlist = vertexlist;
 		nofv = d;
@@ -255,6 +267,15 @@ public:
 			}
 		glEnd();
 	}
+	Polygon* clone(){
+		Polygon* _clone = new Polygon();
+		Vector* _newvec = new Vector[nofv];
+		for(int i = 0 ; i < nofv; i++){
+			_newvec[i] = _vertexlist[i];
+		}
+		_clone->SetVertex(_newvec,nofv);
+		return _clone;
+	}
 protected:
 	Vector* _vertexlist;
 	int nofv;
@@ -262,11 +283,18 @@ protected:
 
 class ExtrudedPolygon : public Polygon{
 public:
-	ExtrudedPolygon(){depth = 0;}
-	virtual ~ExtrudedPolygon(){;}
-	void SetDepth(float _depth){depth = _depth;}
+	ExtrudedPolygon(){
+		depth = 0;
+		_face = NULL;
+	}
+	virtual ~ExtrudedPolygon(){delete _face;}
+	void SetDepth(float _depth){
+		depth = _depth;
+		_face = this->clone();
+		_face->translate(0,0,depth);
+	}
 	void drawObject(){
-		Polygon:drawObject();
+		Polygon:draw();
 		for(int i = 0 ; i < nofv-1 ; i++){
 			glBegin(GL_QUADS);
 				glVertex3f(_vertexlist[i][0],_vertexlist[i][1],_vertexlist[i][2]+depth);
@@ -281,9 +309,11 @@ public:
 			glVertex3f(_vertexlist[0][0],_vertexlist[0][1],_vertexlist[0][2]+depth);
 			glVertex3f(_vertexlist[0][0],_vertexlist[0][1],_vertexlist[0][2]);
 		glEnd();
+		_face->draw();
 	}
 private:
 	float depth;
+	Polygon* _face;
 };
 
 
@@ -345,7 +375,7 @@ void initGlut(int argc, char** argv)
     glutInitWindowPosition (0, 0);
     glutInitWindowSize(Win[0],Win[1]);
     windowID = glutCreateWindow(argv[0]);
-
+    glutSwapBuffers();
     // Setup callback functions to handle events
     glutReshapeFunc(reshape);	// Call reshape whenever window resized
     glutDisplayFunc(display);	// Call display whenever new frame needed
@@ -774,6 +804,10 @@ void initGl(void)
     // glClearColor (red, green, blue, alpha)
     // Ignore the meaning of the 'alpha' value for now
     glClearColor(0.7f,0.7f,0.9f,1.0f);
+    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
 }
 
 
