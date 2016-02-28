@@ -32,7 +32,7 @@ public:
 	// constructors
 	Vector(int dim = 3);		// specify dimension of vector (default = 3)
 	Vector(const Vector& vec);	// copy constructor
-
+	Vector(float x, float y, float z);
 	// destructor
 	virtual ~Vector();
 

@@ -18,12 +18,17 @@ const float kFloatZero = 0.0001f;
 Vector::Vector(int dim)
 {
 	d = dim;
-
 	v = new float[d];
 	for( int i = 0; i < d; i++ )
 		v[i] = 0.0;
 }
-
+Vector::Vector(float x, float y, float z){
+		d = 3;
+		v = new float[3];
+		v[0] = x;
+		v[1] = y;
+		v[2] = z;
+}
 Vector::Vector(const Vector& vec)
 {
 	d = vec.d;

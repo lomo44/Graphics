@@ -48,7 +48,7 @@
 #include "keyframe.h"
 #include "timer.h"
 #include "vector.h"
-
+#include <vector>
 
 // *************** GLOBAL VARIABLES *************************
 
@@ -218,6 +218,8 @@ void writeFrame(char* filename, bool pgm, bool frontBuffer);
 // ******************** FUNCTIONS ************************
 // *** Class **** //
 
+// Extra Classes For Eaiser Implementation
+
 class drawable{
 public:
 	drawable(){
@@ -243,6 +245,11 @@ public:
 	void setReferenceCoordinate(Vector euler){
 		_euler = euler;
 	}
+	void scale(float x, float y, float z){
+		_scale[0] = x;
+		_scale[1] = y;
+		_scale[2] = z;
+	}
 	void scale(Vector scale){
 		_scale = scale;
 	}
@@ -267,7 +274,18 @@ private:
 	Vector _euler;
 	Vector _scale;
 };
-
+class RenderController{
+public:
+	void Render(){
+		for(unsigned int i = 0; i < _renderqueue.size();i++)
+			_renderqueue[i]->draw();
+	}
+	void add(drawable* _item){
+		_renderqueue.push_back(_item);
+	}
+private:
+	std::vector<drawable*> _renderqueue;
+};
 class Polygon : public drawable{
 public:
 	Polygon(){ _vertexlist = NULL, nofv = 0;}
@@ -292,6 +310,7 @@ public:
 	int GetVertexCount(){return nofv;}
 protected:
 	void drawObject(){
+		//std::cout<<"draw"<<std::endl;
 			glBegin(GL_POLYGON);
 				for(int i = 0; i < nofv; i++){
 					glVertex3f(_vertexlist[i][0],_vertexlist[i][1],_vertexlist[i][2]);
@@ -394,7 +413,7 @@ public:
 	}
 };
 
-
+RenderController g_RenderController;
 
 // main() function
 // Initializes the user interface (and any user variables)
@@ -438,6 +457,15 @@ void initDS()
 	animationTimer = new Timer();
 	frameRateTimer = new Timer();
 	joint_ui_data  = new Keyframe();
+	Polygon* newPoly = new Polygon();
+	Vector* newver = new Vector[4];
+	newver[0] = *(new Vector(0.0,0.0,0.0));
+	newver[1] = *(new Vector(1.0,0.0,0.0));
+	newver[2] = *(new Vector(1.0,1.0,0.0));
+	newver[3] = *(new Vector(0.0,1.0,0.0));
+	newPoly->SetVertex(newver,4);
+	g_RenderController.add(newPoly);
+	g_RenderController.add(new ReferenceAxis());
 }
 
 
@@ -990,11 +1018,6 @@ void display(void)
     glTranslatef(camXPos, camYPos, camZPos);
     glRotatef(g_fCamRotateX,0,1,0);
     glRotatef(g_fCamRotateY,1,0,0);
-
-
-
-
-
 	// Get the time for the current animation step, if necessary
 	if( animate_mode )
 	{
@@ -1053,8 +1076,17 @@ void display(void)
 		// determine render style and set glPolygonMode appropriately
 
 		// draw body part
+		/*Polygon newPoly;
+		Vector* newver = new Vector[4];
+		newver[0] = *(new Vector(0.0,0.0,0.0));
+		newver[1] = *(new Vector(1.0,0.0,0.0));
+		newver[2] = *(new Vector(1.0,1.0,0.0));
+		newver[3] = *(new Vector(0.0,1.0,0.0));
+		newPoly.SetVertex(newver,4);
+		//newPoly.draw();*/
 		glColor3f(1.0, 1.0, 1.0);
-		drawCube();
+		g_RenderController.Render();
+		//drawCube();
 
 	glPopMatrix();
 	//
