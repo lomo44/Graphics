@@ -48,7 +48,7 @@ PROGRAM	          = penguin
 CSRCS         =
 
 # Define all C++ source files here
-CPPSRCS       = vector.cpp main.cpp
+CPPSRCS       = vector.cpp main.cpp Matrix.cpp
 
 ##############################################################################
 # Define additional rules that make should know about in order to compile our

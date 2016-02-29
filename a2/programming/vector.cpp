@@ -21,6 +21,7 @@ Vector::Vector(int dim)
 	v = new float[d];
 	for( int i = 0; i < d; i++ )
 		v[i] = 0.0;
+	v[d-1] = 1;
 }
 Vector::Vector(float x, float y, float z){
 		d = 3;
@@ -229,3 +230,12 @@ Vector::makeDim(int dim, const Vector& vec) const
 
 	return newVec;
 }
+
+float Vector::dot(const Vector& lhs, const Vector& rhs){
+	return lhs[0] * rhs[0] +
+			lhs[1] * rhs[1] +
+			lhs[2] * rhs[2] +
+			lhs[4] * rhs[4];
+}
+
+

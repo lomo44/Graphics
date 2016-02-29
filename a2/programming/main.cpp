@@ -49,7 +49,9 @@
 #include "timer.h"
 #include "vector.h"
 #include <vector>
+#include <algorithm>
 
+typedef std::vector<GLfloat> vecGLfloat;
 // *************** GLOBAL VARIABLES *************************
 
 
@@ -219,7 +221,12 @@ void writeFrame(char* filename, bool pgm, bool frontBuffer);
 // *** Class **** //
 
 // Extra Classes For Eaiser Implementation
-
+struct Color{
+	float R;
+	float G;
+	float B;
+	float A;
+};
 class drawable{
 public:
 	drawable(){
@@ -245,6 +252,11 @@ public:
 	void setReferenceCoordinate(Vector euler){
 		_euler = euler;
 	}
+	void setColor(float R, float G, float B){
+		_color.R = R;
+		_color.G = G;
+		_color.B = B;
+	}
 	void scale(float x, float y, float z){
 		_scale[0] = x;
 		_scale[1] = y;
@@ -261,6 +273,7 @@ public:
 			glRotatef(_euler[2],0,0,1); // Gama
 			glTranslatef(_translate[0],_translate[1],_translate[2]);
 			glScalef(_scale[0],_scale[1],_scale[2]);
+			glColor3f(_color.R,_color.G,_color.B);
 			drawObject();
 		glPopMatrix();
 	}
@@ -273,6 +286,7 @@ private:
 	Vector _translate;
 	Vector _euler;
 	Vector _scale;
+	Color _color;
 };
 class RenderController{
 public:
@@ -288,18 +302,30 @@ private:
 };
 class Polygon : public drawable{
 public:
-	Polygon(){ _vertexlist = NULL, nofv = 0; isDrawReverse = false;}
-	virtual ~Polygon(){delete _vertexlist;}
-	void SetVertex(Vector* vertexlist, int d){
-		_vertexlist = vertexlist;
+	Polygon(){nofv = 0; isDrawReverse = false;}
+	virtual ~Polygon(){}
+	void SetVertex(Vector* vertexlist, int d, bool _isDrawReverse){
 		nofv = d;
 		float a = 0;
 		float b = 0;
 		float c = 0;
-		for(int i = 0 ; i < d ; i++){
-			a += _vertexlist[i][0];
-			b += _vertexlist[i][1];
-			c += _vertexlist[i][2];
+		int start = 0;
+		int end = nofv;
+		int increment = 1;
+		isDrawReverse = _isDrawReverse;
+		if(isDrawReverse){
+			start = nofv-1;
+			end = -1;
+			increment = -1;
+		}
+		for(int i = start; i != end; i += increment){
+			//std::cout<<vertexlist[i][0]<<"|"<<vertexlist[i][1]<<"|"<<vertexlist[i][2]<<std::endl;
+			_vertexlist.push_back(vertexlist[i][0]);
+			_vertexlist.push_back(vertexlist[i][1]);
+			_vertexlist.push_back(vertexlist[i][2]);
+			a += vertexlist[i][0];
+			b += vertexlist[i][1];
+			c += vertexlist[i][2];
 		}
 		a = a/d;
 		b = b/d;
@@ -308,46 +334,42 @@ public:
 		mid[1] = b;
 		mid[2] = c;
 	}
-	void SetReverse(bool _b){isDrawReverse = _b;}
+	void SetReverse(bool _b){
+		if(_b != isDrawReverse)
+		{
+			isDrawReverse = _b;
+			std::reverse(_vertexlist.begin(),_vertexlist.end());
+			for(unsigned int i = 0; i < _vertexlist.size();i+=3){
+				GLfloat a = _vertexlist[i];
+				_vertexlist[i] = _vertexlist[i+2];
+				_vertexlist[i+2] = a;
+			}
+		}
+	}
 	Polygon* clone(){
 		Polygon* _clone = new Polygon();
 		Vector* _newvec = new Vector[nofv];
 		for(int i = 0 ; i < nofv; i++){
 			_newvec[i] = _vertexlist[i];
 		}
-		_clone->SetVertex(_newvec,nofv);
+		_clone->SetVertex(_newvec,nofv,isDrawReverse);
 		_clone->translate(this->getTranslation());
 		_clone->setReferenceCoordinate(this->getReferenceCoord());
 		_clone->scale(this->getScale());
 		return _clone;
 	}
-	Vector* GetVertexlist(){return _vertexlist;}
+	vecGLfloat& GetVertexlist(){return _vertexlist;}
 	int GetVertexCount(){return nofv;}
 	float GetDepth(){return mid[2];}
 protected:
 	void drawObject(){
-		//std::cout<<"draw"<<std::endl;
-		int start;
-		int end;
-		int increment;
-		if(isDrawReverse){
-			start = nofv-1;
-			end = -1;
-			increment = -1;
-		}
-		else{
-			start = 0;
-			end = nofv;
-			increment = 1;
-		}
-		glBegin(GL_POLYGON);
-		for(int i = start; i != end; i += increment){
-			glVertex3f(_vertexlist[i][0],_vertexlist[i][1],_vertexlist[i][2]);
-		}
-		glEnd();
+		glEnableClientState(GL_VERTEX_ARRAY);
+		glVertexPointer(3,GL_FLOAT,0,&_vertexlist[0]);
+		glDrawArrays(GL_POLYGON,0,nofv);
+		glDisableClientState(GL_VERTEX_ARRAY);
 	}
 private:
-	Vector* _vertexlist;
+	vecGLfloat _vertexlist;
 	Vector mid;
 	int nofv;
 	bool isDrawReverse;
@@ -372,32 +394,32 @@ public:
 			_face1 = face2;
 			_face2 = face1;
 		}
+		vecGLfloat& _v1 = _face1->GetVertexlist();
+		vecGLfloat& _v2 = _face2->GetVertexlist();
+		int vc1 = _face1->GetVertexCount();
+		int vc2 = _face2->GetVertexCount();
+		assert(vc1 == vc2);
+		for(int i = 0; i < (vc1-1)*3; i+=3){
+			addVertex(_v1[i+3],_v1[i+4],_v1[i+5]);
+			addVertex(_v1[i],_v1[i+1],_v1[i+2]);
+			addVertex(_v2[i],_v2[i+1],_v2[i+2]);
+			addVertex(_v2[i+3],_v2[i+4],_v2[i+5]);
+		}
+		addVertex(_v1[0],_v1[1],_v1[2]);
+		addVertex(_v1[vc1*3-3],_v1[vc1*3-2],_v1[vc1*3-1]);
+		addVertex(_v2[vc1*3-3],_v2[vc1*3-2],_v2[vc1*3-1]);
+		addVertex(_v2[0],_v2[1],_v2[2]);
 		_face1->SetReverse(false);
 		_face2->SetReverse(true);
 	}
 protected:
 	void drawObject(){
-		Vector* _v1 = _face1->GetVertexlist();
-		Vector* _v2 = _face2->GetVertexlist();
-		int vc1 = _face1->GetVertexCount();
-		int vc2 = _face2->GetVertexCount();
-		assert(vc1 == vc2);
 		_face1->draw();
 		_face2->draw();
-		for(int i = 0; i < vc1-1; i++){
-			glBegin(GL_QUADS);
-				glVertex3f(_v1[i+1][0],_v1[i+1][1],_v1[i+1][2]);
-				glVertex3f(_v1[i][0],_v1[i][1],_v1[i][2]);
-				glVertex3f(_v2[i][0],_v2[i][1],_v2[i][2]);
-				glVertex3f(_v2[i+1][0],_v2[i+1][1],_v2[i+1][2]);
-				glEnd();
-		}
-		glBegin(GL_QUADS);
-			glVertex3f(_v1[0][0],_v1[0][1],_v1[0][2]);
-			glVertex3f(_v1[vc1-1][0],_v1[vc1-1][1],_v1[vc1-1][2]);
-			glVertex3f(_v2[vc1-1][0],_v2[vc1-1][1],_v2[vc1-1][2]);
-			glVertex3f(_v2[0][0],_v2[0][1],_v2[0][2]);
-		glEnd();
+		glEnableClientState(GL_VERTEX_ARRAY);
+		glVertexPointer(3,GL_FLOAT,0,&_vertexlist[0]);
+		glDrawArrays(GL_QUADS,0,(int)(_vertexlist.size()/3));
+		glDisableClientState(GL_VERTEX_ARRAY);
 	}
 	LoftedPolygon* clone(){
 		LoftedPolygon* _new = new LoftedPolygon();
@@ -405,8 +427,14 @@ protected:
 		return _new;
 	}
 private:
+	void addVertex(GLfloat x, GLfloat y, GLfloat z){
+		_vertexlist.push_back(x);
+		_vertexlist.push_back(y);
+		_vertexlist.push_back(z);
+	}
 	Polygon* _face1;
 	Polygon* _face2;
+	vecGLfloat _vertexlist;
 };
 class ExtrudedPolygon : public LoftedPolygon{
 public:
@@ -450,6 +478,17 @@ private:
 public:
 	ReferenceAxis* clone(){
 		return new ReferenceAxis();
+	}
+};
+class PenguinFeet : public drawable{
+public:
+	PenguinFeet(){;}
+	~PenguinFeet(){;}
+	PenguinFeet* clone(){
+		return new PenguinFeet();
+	}
+	void drawObject(){
+
 	}
 };
 
@@ -499,19 +538,21 @@ void initDS()
 	joint_ui_data  = new Keyframe();
 
 	Polygon* newPoly1 = new Polygon();
-	Vector* newver = new Vector[4];
+	Vector* newver = new Vector[5];
 	newver[0] = *(new Vector(0.0,0.0,0.0));
 	newver[1] = *(new Vector(1.0,0.0,0.0));
 	newver[2] = *(new Vector(1.0,1.0,0.0));
-	newver[3] = *(new Vector(0.0,1.0,0.0));
-	newPoly1->SetVertex(newver,4);
+	newver[3] = *(new Vector(0.5,1.5,0.0));
+	newver[4] = *(new Vector(0.0,1.0,0.0));
+	newPoly1->SetVertex(newver,5,false);
 	Polygon* newPoly2 = new Polygon();
-	Vector* newver2 = new Vector[4];
+	Vector* newver2 = new Vector[5];
 	newver2[0] = *(new Vector(0.0,0.0,1.0));
 	newver2[1] = *(new Vector(1.0,0.0,1.0));
 	newver2[2] = *(new Vector(1.0,1.0,1.0));
-	newver2[3] = *(new Vector(0.0,1.0,1.0));
-	newPoly2->SetVertex(newver2,4);
+	newver2[3] = *(new Vector(0.5,2.0,1.0));
+	newver2[4] = *(new Vector(0.0,1.0,1.0));
+	newPoly2->SetVertex(newver2,5,false);
 	LoftedPolygon* lp = new LoftedPolygon();
 	lp->Setfaces(newPoly1,newPoly2);
 	//g_RenderController.add(newPoly1);

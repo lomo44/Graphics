@@ -30,7 +30,7 @@ class Vector
 public:
 
 	// constructors
-	Vector(int dim = 3);		// specify dimension of vector (default = 3)
+	Vector(int dim = 4);		// specify dimension of vector (default = 3)
 	Vector(const Vector& vec);	// copy constructor
 	Vector(float x, float y, float z);
 	// destructor
@@ -54,6 +54,7 @@ public:
 	Vector  operator/ (float scalar) const;
 	Vector& operator/=(float scalar);
 
+	static float dot(const Vector& lhs, const Vector& rhs);
 	// accessor methods
 	int    getDim()  const;
 	float* getData() const;
