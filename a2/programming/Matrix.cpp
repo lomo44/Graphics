@@ -1,9 +1,4 @@
-/*
- * Matrix.cpp
- *
- *  Created on: Feb 28, 2016
- *      Author: c5lizhua
- */
+
 
 #include "Matrix.h"
 #include "vector.h"
