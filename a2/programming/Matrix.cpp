@@ -5,6 +5,7 @@
 #include <iostream>
 #include <cmath>
 #include <assert.h>
+#include <cstring>
 Matrix::Matrix(unsigned int dim) {
 	// TODO Auto-generated constructor stub
 	this->d = dim;
@@ -18,12 +19,13 @@ Matrix::~Matrix() {
 }
 
 Matrix::Matrix(const Matrix& rhs){
-	f = new float(dim<<2);
-		this->d = ;
+	//f = new float(dim<<2);
+	this->d = rhs.getDimension();
+	if(rhs.f!=NULL){
+		std::memcpy(f,rhs.f,sizeof(float)*(d<<2));
+	}
+	else{
 		f = NULL;
-		_t = eNULL;
-	for(int i = 0 ; i < d<<2; i++){
-
 	}
 }
 
@@ -57,9 +59,12 @@ void Matrix::loadTranslational(float x, float y, float z){
 	f[11] = z;
 }
 void Matrix::loadIdentity(){
+	f = new float[d<<2];
+	int c =0;
 	for(int i = 0 ; i < d<<2; i++){
-		if((i & ~d) == 1){
+		if(i == c){
 			f[i] = 1.0;
+			c+=(d+1);
 		}
 		else{
 			f[i] = 0;
@@ -88,7 +93,7 @@ Vector Matrix::getRow(int i){
 	_ret[3] = f[i+3];
 	return _ret;
 }
-int Matrix::getDimension(){
+int Matrix::getDimension() const{
 	return d;
 }
 
@@ -104,11 +109,31 @@ Matrix Matrix::operator *(const Matrix& rhs){
 	return _ret;
 }
 
+Vector Matrix::operator*(const Vector& rhs){
+	Vector _ret;
+	_ret[0] = Vector::dot(rhs,this->getRow(0));
+	_ret[1] = Vector::dot(rhs,this->getRow(1));
+	_ret[2] = Vector::dot(rhs,this->getRow(2));
+	_ret[3] = Vector::dot(rhs,this->getRow(3));
+	return _ret;
+}
 
-Matrix& Matrix::operator *=(Matrix& rhs){
-	Matrix _ret = *(this)*rhs;
-	rhs.f = _ret.f;
+
+Vector& Matrix::operator *=(Vector& rhs){
+	rhs[0] = Vector::dot(rhs,this->getRow(0));
+	rhs[1] = Vector::dot(rhs,this->getRow(1));
+	rhs[2] = Vector::dot(rhs,this->getRow(2));
+	rhs[3] = Vector::dot(rhs,this->getRow(3));
 	return rhs;
+}
+
+void Matrix::print(){
+	for(int i = 0; i < d<<2;i++){
+		if(i & ~d == 3){
+			std::cout<<std::endl;
+		}
+		std::cout<<f[i]<<",";
+	}
 }
 
 

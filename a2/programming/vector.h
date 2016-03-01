@@ -58,7 +58,12 @@ public:
 	// accessor methods
 	int    getDim()  const;
 	float* getData() const;
-
+	void print(){
+		std::cout<<v[0]<<std::endl;
+		std::cout<<v[1]<<std::endl;
+		std::cout<<v[2]<<std::endl;
+		std::cout<<v[3]<<std::endl;
+	}
 private:
 
 	// make a dim dimension vector from vec

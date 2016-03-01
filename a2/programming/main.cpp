@@ -50,6 +50,7 @@
 #include "vector.h"
 #include <vector>
 #include <algorithm>
+#include "Matrix.h"
 
 typedef std::vector<GLfloat> vecGLfloat;
 // *************** GLOBAL VARIABLES *************************
@@ -281,7 +282,7 @@ public:
 	Vector getReferenceCoord(){return _euler;}
 	Vector getScale(){return _scale;}
 	virtual drawable* clone() = 0;
-private:
+protected:
 	virtual void drawObject() = 0;
 	Vector _translate;
 	Vector _euler;
@@ -360,7 +361,10 @@ public:
 	}
 	vecGLfloat& GetVertexlist(){return _vertexlist;}
 	int GetVertexCount(){return nofv;}
-	float GetDepth(){return mid[2];}
+	Vector& GetMid(){return mid;}
+	void SetMid(Vector _v){
+		mid = _v;
+	}
 protected:
 	void drawObject(){
 		glEnableClientState(GL_VERTEX_ARRAY);
@@ -386,7 +390,7 @@ public:
 		delete _face2;
 	}
 	void Setfaces(Polygon* face1, Polygon* face2){
-		if(face1->GetDepth() > face2->GetDepth()){
+		if(face1->GetMid()[3] > face2->GetMid()[3]){
 			_face1 = face1;
 			_face2 = face2;
 		}
@@ -414,7 +418,9 @@ public:
 	}
 protected:
 	void drawObject(){
+		_face1->setColor(_color.R,_color.G,_color.B);
 		_face1->draw();
+		_face2->setColor(_color.R,_color.G,_color.B);
 		_face2->draw();
 		glEnableClientState(GL_VERTEX_ARRAY);
 		glVertexPointer(3,GL_FLOAT,0,&_vertexlist[0]);
@@ -439,22 +445,43 @@ private:
 class ExtrudedPolygon : public LoftedPolygon{
 public:
 	ExtrudedPolygon(){
-		depth = 0;
 	}
 	~ExtrudedPolygon(){}
 	void SetBase(Polygon* face){
-		Polygon* _newface = face->clone();
-		_newface->translate(0,0,depth);
-		this->Setfaces(face,_newface);
+		vecGLfloat& _vec = face->GetVertexlist();
+		Polygon* newface = new Polygon();
+		*(newface) = *(face);
+		vecGLfloat& newvec = newface->GetVertexlist();
+		Matrix* _new = new Matrix();
+		//depth.print();
+		_new->loadTranslational(depth[0],depth[1],depth[2]);
+		_new->print();
+		Vector _temp;
+		for(unsigned int i = 0 ; i <= (_vec.size()-3);i+=3){
+			_temp[0] = _vec[i];
+			_temp[1] = _vec[i+1];
+			_temp[2] = _vec[i+2];
+			_temp = *(_new)*=_temp;
+			newvec[i] = (_temp[0]);
+			newvec[i+1]=(_temp[1]);
+			newvec[i+2] =(_temp[2]);
+		}
+		Vector& mid = newface->GetMid();
+		mid = *(_new)*=mid;
+		//vecGL
+		//newface->translate(depth);
+		//newface->SetReverse(true);
+		this->Setfaces(newface,face);
 	}
-	void SetDepth(float _depth){
+	void SetDepth(Vector _depth){
+		_depth.print();
 		depth = _depth;
 	}
 	void drawObject(){
 		LoftedPolygon::drawObject();
 	}
 private:
-	float depth;
+	Vector depth;
 };
 class ReferenceAxis : public drawable{
 private:
@@ -482,14 +509,53 @@ public:
 };
 class PenguinFeet : public drawable{
 public:
-	PenguinFeet(){;}
+	PenguinFeet(){}
 	~PenguinFeet(){;}
 	PenguinFeet* clone(){
 		return new PenguinFeet();
 	}
 	void drawObject(){
-
+		//m_palm.draw();
+		m_leg.draw();
+		m_palm.draw();
 	}
+	void initialize(){
+		initializeLeg();
+		initializePalm();
+	}
+private:
+	void initializePalm(){
+		Polygon* newPoly1 = new Polygon();
+		Vector* newver = new Vector[3];
+		newver[0] = *(new Vector(0.0,0.0,0.0));
+		newver[1] = *(new Vector(-2,0.0,-1.5));
+		newver[2] = *(new Vector(-2,0.0,1.5));
+		newPoly1->SetVertex(newver,3,false);
+		Vector _newvec;
+		_newvec[1] = -0.1;
+		m_palm.SetDepth(_newvec);
+		m_palm.SetBase(newPoly1);
+		m_palm.setColor(1,1,0);
+		m_palm.translate(0,-3,0);
+	}
+	void initializeLeg(){
+		Polygon* newPoly1 = new Polygon();
+		Vector* newver = new Vector[4];
+		newver[0] = *(new Vector(-0.1,0.0,0.1));
+		newver[1] = *(new Vector(0.1,0.0,0.1));
+		newver[2] = *(new Vector(0.1,0.0,-0.1));
+		newver[3] = *(new Vector(-0.1,0.0,-0.1));
+		newPoly1->SetVertex(newver,4,false);
+		Vector _newvec;
+		_newvec[1] = 3.0;
+		m_leg.SetDepth(_newvec);
+		m_leg.SetBase(newPoly1);
+		m_leg.setColor(1,0.5,0);
+		m_leg.translate(0,-3,0);
+	}
+private:
+	ExtrudedPolygon m_palm;
+	ExtrudedPolygon m_leg;
 };
 
 RenderController g_RenderController;
@@ -536,28 +602,11 @@ void initDS()
 	animationTimer = new Timer();
 	frameRateTimer = new Timer();
 	joint_ui_data  = new Keyframe();
-
-	Polygon* newPoly1 = new Polygon();
-	Vector* newver = new Vector[5];
-	newver[0] = *(new Vector(0.0,0.0,0.0));
-	newver[1] = *(new Vector(1.0,0.0,0.0));
-	newver[2] = *(new Vector(1.0,1.0,0.0));
-	newver[3] = *(new Vector(0.5,1.5,0.0));
-	newver[4] = *(new Vector(0.0,1.0,0.0));
-	newPoly1->SetVertex(newver,5,false);
-	Polygon* newPoly2 = new Polygon();
-	Vector* newver2 = new Vector[5];
-	newver2[0] = *(new Vector(0.0,0.0,1.0));
-	newver2[1] = *(new Vector(1.0,0.0,1.0));
-	newver2[2] = *(new Vector(1.0,1.0,1.0));
-	newver2[3] = *(new Vector(0.5,2.0,1.0));
-	newver2[4] = *(new Vector(0.0,1.0,1.0));
-	newPoly2->SetVertex(newver2,5,false);
-	LoftedPolygon* lp = new LoftedPolygon();
-	lp->Setfaces(newPoly1,newPoly2);
 	//g_RenderController.add(newPoly1);
 	//g_RenderController.add(newPoly2);
-	g_RenderController.add(lp);
+	PenguinFeet* feet1 = new PenguinFeet();
+	feet1->initialize();
+	g_RenderController.add(feet1);
 	g_RenderController.add(new ReferenceAxis());
 }
 
