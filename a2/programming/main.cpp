@@ -222,6 +222,10 @@ void writeFrame(char* filename, bool pgm, bool frontBuffer);
 // *** Class **** //
 
 // Extra Classes For Eaiser Implementation
+
+// TODO: Currentlly the object layer is mixed up with render layer,need to
+// seperate the layer.
+
 struct Color{
 	float R;
 	float G;
@@ -509,7 +513,7 @@ public:
 };
 class PenguinFeet : public drawable{
 public:
-	PenguinFeet(){}
+	PenguinFeet(){;}
 	~PenguinFeet(){;}
 	PenguinFeet* clone(){
 		return new PenguinFeet();
@@ -557,7 +561,77 @@ private:
 	ExtrudedPolygon m_palm;
 	ExtrudedPolygon m_leg;
 };
+class PenguinBody : public drawable{
+public:
+	PenguinBody(){;}
+	~PenguinBody(){;}
+	PenguinBody* clone(){
+		return new PenguinBody();
+	}
+	void initialize(){
+		Polygon* newPoly1 = new Polygon();
+		Vector* newver1 = new Vector[4];
+		newver1[0] = *(new Vector(-1,-1,1));
+		newver1[1] = *(new Vector(1,-1,1));
+		newver1[2] = *(new Vector(1,-1,-1));
+		newver1[3] = *(new Vector(-1,-1,-1));
+		newPoly1->SetVertex(newver1,4,false);
+		Polygon* newPoly2 = new Polygon();
+		Vector* newver = new Vector[4];
+		newver[0] = *(new Vector(-0.8,1,0.8));
+		newver[1] = *(new Vector(0.8,1,0.8));
+		newver[2] = *(new Vector(0.8,1,-0.8));
+		newver[3] = *(new Vector(-0.8,1,-0.8));
+		newPoly2->SetVertex(newver,4,false);
+		m_body.Setfaces(newPoly1,newPoly2);
+	}
+	void drawObject(){
+		m_body.setColor(0.2,0,0.2);
+		m_body.draw();
+	}
+private:
+	LoftedPolygon m_body;
+};
+class PenguinUpperWing : public drawable{
+public:
+	PenguinUpperWing(){
+		Polygon* newPoly1 = new Polygon();
+		Vector* newver = new Vector[4];
+		newver[0] = *(new Vector(0.1,0.2,0.0));
+		newver[1] = *(new Vector(-0.1,0.2,0.0));
+		newver[2] = *(new Vector(-0.05,-0.2,0.0));
+		newver[3] = *(new Vector(0.1,-0.2,0.0));
+		newPoly1->SetVertex(newver,4,false);
+		Vector _newvec;
+		_newvec[2] = 0.1;
+		m_upperwing.SetDepth(_newvec);
+		m_upperwing.SetBase(newPoly1);
+		m_upperwing.setColor(1,1,1);
+		m_upperwing.translate(-0.02,-0.15,0);
+	}
+	~PenguinUpperWing(){;}
+	PenguinUpperWing* clone(){
+		return new PenguinUpperWing();
+	}
+	void drawObject(){
+		m_upperwing.draw();
+	}
+private:
+	ExtrudedPolygon m_upperwing;
+};
+class PenguinLowerWing : public drawable{
+public:
+	PenguinLowerWing(){;}
+	~PenguinLowerWing(){;}
+	PenguinLowerWing* clone(){
+		return new PenguinLowerWing();
+	}
+	void drawObject(){
 
+	}
+private:
+
+};
 RenderController g_RenderController;
 
 // main() function
@@ -606,7 +680,12 @@ void initDS()
 	//g_RenderController.add(newPoly2);
 	PenguinFeet* feet1 = new PenguinFeet();
 	feet1->initialize();
+	PenguinBody* body = new PenguinBody();
+	body->initialize();
+	PenguinUpperWing* upperwing = new PenguinUpperWing();
+	//g_RenderController.add(body);
 	g_RenderController.add(feet1);
+	//g_RenderController.add(upperwing);
 	g_RenderController.add(new ReferenceAxis());
 }
 
