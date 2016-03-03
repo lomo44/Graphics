@@ -225,12 +225,21 @@ void writeFrame(char* filename, bool pgm, bool frontBuffer);
 
 // TODO: Currentlly the object layer is mixed up with render layer,need to
 // seperate the layer.
-
-struct Color{
-	float R;
-	float G;
-	float B;
-	float A;
+#define COLOR_PENGUINFEET 0x00ffff26
+#define COLOR_PENGUINLEG  0x00191903
+#define COLOR_PENGUINBODY 0x0066660f
+#define COLOR_PENGUINBEAK 0x00ff4800
+class Color3B{
+public:
+	union{
+		unsigned int _c;
+		unsigned char ARGB[4];
+	};
+	int B(){return ARGB[0];}
+	int G(){return ARGB[1];}
+	int R(){return ARGB[2];}
+	int A(){return ARGB[3];}
+	void set(unsigned _co){_c = _co;}
 };
 class drawable{
 public:
@@ -257,10 +266,12 @@ public:
 	void setReferenceCoordinate(Vector euler){
 		_euler = euler;
 	}
-	void setColor(float R, float G, float B){
-		_color.R = R;
-		_color.G = G;
-		_color.B = B;
+	void setColor1i(unsigned int _color){
+		_colori._c = _color;
+		//std::cout<<"Color is"<< _colori._c << std::endl;
+		//std::cout<<"R" << _colori.R << std::endl;
+		//std::cout<<"G" << _colori.G << std::endl;
+		//std::cout<<"B" << _colori.ARGB[1] << std::endl;
 	}
 	void scale(float x, float y, float z){
 		_scale[0] = x;
@@ -276,9 +287,9 @@ public:
 			glRotatef(_euler[0],0,0,1); // Alpha
 			glRotatef(_euler[1],1,0,0); // Beta
 			glRotatef(_euler[2],0,0,1); // Gama
-			glTranslatef(_translate[0],_translate[1],_translate[2]);
 			glScalef(_scale[0],_scale[1],_scale[2]);
-			glColor3f(_color.R,_color.G,_color.B);
+			glTranslatef(_translate[0],_translate[1],_translate[2]);
+			glColor3ub(_colori.R(),_colori.G(),_colori.B());
 			drawObject();
 		glPopMatrix();
 	}
@@ -291,7 +302,7 @@ protected:
 	Vector _translate;
 	Vector _euler;
 	Vector _scale;
-	Color _color;
+	Color3B _colori;
 };
 class RenderController{
 public:
@@ -422,9 +433,9 @@ public:
 	}
 protected:
 	void drawObject(){
-		_face1->setColor(_color.R,_color.G,_color.B);
+		_face1->setColor1i(_colori._c);
 		_face1->draw();
-		_face2->setColor(_color.R,_color.G,_color.B);
+		_face2->setColor1i(_colori._c);
 		_face2->draw();
 		glEnableClientState(GL_VERTEX_ARRAY);
 		glVertexPointer(3,GL_FLOAT,0,&_vertexlist[0]);
@@ -459,7 +470,7 @@ public:
 		Matrix* _new = new Matrix();
 		//depth.print();
 		_new->loadTranslational(depth[0],depth[1],depth[2]);
-		_new->print();
+		//_new->print();
 		Vector _temp;
 		for(unsigned int i = 0 ; i <= (_vec.size()-3);i+=3){
 			_temp[0] = _vec[i];
@@ -478,7 +489,7 @@ public:
 		this->Setfaces(newface,face);
 	}
 	void SetDepth(Vector _depth){
-		_depth.print();
+		//_depth.print();
 		depth = _depth;
 	}
 	void drawObject(){
@@ -539,7 +550,7 @@ private:
 		_newvec[1] = -0.1;
 		m_palm.SetDepth(_newvec);
 		m_palm.SetBase(newPoly1);
-		m_palm.setColor(1,1,0);
+		m_palm.setColor1i(COLOR_PENGUINFEET);
 		m_palm.translate(0,-3,0);
 	}
 	void initializeLeg(){
@@ -554,7 +565,7 @@ private:
 		_newvec[1] = 3.0;
 		m_leg.SetDepth(_newvec);
 		m_leg.SetBase(newPoly1);
-		m_leg.setColor(1,0.5,0);
+		m_leg.setColor1i(COLOR_PENGUINLEG);
 		m_leg.translate(0,-3,0);
 	}
 private:
@@ -563,12 +574,7 @@ private:
 };
 class PenguinBody : public drawable{
 public:
-	PenguinBody(){;}
-	~PenguinBody(){;}
-	PenguinBody* clone(){
-		return new PenguinBody();
-	}
-	void initialize(){
+	PenguinBody(){
 		Polygon* newPoly1 = new Polygon();
 		Vector* newver1 = new Vector[4];
 		newver1[0] = *(new Vector(-1,-1,1));
@@ -578,15 +584,19 @@ public:
 		newPoly1->SetVertex(newver1,4,false);
 		Polygon* newPoly2 = new Polygon();
 		Vector* newver = new Vector[4];
-		newver[0] = *(new Vector(-0.8,1,0.8));
-		newver[1] = *(new Vector(0.8,1,0.8));
-		newver[2] = *(new Vector(0.8,1,-0.8));
-		newver[3] = *(new Vector(-0.8,1,-0.8));
+		newver[0] = *(new Vector(-0.7,1,0.7));
+		newver[1] = *(new Vector(0.7,1,0.7));
+		newver[2] = *(new Vector(0.7,1,-0.7));
+		newver[3] = *(new Vector(-0.7,1,-0.7));
 		newPoly2->SetVertex(newver,4,false);
 		m_body.Setfaces(newPoly1,newPoly2);
 	}
+	~PenguinBody(){;}
+	PenguinBody* clone(){
+		return new PenguinBody();
+	}
 	void drawObject(){
-		m_body.setColor(0.2,0,0.2);
+		m_body.setColor1i(COLOR_PENGUINLEG);
 		m_body.draw();
 	}
 private:
@@ -606,7 +616,7 @@ public:
 		_newvec[2] = 0.1;
 		m_upperwing.SetDepth(_newvec);
 		m_upperwing.SetBase(newPoly1);
-		m_upperwing.setColor(1,1,1);
+		m_upperwing.setColor1i(COLOR_PENGUINLEG);
 		m_upperwing.translate(-0.02,-0.15,0);
 	}
 	~PenguinUpperWing(){;}
@@ -621,17 +631,152 @@ private:
 };
 class PenguinLowerWing : public drawable{
 public:
-	PenguinLowerWing(){;}
+	PenguinLowerWing(){
+		Polygon* newPoly1 = new Polygon();
+		Vector* newver = new Vector[4];
+		newver[0] = *(new Vector(0.75,0.75,0.0));
+		newver[1] = *(new Vector(-0.75,0.75,0.0));
+		newver[2] = *(new Vector(-0.3,-0.75,0.0));
+		newver[3] = *(new Vector(0.75,-0.75,0.0));
+		newPoly1->SetVertex(newver,4,false);
+		Vector _newvec;
+		_newvec[2] = 0.1;
+		m_lowerwing.SetDepth(_newvec);
+		m_lowerwing.SetBase(newPoly1);
+		m_lowerwing.setColor1i(COLOR_PENGUINLEG);
+		m_lowerwing.translate(0,-0.75,0);
+	}
 	~PenguinLowerWing(){;}
 	PenguinLowerWing* clone(){
 		return new PenguinLowerWing();
 	}
 	void drawObject(){
-
+		m_lowerwing.draw();
 	}
 private:
-
+	ExtrudedPolygon m_lowerwing;
 };
+class PenguinHip : public drawable{
+public:
+	PenguinHip(){
+		Polygon* newPoly1 = new Polygon();
+		Vector* newver = new Vector[4];
+		newver[0] = *(new Vector(-0.15,0.0,0.15));
+		newver[1] = *(new Vector(0.15,0.0,0.15));
+		newver[2] = *(new Vector(0.15,0.0,-0.15));
+		newver[3] = *(new Vector(-0.15,0.0,-0.15));
+		newPoly1->SetVertex(newver,4,false);
+
+		Polygon* newPoly2 = new Polygon();
+		Vector* newver1 = new Vector[4];
+		newver1[0] = *(new Vector(-0.1,0.2,0.1));
+		newver1[1] = *(new Vector(0.1,0.2,0.1));
+		newver1[2] = *(new Vector(0.1,0.2,-0.1));
+		newver1[3] = *(new Vector(-0.1,0.2,-0.1));
+		newPoly2->SetVertex(newver1,4,false);
+
+		m_Hip.Setfaces(newPoly1,newPoly2);
+		m_Hip.setColor1i(COLOR_PENGUINFEET);
+		m_Hip.translate(0,-0.1,0);
+	}
+	~PenguinHip(){;}
+	PenguinHip* clone(){
+		return new PenguinHip();
+	}
+	void drawObject(){
+		m_Hip.draw();
+	}
+protected:
+	LoftedPolygon m_Hip;
+};
+class PenguinHead : public drawable{
+public:
+	PenguinHead(){
+		Polygon* newPoly1 = new Polygon();
+		Vector* newver1 = new Vector[4];
+		newver1[0] = *(new Vector(-0.8,0,0.8));
+		newver1[1] = *(new Vector(0.8,0,0.8));
+		newver1[2] = *(new Vector(0.8,0,-0.8));
+		newver1[3] = *(new Vector(-0.8,0,-0.8));
+		newPoly1->SetVertex(newver1,4,false);
+		Polygon* newPoly2 = new Polygon();
+		Vector* newver = new Vector[4];
+		newver[0] = *(new Vector(-0.7,0.8,0.7));
+		newver[1] = *(new Vector(0.7,0.8,0.7));
+		newver[2] = *(new Vector(0.7,0.8,-0.7));
+		newver[3] = *(new Vector(-0.7,0.8,-0.7));
+		newPoly2->SetVertex(newver,4,false);
+		m_head.setColor1i(COLOR_PENGUINBODY);
+		m_head.Setfaces(newPoly1,newPoly2);
+	}
+	~PenguinHead(){;}
+	PenguinHead* clone(){return new PenguinHead();}
+	void drawObject(){
+		m_head.draw();
+	}
+private:
+	LoftedPolygon m_head;
+};
+class PenguinUpperBeak : public drawable{
+public:
+	PenguinUpperBeak(){
+		Polygon* newPoly1 = new Polygon();
+		Vector* newver1 = new Vector[4];
+		newver1[0] = *(new Vector(-0.5,0,0.1));
+		newver1[1] = *(new Vector(0.0,0,0.1));
+		newver1[2] = *(new Vector(0.0,0,-0.1));
+		newver1[3] = *(new Vector(-0.5,0,-0.1));
+		newPoly1->SetVertex(newver1,4,false);
+
+		Polygon* newPoly2 = new Polygon();
+		Vector* newver = new Vector[4];
+		newver[0] = *(new Vector(-0.45,0.1,0.08));
+		newver[1] = *(new Vector(0.0,0.1,0.08));
+		newver[2] = *(new Vector(0.0,0.1,-0.08));
+		newver[3] = *(new Vector(-0.45,0.1,-0.08));
+		newPoly2->SetVertex(newver,4,false);
+		m_UpperBeak.setColor1i(COLOR_PENGUINBEAK);
+		m_UpperBeak.Setfaces(newPoly1,newPoly2);
+	}
+	~PenguinUpperBeak(){;}
+	PenguinUpperBeak* clone(){ return new PenguinUpperBeak();}
+	void drawObject(){
+		m_UpperBeak.draw();
+	}
+private:
+	ExtrudedPolygon m_UpperBeak;
+};
+class PenguinLowerBeak : public drawable{
+public:
+	PenguinLowerBeak(){
+		Polygon* newPoly1 = new Polygon();
+		Vector* newver1 = new Vector[4];
+		newver1[0] = *(new Vector(-0.5,0,0.1));
+		newver1[1] = *(new Vector(0.0,0,0.1));
+		newver1[2] = *(new Vector(0.0,0,-0.1));
+		newver1[3] = *(new Vector(-0.5,0,-0.1));
+		newPoly1->SetVertex(newver1,4,false);
+
+		Polygon* newPoly2 = new Polygon();
+		Vector* newver = new Vector[4];
+		newver[0] = *(new Vector(-0.45,-0.1,0.08));
+		newver[1] = *(new Vector(0.0,-0.1,0.08));
+		newver[2] = *(new Vector(0.0,-0.1,-0.08));
+		newver[3] = *(new Vector(-0.45,-0.1,-0.08));
+		newPoly2->SetVertex(newver,4,false);
+		m_LowerBeak.setColor1i(COLOR_PENGUINBEAK);
+		m_LowerBeak.Setfaces(newPoly2,newPoly1);
+	}
+	~PenguinLowerBeak(){;}
+	PenguinUpperBeak* clone(){ return new PenguinUpperBeak();}
+	void drawObject(){
+		m_LowerBeak.draw();
+	}
+private:
+	ExtrudedPolygon m_LowerBeak;
+};
+// This controller is used for drawing all the object on the
+// screen
 RenderController g_RenderController;
 
 // main() function
@@ -679,13 +824,22 @@ void initDS()
 	//g_RenderController.add(newPoly1);
 	//g_RenderController.add(newPoly2);
 	PenguinFeet* feet1 = new PenguinFeet();
-	feet1->initialize();
-	PenguinBody* body = new PenguinBody();
-	body->initialize();
-	PenguinUpperWing* upperwing = new PenguinUpperWing();
+	//feet1->initialize();
+	//PenguinBody* body = new PenguinBody();
+	//body->initialize();
+	//PenguinUpperWing* upperwing = new PenguinUpperWing();
+	//PenguinHip* hip = new PenguinHip();
 	//g_RenderController.add(body);
-	g_RenderController.add(feet1);
+	PenguinHead* newhead = new PenguinHead();
+	newhead->translate(0,1,0);
+	//g_RenderController.add(newhead);
 	//g_RenderController.add(upperwing);
+	/*PenguinUpperBeak* newb = new PenguinUpperBeak();
+	PenguinLowerBeak* newnn = new PenguinLowerBeak();
+	g_RenderController.add(newb);
+	g_RenderController.add(newnn);*/
+	PenguinLowerWing* neww = new PenguinLowerWing();
+	g_RenderController.add(neww);
 	g_RenderController.add(new ReferenceAxis());
 }
 
