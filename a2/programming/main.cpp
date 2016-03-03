@@ -225,10 +225,12 @@ void writeFrame(char* filename, bool pgm, bool frontBuffer);
 
 // TODO: Currentlly the object layer is mixed up with render layer,need to
 // seperate the layer.
+
 #define COLOR_PENGUINFEET 0x00ffff26
 #define COLOR_PENGUINLEG  0x00191903
 #define COLOR_PENGUINBODY 0x0066660f
 #define COLOR_PENGUINBEAK 0x00ff4800
+
 class Color3B{
 public:
 	union{
@@ -263,8 +265,13 @@ public:
 		_translate[1] = y;
 		_translate[2] = z;
 	}
-	void setReferenceCoordinate(Vector euler){
+	void rotate(Vector euler){
 		_euler = euler;
+	}
+	void rotate(float x, float y, float z){
+		_euler[0] = x;
+		_euler[1] = y;
+		_euler[2] = z;
 	}
 	void setColor1i(unsigned int _color){
 		_colori._c = _color;
@@ -284,8 +291,8 @@ public:
 	void draw(){
 		glPushMatrix();
 			// Adjust Reference Frame ZNZ
-			glRotatef(_euler[0],0,0,1); // Alpha
-			glRotatef(_euler[1],1,0,0); // Beta
+			glRotatef(_euler[0],1,0,0); // Alpha
+			glRotatef(_euler[1],0,1,0); // Beta
 			glRotatef(_euler[2],0,0,1); // Gama
 			glScalef(_scale[0],_scale[1],_scale[2]);
 			glTranslatef(_translate[0],_translate[1],_translate[2]);
@@ -370,7 +377,7 @@ public:
 		}
 		_clone->SetVertex(_newvec,nofv,isDrawReverse);
 		_clone->translate(this->getTranslation());
-		_clone->setReferenceCoordinate(this->getReferenceCoord());
+		_clone->rotate(this->getReferenceCoord());
 		_clone->scale(this->getScale());
 		return _clone;
 	}
@@ -486,7 +493,7 @@ public:
 		//vecGL
 		//newface->translate(depth);
 		//newface->SetReverse(true);
-		this->Setfaces(newface,face);
+		this->Setfaces(face,newface);
 	}
 	void SetDepth(Vector _depth){
 		//_depth.print();
@@ -524,7 +531,12 @@ public:
 };
 class PenguinFeet : public drawable{
 public:
-	PenguinFeet(){;}
+	PenguinFeet(){
+		m_fLegLength = 1;
+		initializeLeg();
+		initializePalm();
+
+	}
 	~PenguinFeet(){;}
 	PenguinFeet* clone(){
 		return new PenguinFeet();
@@ -534,24 +546,20 @@ public:
 		m_leg.draw();
 		m_palm.draw();
 	}
-	void initialize(){
-		initializeLeg();
-		initializePalm();
-	}
 private:
 	void initializePalm(){
 		Polygon* newPoly1 = new Polygon();
 		Vector* newver = new Vector[3];
 		newver[0] = *(new Vector(0.0,0.0,0.0));
-		newver[1] = *(new Vector(-2,0.0,-1.5));
-		newver[2] = *(new Vector(-2,0.0,1.5));
+		newver[1] = *(new Vector(-1,0.0,-0.5));
+		newver[2] = *(new Vector(-1,0.0,0.5));
 		newPoly1->SetVertex(newver,3,false);
 		Vector _newvec;
 		_newvec[1] = -0.1;
 		m_palm.SetDepth(_newvec);
 		m_palm.SetBase(newPoly1);
 		m_palm.setColor1i(COLOR_PENGUINFEET);
-		m_palm.translate(0,-3,0);
+		m_palm.translate(0,-m_fLegLength,0);
 	}
 	void initializeLeg(){
 		Polygon* newPoly1 = new Polygon();
@@ -562,46 +570,18 @@ private:
 		newver[3] = *(new Vector(-0.1,0.0,-0.1));
 		newPoly1->SetVertex(newver,4,false);
 		Vector _newvec;
-		_newvec[1] = 3.0;
+		_newvec[1] = m_fLegLength;
 		m_leg.SetDepth(_newvec);
 		m_leg.SetBase(newPoly1);
 		m_leg.setColor1i(COLOR_PENGUINLEG);
-		m_leg.translate(0,-3,0);
+		m_leg.translate(0,-m_fLegLength,0);
 	}
 private:
+	float m_fLegLength;
 	ExtrudedPolygon m_palm;
 	ExtrudedPolygon m_leg;
 };
-class PenguinBody : public drawable{
-public:
-	PenguinBody(){
-		Polygon* newPoly1 = new Polygon();
-		Vector* newver1 = new Vector[4];
-		newver1[0] = *(new Vector(-1,-1,1));
-		newver1[1] = *(new Vector(1,-1,1));
-		newver1[2] = *(new Vector(1,-1,-1));
-		newver1[3] = *(new Vector(-1,-1,-1));
-		newPoly1->SetVertex(newver1,4,false);
-		Polygon* newPoly2 = new Polygon();
-		Vector* newver = new Vector[4];
-		newver[0] = *(new Vector(-0.7,1,0.7));
-		newver[1] = *(new Vector(0.7,1,0.7));
-		newver[2] = *(new Vector(0.7,1,-0.7));
-		newver[3] = *(new Vector(-0.7,1,-0.7));
-		newPoly2->SetVertex(newver,4,false);
-		m_body.Setfaces(newPoly1,newPoly2);
-	}
-	~PenguinBody(){;}
-	PenguinBody* clone(){
-		return new PenguinBody();
-	}
-	void drawObject(){
-		m_body.setColor1i(COLOR_PENGUINLEG);
-		m_body.draw();
-	}
-private:
-	LoftedPolygon m_body;
-};
+
 class PenguinUpperWing : public drawable{
 public:
 	PenguinUpperWing(){
@@ -677,7 +657,7 @@ public:
 
 		m_Hip.Setfaces(newPoly1,newPoly2);
 		m_Hip.setColor1i(COLOR_PENGUINFEET);
-		m_Hip.translate(0,-0.1,0);
+		m_Hip.translate(0,-0.2,0);
 	}
 	~PenguinHip(){;}
 	PenguinHip* clone(){
@@ -685,38 +665,13 @@ public:
 	}
 	void drawObject(){
 		m_Hip.draw();
+		m_feet.draw();
 	}
 protected:
 	LoftedPolygon m_Hip;
+	PenguinFeet m_feet;
 };
-class PenguinHead : public drawable{
-public:
-	PenguinHead(){
-		Polygon* newPoly1 = new Polygon();
-		Vector* newver1 = new Vector[4];
-		newver1[0] = *(new Vector(-0.8,0,0.8));
-		newver1[1] = *(new Vector(0.8,0,0.8));
-		newver1[2] = *(new Vector(0.8,0,-0.8));
-		newver1[3] = *(new Vector(-0.8,0,-0.8));
-		newPoly1->SetVertex(newver1,4,false);
-		Polygon* newPoly2 = new Polygon();
-		Vector* newver = new Vector[4];
-		newver[0] = *(new Vector(-0.7,0.8,0.7));
-		newver[1] = *(new Vector(0.7,0.8,0.7));
-		newver[2] = *(new Vector(0.7,0.8,-0.7));
-		newver[3] = *(new Vector(-0.7,0.8,-0.7));
-		newPoly2->SetVertex(newver,4,false);
-		m_head.setColor1i(COLOR_PENGUINBODY);
-		m_head.Setfaces(newPoly1,newPoly2);
-	}
-	~PenguinHead(){;}
-	PenguinHead* clone(){return new PenguinHead();}
-	void drawObject(){
-		m_head.draw();
-	}
-private:
-	LoftedPolygon m_head;
-};
+
 class PenguinUpperBeak : public drawable{
 public:
 	PenguinUpperBeak(){
@@ -775,6 +730,119 @@ public:
 private:
 	ExtrudedPolygon m_LowerBeak;
 };
+class PenguinBeak : public drawable{
+public:
+	PenguinBeak(Keyframe* _keyframe){
+		m_AnimationKeyFrame = _keyframe;
+		m_Displacement = _keyframe->getDOFPtr(Keyframe::BEAK);
+	}
+	~PenguinBeak(){;}
+	PenguinBeak* clone(){return new PenguinBeak(m_AnimationKeyFrame);}
+	void drawObject(){
+		float _temp = *(m_Displacement)/2;
+		//std::cout<<"temp"<<_temp << std::endl;
+
+		m_UpperBeak.translate(0,_temp,0);
+		m_LowerBeak.translate(0,-_temp,0);
+		m_UpperBeak.draw();
+		m_LowerBeak.draw();
+	}
+private:
+	float* m_Displacement;
+	Keyframe* m_AnimationKeyFrame;
+	PenguinUpperBeak m_UpperBeak;
+	PenguinLowerBeak m_LowerBeak;
+};
+class PenguinHead : public drawable{
+public:
+	PenguinHead(Keyframe* _frame){
+		Polygon* newPoly1 = new Polygon();
+		Vector* newver1 = new Vector[4];
+		newver1[0] = *(new Vector(-0.8,0,0.8));
+		newver1[1] = *(new Vector(0.8,0,0.8));
+		newver1[2] = *(new Vector(0.8,0,-0.8));
+		newver1[3] = *(new Vector(-0.8,0,-0.8));
+		newPoly1->SetVertex(newver1,4,false);
+		Polygon* newPoly2 = new Polygon();
+		Vector* newver = new Vector[4];
+		newver[0] = *(new Vector(-0.6,1.0,0.6));
+		newver[1] = *(new Vector(0.6,1.0,0.6));
+		newver[2] = *(new Vector(0.6,1.0,-0.6));
+		newver[3] = *(new Vector(-0.6,1.0,-0.6));
+		newPoly2->SetVertex(newver,4,false);
+		m_head.setColor1i(COLOR_PENGUINBODY);
+		m_head.Setfaces(newPoly1,newPoly2);
+		m_keyframe = _frame;
+		m_Beak = new PenguinBeak(_frame);
+	}
+	~PenguinHead(){;}
+	PenguinHead* clone(){return new PenguinHead(m_keyframe);}
+	void drawObject(){
+		m_head.draw();
+		m_Beak->translate(-0.65,0.65,0);
+		m_Beak->draw();
+	}
+private:
+	Keyframe* m_keyframe;
+	LoftedPolygon m_head;
+	PenguinBeak* m_Beak;
+};
+class PenguinBody : public drawable{
+public:
+	PenguinBody(){
+		Polygon* newPoly1 = new Polygon();
+		Vector* newver1 = new Vector[4];
+		newver1[0] = *(new Vector(-1,-1,1));
+		newver1[1] = *(new Vector(1,-1,1));
+		newver1[2] = *(new Vector(1,-1,-1));
+		newver1[3] = *(new Vector(-1,-1,-1));
+		newPoly1->SetVertex(newver1,4,false);
+		Polygon* newPoly2 = new Polygon();
+		Vector* newver = new Vector[4];
+		newver[0] = *(new Vector(-0.7,1,0.7));
+		newver[1] = *(new Vector(0.7,1,0.7));
+		newver[2] = *(new Vector(0.7,1,-0.7));
+		newver[3] = *(new Vector(-0.7,1,-0.7));
+		newPoly2->SetVertex(newver,4,false);
+		m_body.Setfaces(newPoly1,newPoly2);
+	}
+	~PenguinBody(){;}
+	PenguinBody* clone(){
+		return new PenguinBody();
+	}
+	void drawObject(){
+		m_body.setColor1i(COLOR_PENGUINLEG);
+		m_body.draw();
+		m_hip.translate(0,-1,0);
+		m_hip.draw();
+	}
+private:
+	LoftedPolygon m_body;
+	PenguinHip m_hip;
+};
+
+
+class Penguin : public drawable{
+public:
+	Penguin(Keyframe* _frame){
+		m_keyframe = _frame;
+		m_head = new PenguinHead(_frame);
+		m_body = new PenguinBody();
+	}
+	~Penguin(){;}
+	Penguin* clone(){return new Penguin(m_keyframe);}
+	void drawObject(){
+		float rotate = (m_keyframe->getDOF(Keyframe::HEAD));
+		m_head->rotate(0,rotate,0);
+		m_head->translate(0,1,0);
+		m_head->draw();
+		m_body->draw();
+	}
+private:
+	Keyframe* m_keyframe;
+	PenguinHead* m_head;
+	PenguinBody* m_body;
+};
 // This controller is used for drawing all the object on the
 // screen
 RenderController g_RenderController;
@@ -821,25 +889,10 @@ void initDS()
 	animationTimer = new Timer();
 	frameRateTimer = new Timer();
 	joint_ui_data  = new Keyframe();
-	//g_RenderController.add(newPoly1);
-	//g_RenderController.add(newPoly2);
-	PenguinFeet* feet1 = new PenguinFeet();
-	//feet1->initialize();
-	//PenguinBody* body = new PenguinBody();
-	//body->initialize();
-	//PenguinUpperWing* upperwing = new PenguinUpperWing();
-	//PenguinHip* hip = new PenguinHip();
-	//g_RenderController.add(body);
-	PenguinHead* newhead = new PenguinHead();
-	newhead->translate(0,1,0);
-	//g_RenderController.add(newhead);
-	//g_RenderController.add(upperwing);
-	/*PenguinUpperBeak* newb = new PenguinUpperBeak();
-	PenguinLowerBeak* newnn = new PenguinLowerBeak();
-	g_RenderController.add(newb);
-	g_RenderController.add(newnn);*/
-	PenguinLowerWing* neww = new PenguinLowerWing();
-	g_RenderController.add(neww);
+	//PenguinBeak* beak = new PenguinBeak(joint_ui_data);
+	//PenguinHead* head = new PenguinHead(joint_ui_data);
+	Penguin* mypenguin = new Penguin(joint_ui_data);
+	g_RenderController.add(mypenguin);
 	g_RenderController.add(new ReferenceAxis());
 }
 
@@ -1384,7 +1437,6 @@ void display(void)
 {
     // Clear the screen with the background colour
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  
-
     // Setup the model-view transformation matrix
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -1573,8 +1625,8 @@ void keyboard(unsigned char c, int x, int y){
 		std::cout<<"wow"<<std::endl;
 		break;
 	}
-	glutSetWindow(windowID);
-	glutPostRedisplay();
+	//glutSetWindow(windowID);
+	//glutPostRedisplay();
 }
 
 // Draw a unit cube, centered at the current location
