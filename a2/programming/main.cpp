@@ -316,14 +316,52 @@ protected:
 };
 class RenderController{
 public:
+	RenderController(){
+		currentmode = -1;
+		lastmode = -1;
+	}
 	void Render(){
-		for(unsigned int i = 0; i < _renderqueue.size();i++)
-			_renderqueue[i]->draw();
+		//glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
+	    //glEnable(GL_CULL_FACE);
+
+		if(currentmode == OUTLINED){
+			glPolygonMode(GL_FRONT,GL_FILL);
+			glEnable(GL_POLYGON_OFFSET_FILL);
+			for(unsigned int i = 0; i < _renderqueue.size();i++)
+				_renderqueue[i]->draw();
+			glDisable(GL_POLYGON_OFFSET_FILL);
+			glPolygonMode(GL_FRONT,GL_LINE);
+			for(unsigned int i = 0; i < _renderqueue.size();i++)
+				_renderqueue[i]->draw();
+		}
+		else{
+			for(unsigned int i = 0; i < _renderqueue.size();i++)
+						_renderqueue[i]->draw();
+		}
+	}
+	void SetMode(int mode){
+		if(mode != currentmode){
+			if(mode == WIREFRAME){
+				glDisable(GL_CULL_FACE);
+				glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
+			}
+			else if(mode == SOLID){
+				glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
+				glEnable(GL_CULL_FACE);
+			}
+			else if(mode == OUTLINED){
+				glPolygonOffset(1,1);
+			}
+			lastmode = currentmode;
+			currentmode = mode;
+		}
 	}
 	void add(drawable* _item){
 		_renderqueue.push_back(_item);
 	}
 private:
+	int currentmode;
+	int lastmode;
 	std::vector<drawable*> _renderqueue;
 };
 class Polygon : public drawable{
@@ -566,7 +604,7 @@ private:
 		newver[2] = *(new Vector(-1,0.0,0.5));
 		newPoly1->SetVertex(newver,3,false);
 		Vector _newvec;
-		_newvec[1] = -0.1;
+		_newvec[1] = 0.1;
 		m_palm.SetDepth(_newvec);
 		m_palm.SetBase(newPoly1);
 		m_palm.setColor1i(COLOR_PENGUINFEET);
@@ -892,18 +930,24 @@ private:
 	PenguinWing* m_LWing;
 	PenguinWing* m_RWing;
 };
-
-
 class Penguin : public drawable{
 public:
 	Penguin(Keyframe* _frame){
 		m_keyframe = _frame;
 		m_head = new PenguinHead(_frame);
 		m_body = new PenguinBody(_frame);
+		m_fTranslateX = m_keyframe->getDOFPtr(Keyframe::ROOT_TRANSLATE_X);
+		m_fTranslateY = m_keyframe->getDOFPtr(Keyframe::ROOT_TRANSLATE_Y);
+		m_fTranslateZ = m_keyframe->getDOFPtr(Keyframe::ROOT_TRANSLATE_Z);
+		m_fRotateX = m_keyframe->getDOFPtr(Keyframe::ROOT_ROTATE_X);
+		m_fRotateY = m_keyframe->getDOFPtr(Keyframe::ROOT_ROTATE_Y);
+		m_fRotateZ = m_keyframe->getDOFPtr(Keyframe::ROOT_ROTATE_Z);
 	}
 	~Penguin(){;}
 	Penguin* clone(){return new Penguin(m_keyframe);}
 	void drawObject(){
+		this->rotate(*(m_fRotateX),*(m_fRotateY),*(m_fRotateZ));
+		this->rotate(*(m_fTranslateX),*(m_fTranslateY),*(m_fTranslateZ));
 		float rotate = (m_keyframe->getDOF(Keyframe::HEAD));
 		m_head->rotate(0,rotate,0);
 		m_head->translate(0,1,0);
@@ -911,6 +955,13 @@ public:
 		m_body->draw();
 	}
 private:
+	float* m_fTranslateX;
+	float* m_fTranslateY;
+	float* m_fTranslateZ;
+	float* m_fRotateX;
+	float* m_fRotateY;
+	float* m_fRotateZ;
+
 	Keyframe* m_keyframe;
 	PenguinHead* m_head;
 	PenguinBody* m_body;
@@ -961,8 +1012,6 @@ void initDS()
 	animationTimer = new Timer();
 	frameRateTimer = new Timer();
 	joint_ui_data  = new Keyframe();
-	//PenguinBeak* beak = new PenguinBeak(joint_ui_data);
-	//PenguinHead* head = new PenguinHead(joint_ui_data);
 	Penguin* mypenguin = new Penguin(joint_ui_data);
 	g_RenderController.add(mypenguin);
 	g_RenderController.add(new ReferenceAxis());
@@ -1023,11 +1072,15 @@ void updateKeyframeButton(int)
 	///////////////////////////////////////////////////////////
 
 	// Get the keyframe ID from the UI
-	int keyframeID = 0;
 
+	int keyframeID = joint_ui_data->getID();
+	//std::cout<<"Keyframe ID: "<<keyframeID << std::endl;
+	if(keyframeID > maxValidKeyframe){
+		maxValidKeyframe = keyframeID;
+	}
 	// Update the 'maxValidKeyframe' index variable
 	// (it will be needed when doing the interpolation)
-
+	keyframes[keyframeID] = *(joint_ui_data);
 	// Update the appropriate entry in the 'keyframes' array
 	// with the 'joint_ui_data' data
 
@@ -1415,7 +1468,6 @@ void initGl(void)
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
     glDepthFunc(GL_LESS);
 }
 
@@ -1584,6 +1636,7 @@ void display(void)
 		newPoly.SetVertex(newver,4);
 		//newPoly.draw();*/
 		glColor3f(1.0, 1.0, 1.0);
+		g_RenderController.SetMode(renderStyle);
 		g_RenderController.Render();
 		//drawCube();
 
