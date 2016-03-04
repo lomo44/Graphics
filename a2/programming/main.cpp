@@ -230,6 +230,9 @@ void writeFrame(char* filename, bool pgm, bool frontBuffer);
 #define COLOR_PENGUINLEG  0x00191903
 #define COLOR_PENGUINBODY 0x0066660f
 #define COLOR_PENGUINBEAK 0x00ff4800
+#define COLOR_PENGUINHEAD 0x00656638
+#define COLOR_PENGUINWING 0x007a8b8b
+#define COLOR_PENGUINARM  0x00bcc5c5
 
 class Color3B{
 public:
@@ -290,12 +293,12 @@ public:
 	}
 	void draw(){
 		glPushMatrix();
-			// Adjust Reference Frame ZNZ
+			// Adjust Reference Frame ZNZ;
+			glTranslatef(_translate[0],_translate[1],_translate[2]);
 			glRotatef(_euler[0],1,0,0); // Alpha
 			glRotatef(_euler[1],0,1,0); // Beta
 			glRotatef(_euler[2],0,0,1); // Gama
 			glScalef(_scale[0],_scale[1],_scale[2]);
-			glTranslatef(_translate[0],_translate[1],_translate[2]);
 			glColor3ub(_colori.R(),_colori.G(),_colori.B());
 			drawObject();
 		glPopMatrix();
@@ -531,18 +534,26 @@ public:
 };
 class PenguinFeet : public drawable{
 public:
-	PenguinFeet(){
+	PenguinFeet(Keyframe* _keyframe, bool isLeft){
 		m_fLegLength = 1;
 		initializeLeg();
 		initializePalm();
-
+		m_keyframe = _keyframe;
+		m_bIsLeft = isLeft;
+		if(m_bIsLeft){
+			m_angle = _keyframe->getDOFPtr(Keyframe::L_KNEE);
+		}
+		else{
+			m_angle = _keyframe->getDOFPtr(Keyframe::R_KNEE);
+		}
 	}
 	~PenguinFeet(){;}
 	PenguinFeet* clone(){
-		return new PenguinFeet();
+		return new PenguinFeet(m_keyframe,m_bIsLeft);
 	}
 	void drawObject(){
 		//m_palm.draw();
+		m_palm.rotate(0,0,-(*m_angle));
 		m_leg.draw();
 		m_palm.draw();
 	}
@@ -577,27 +588,29 @@ private:
 		m_leg.translate(0,-m_fLegLength,0);
 	}
 private:
+	float* m_angle;
+	bool m_bIsLeft;
+	Keyframe* m_keyframe;
 	float m_fLegLength;
 	ExtrudedPolygon m_palm;
 	ExtrudedPolygon m_leg;
 };
-
 class PenguinUpperWing : public drawable{
 public:
 	PenguinUpperWing(){
 		Polygon* newPoly1 = new Polygon();
 		Vector* newver = new Vector[4];
-		newver[0] = *(new Vector(0.1,0.2,0.0));
-		newver[1] = *(new Vector(-0.1,0.2,0.0));
-		newver[2] = *(new Vector(-0.05,-0.2,0.0));
-		newver[3] = *(new Vector(0.1,-0.2,0.0));
+		newver[0] = *(new Vector(0.3,0.6,0.0));
+		newver[1] = *(new Vector(-0.3,0.6,0.0));
+		newver[2] = *(new Vector(-0.15,-0.6,0.0));
+		newver[3] = *(new Vector(0.3,-0.6,0.0));
 		newPoly1->SetVertex(newver,4,false);
 		Vector _newvec;
 		_newvec[2] = 0.1;
 		m_upperwing.SetDepth(_newvec);
 		m_upperwing.SetBase(newPoly1);
-		m_upperwing.setColor1i(COLOR_PENGUINLEG);
-		m_upperwing.translate(-0.02,-0.15,0);
+		m_upperwing.translate(-0.04,-0.3,0);
+		m_upperwing.setColor1i(COLOR_PENGUINWING);
 	}
 	~PenguinUpperWing(){;}
 	PenguinUpperWing* clone(){
@@ -614,17 +627,17 @@ public:
 	PenguinLowerWing(){
 		Polygon* newPoly1 = new Polygon();
 		Vector* newver = new Vector[4];
-		newver[0] = *(new Vector(0.75,0.75,0.0));
-		newver[1] = *(new Vector(-0.75,0.75,0.0));
-		newver[2] = *(new Vector(-0.3,-0.75,0.0));
-		newver[3] = *(new Vector(0.75,-0.75,0.0));
+		newver[0] = *(new Vector(0.20,0.2,0.0));
+		newver[1] = *(new Vector(-0.20,0.2,0.0));
+		newver[2] = *(new Vector(-0.15,-0.2,0.0));
+		newver[3] = *(new Vector(0.20,-0.2,0.0));
 		newPoly1->SetVertex(newver,4,false);
 		Vector _newvec;
 		_newvec[2] = 0.1;
 		m_lowerwing.SetDepth(_newvec);
 		m_lowerwing.SetBase(newPoly1);
-		m_lowerwing.setColor1i(COLOR_PENGUINLEG);
-		m_lowerwing.translate(0,-0.75,0);
+		m_lowerwing.translate(0,-0.2,0);
+		m_lowerwing.setColor1i(COLOR_PENGUINARM);
 	}
 	~PenguinLowerWing(){;}
 	PenguinLowerWing* clone(){
@@ -636,42 +649,76 @@ public:
 private:
 	ExtrudedPolygon m_lowerwing;
 };
+class PenguinWing : public drawable{
+public:
+	PenguinWing(Keyframe* _keyframe, bool isLeft){
+		m_keyframe = _keyframe;
+		m_isLeft = isLeft;
+		m_lowerwing = new PenguinLowerWing();
+		m_upperwing = new PenguinUpperWing();
+		if(m_isLeft){
+			m_scale = _keyframe->getDOFPtr(Keyframe::L_ARM_SCALE);
+		}
+		else{
+			m_scale = _keyframe->getDOFPtr(Keyframe::R_ARM_SCALE);
+		}
+	}
+	~PenguinWing(){;}
+	PenguinWing* clone(){ return new PenguinWing(m_keyframe, m_isLeft);}
+	void drawObject(){
+		m_upperwing->draw();
+		m_lowerwing->translate(0,-0.8,0);
+		m_lowerwing->rotate(0,0,-5);
+		m_lowerwing->scale(1,*(m_scale),1);
+		m_lowerwing->draw();
+	}
+private:
+	float* m_scale;
+	Keyframe* m_keyframe;
+	bool m_isLeft;
+	PenguinLowerWing* m_lowerwing;
+	PenguinUpperWing* m_upperwing;
+};
 class PenguinHip : public drawable{
 public:
-	PenguinHip(){
+	PenguinHip(Keyframe* _keyframe, bool left ){
 		Polygon* newPoly1 = new Polygon();
 		Vector* newver = new Vector[4];
-		newver[0] = *(new Vector(-0.15,0.0,0.15));
-		newver[1] = *(new Vector(0.15,0.0,0.15));
-		newver[2] = *(new Vector(0.15,0.0,-0.15));
-		newver[3] = *(new Vector(-0.15,0.0,-0.15));
+		newver[0] = *(new Vector(-0.15,0.2,0.15));
+		newver[1] = *(new Vector(0.15,0.2,0.15));
+		newver[2] = *(new Vector(0.15,0.2,-0.15));
+		newver[3] = *(new Vector(-0.15,0.2,-0.15));
 		newPoly1->SetVertex(newver,4,false);
 
 		Polygon* newPoly2 = new Polygon();
 		Vector* newver1 = new Vector[4];
-		newver1[0] = *(new Vector(-0.1,0.2,0.1));
-		newver1[1] = *(new Vector(0.1,0.2,0.1));
-		newver1[2] = *(new Vector(0.1,0.2,-0.1));
-		newver1[3] = *(new Vector(-0.1,0.2,-0.1));
+		newver1[0] = *(new Vector(-0.1,0.0,0.1));
+		newver1[1] = *(new Vector(0.1,0.0,0.1));
+		newver1[2] = *(new Vector(0.1,0.0,-0.1));
+		newver1[3] = *(new Vector(-0.1,0.0,-0.1));
 		newPoly2->SetVertex(newver1,4,false);
 
-		m_Hip.Setfaces(newPoly1,newPoly2);
+		m_keyframe = _keyframe;
+		m_Hip.Setfaces(newPoly2,newPoly1);
 		m_Hip.setColor1i(COLOR_PENGUINFEET);
 		m_Hip.translate(0,-0.2,0);
+		b_isLeft = left;
+		m_feet = new PenguinFeet(_keyframe,left);
 	}
 	~PenguinHip(){;}
 	PenguinHip* clone(){
-		return new PenguinHip();
+		return new PenguinHip(m_keyframe,b_isLeft);
 	}
 	void drawObject(){
 		m_Hip.draw();
-		m_feet.draw();
+		m_feet->draw();
 	}
 protected:
+	bool b_isLeft;
+	Keyframe* m_keyframe;
 	LoftedPolygon m_Hip;
-	PenguinFeet m_feet;
+	PenguinFeet* m_feet;
 };
-
 class PenguinUpperBeak : public drawable{
 public:
 	PenguinUpperBeak(){
@@ -770,7 +817,7 @@ public:
 		newver[2] = *(new Vector(0.6,1.0,-0.6));
 		newver[3] = *(new Vector(-0.6,1.0,-0.6));
 		newPoly2->SetVertex(newver,4,false);
-		m_head.setColor1i(COLOR_PENGUINBODY);
+		m_head.setColor1i(COLOR_PENGUINHEAD);
 		m_head.Setfaces(newPoly1,newPoly2);
 		m_keyframe = _frame;
 		m_Beak = new PenguinBeak(_frame);
@@ -789,7 +836,7 @@ private:
 };
 class PenguinBody : public drawable{
 public:
-	PenguinBody(){
+	PenguinBody(Keyframe* _keyframe){
 		Polygon* newPoly1 = new Polygon();
 		Vector* newver1 = new Vector[4];
 		newver1[0] = *(new Vector(-1,-1,1));
@@ -805,20 +852,45 @@ public:
 		newver[3] = *(new Vector(-0.7,1,-0.7));
 		newPoly2->SetVertex(newver,4,false);
 		m_body.Setfaces(newPoly1,newPoly2);
+		m_body.setColor1i(COLOR_PENGUINBODY);
+		m_keyframe = _keyframe;
+		m_Lhip = new PenguinHip(m_keyframe,true);
+		m_Rhip = new PenguinHip(m_keyframe,false);
+		m_Lhip->translate(0,-1,0.5);
+		m_Rhip->translate(0,-1,-0.5);
+
+		float wing_distance = 1.6;
+		m_RWing = new PenguinWing(m_keyframe,false);
+		m_LWing = new PenguinWing(m_keyframe,true);
+		m_LWing->translate(0,0.2,wing_distance/2);
+		m_RWing->translate(0,0.2,-wing_distance/2-0.1);
+		m_fWingTilt = -7;
 	}
 	~PenguinBody(){;}
 	PenguinBody* clone(){
-		return new PenguinBody();
+		return new PenguinBody(m_keyframe);
 	}
 	void drawObject(){
-		m_body.setColor1i(COLOR_PENGUINLEG);
+
 		m_body.draw();
-		m_hip.translate(0,-1,0);
-		m_hip.draw();
+		//m_hip.translate(0,-1,0);
+		m_Lhip->rotate(m_keyframe->getDOF(Keyframe::L_HIP_ROLL),m_keyframe->getDOF(Keyframe::L_HIP_YAW),m_keyframe->getDOF(Keyframe::L_HIP_PITCH));
+		m_Lhip->draw();
+		m_Rhip->rotate(m_keyframe->getDOF(Keyframe::R_HIP_ROLL),m_keyframe->getDOF(Keyframe::R_HIP_YAW),m_keyframe->getDOF(Keyframe::R_HIP_PITCH));
+		m_Rhip->draw();
+		m_LWing->rotate(-(m_keyframe->getDOF(Keyframe::L_SHOULDER_ROLL))+m_fWingTilt,-(m_keyframe->getDOF(Keyframe::L_SHOULDER_YAW)),-(m_keyframe->getDOF(Keyframe::L_SHOULDER_PITCH)));
+		m_RWing->rotate(m_keyframe->getDOF(Keyframe::R_SHOULDER_ROLL)-m_fWingTilt,m_keyframe->getDOF(Keyframe::R_SHOULDER_YAW),m_keyframe->getDOF(Keyframe::R_SHOULDER_PITCH));
+		m_RWing->draw();
+		m_LWing->draw();
 	}
 private:
+	float m_fWingTilt;
+	Keyframe* m_keyframe;
 	LoftedPolygon m_body;
-	PenguinHip m_hip;
+	PenguinHip* m_Lhip;
+	PenguinHip* m_Rhip;
+	PenguinWing* m_LWing;
+	PenguinWing* m_RWing;
 };
 
 
@@ -827,7 +899,7 @@ public:
 	Penguin(Keyframe* _frame){
 		m_keyframe = _frame;
 		m_head = new PenguinHead(_frame);
-		m_body = new PenguinBody();
+		m_body = new PenguinBody(_frame);
 	}
 	~Penguin(){;}
 	Penguin* clone(){return new Penguin(m_keyframe);}
