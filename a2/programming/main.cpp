@@ -51,7 +51,8 @@
 #include <vector>
 #include <algorithm>
 #include "Matrix.h"
-
+#include "RenderController.h"
+#include "Drawable.h"
 typedef std::vector<GLfloat> vecGLfloat;
 // *************** GLOBAL VARIABLES *************************
 
@@ -103,7 +104,7 @@ const GLdouble NEAR_CLIP   = 0.1;
 const GLdouble FAR_CLIP    = 1000.0;
 
 // Render settings
-enum { WIREFRAME, SOLID, OUTLINED };	// README: the different render styles
+enum { WIREFRAME , SOLID, OUTLINED };	// README: the different render styles
 int renderStyle = WIREFRAME;			// README: the selected render style
 
 // Animation settings
@@ -234,137 +235,9 @@ void writeFrame(char* filename, bool pgm, bool frontBuffer);
 #define COLOR_PENGUINWING 0x007a8b8b
 #define COLOR_PENGUINARM  0x00bcc5c5
 
-class Color3B{
-public:
-	union{
-		unsigned int _c;
-		unsigned char ARGB[4];
-	};
-	int B(){return ARGB[0];}
-	int G(){return ARGB[1];}
-	int R(){return ARGB[2];}
-	int A(){return ARGB[3];}
-	void set(unsigned _co){_c = _co;}
-};
-class drawable{
-public:
-	drawable(){
-		_scale[0] = 1;
-		_scale[1] = 1;
-		_scale[2] = 1;
-		_euler[0] = 0;
-		_euler[1] = 0;
-		_euler[2] = 0;
-		_translate[0] = 0;
-		_translate[1] = 0;
-		_translate[2] = 0;
-	}
-	virtual ~drawable(){;}
-	void translate(Vector dir){
-		_translate = dir;
-	}
-	void translate(float x, float y, float z){
-		_translate [0] = x;
-		_translate[1] = y;
-		_translate[2] = z;
-	}
-	void rotate(Vector euler){
-		_euler = euler;
-	}
-	void rotate(float x, float y, float z){
-		_euler[0] = x;
-		_euler[1] = y;
-		_euler[2] = z;
-	}
-	void setColor1i(unsigned int _color){
-		_colori._c = _color;
-		//std::cout<<"Color is"<< _colori._c << std::endl;
-		//std::cout<<"R" << _colori.R << std::endl;
-		//std::cout<<"G" << _colori.G << std::endl;
-		//std::cout<<"B" << _colori.ARGB[1] << std::endl;
-	}
-	void scale(float x, float y, float z){
-		_scale[0] = x;
-		_scale[1] = y;
-		_scale[2] = z;
-	}
-	void scale(Vector scale){
-		_scale = scale;
-	}
-	void draw(){
-		glPushMatrix();
-			// Adjust Reference Frame ZNZ;
-			glTranslatef(_translate[0],_translate[1],_translate[2]);
-			glRotatef(_euler[0],1,0,0); // Alpha
-			glRotatef(_euler[1],0,1,0); // Beta
-			glRotatef(_euler[2],0,0,1); // Gama
-			glScalef(_scale[0],_scale[1],_scale[2]);
-			glColor3ub(_colori.R(),_colori.G(),_colori.B());
-			drawObject();
-		glPopMatrix();
-	}
-	Vector getTranslation(){return _translate;}
-	Vector getReferenceCoord(){return _euler;}
-	Vector getScale(){return _scale;}
-	virtual drawable* clone() = 0;
-protected:
-	virtual void drawObject() = 0;
-	Vector _translate;
-	Vector _euler;
-	Vector _scale;
-	Color3B _colori;
-};
-class RenderController{
-public:
-	RenderController(){
-		currentmode = -1;
-		lastmode = -1;
-	}
-	void Render(){
-		//glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
-	    //glEnable(GL_CULL_FACE);
+std::vector<Drawable*> primitive_list;
 
-		if(currentmode == OUTLINED){
-			glPolygonMode(GL_FRONT,GL_FILL);
-			glEnable(GL_POLYGON_OFFSET_FILL);
-			for(unsigned int i = 0; i < _renderqueue.size();i++)
-				_renderqueue[i]->draw();
-			glDisable(GL_POLYGON_OFFSET_FILL);
-			glPolygonMode(GL_FRONT,GL_LINE);
-			for(unsigned int i = 0; i < _renderqueue.size();i++)
-				_renderqueue[i]->draw();
-		}
-		else{
-			for(unsigned int i = 0; i < _renderqueue.size();i++)
-						_renderqueue[i]->draw();
-		}
-	}
-	void SetMode(int mode){
-		if(mode != currentmode){
-			if(mode == WIREFRAME){
-				glDisable(GL_CULL_FACE);
-				glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
-			}
-			else if(mode == SOLID){
-				glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
-				glEnable(GL_CULL_FACE);
-			}
-			else if(mode == OUTLINED){
-				glPolygonOffset(1,1);
-			}
-			lastmode = currentmode;
-			currentmode = mode;
-		}
-	}
-	void add(drawable* _item){
-		_renderqueue.push_back(_item);
-	}
-private:
-	int currentmode;
-	int lastmode;
-	std::vector<drawable*> _renderqueue;
-};
-class Polygon : public drawable{
+class Polygon : public Drawable{
 public:
 	Polygon(){nofv = 0; isDrawReverse = false;}
 	virtual ~Polygon(){}
@@ -441,7 +314,7 @@ private:
 	int nofv;
 	bool isDrawReverse;
 };
-class LoftedPolygon : public drawable{
+class LoftedPolygon : public Drawable{
 // Note: Lofted Polygon Must Have same number of vertex for each face;
 public:
 	LoftedPolygon(){
@@ -546,7 +419,7 @@ public:
 private:
 	Vector depth;
 };
-class ReferenceAxis : public drawable{
+class ReferenceAxis : public Drawable{
 private:
 	void drawObject(){
 		glColor3f(1,0,0);
@@ -570,7 +443,8 @@ public:
 		return new ReferenceAxis();
 	}
 };
-class PenguinFeet : public drawable{
+
+class PenguinFeet : public Drawable{
 public:
 	PenguinFeet(Keyframe* _keyframe, bool isLeft){
 		m_fLegLength = 1;
@@ -633,7 +507,7 @@ private:
 	ExtrudedPolygon m_palm;
 	ExtrudedPolygon m_leg;
 };
-class PenguinUpperWing : public drawable{
+class PenguinUpperWing : public Drawable{
 public:
 	PenguinUpperWing(){
 		Polygon* newPoly1 = new Polygon();
@@ -660,7 +534,7 @@ public:
 private:
 	ExtrudedPolygon m_upperwing;
 };
-class PenguinLowerWing : public drawable{
+class PenguinLowerWing : public Drawable{
 public:
 	PenguinLowerWing(){
 		Polygon* newPoly1 = new Polygon();
@@ -687,7 +561,7 @@ public:
 private:
 	ExtrudedPolygon m_lowerwing;
 };
-class PenguinWing : public drawable{
+class PenguinWing : public Drawable{
 public:
 	PenguinWing(Keyframe* _keyframe, bool isLeft){
 		m_keyframe = _keyframe;
@@ -717,7 +591,7 @@ private:
 	PenguinLowerWing* m_lowerwing;
 	PenguinUpperWing* m_upperwing;
 };
-class PenguinHip : public drawable{
+class PenguinHip : public Drawable{
 public:
 	PenguinHip(Keyframe* _keyframe, bool left ){
 		Polygon* newPoly1 = new Polygon();
@@ -757,7 +631,7 @@ protected:
 	LoftedPolygon m_Hip;
 	PenguinFeet* m_feet;
 };
-class PenguinUpperBeak : public drawable{
+class PenguinUpperBeak : public Drawable{
 public:
 	PenguinUpperBeak(){
 		Polygon* newPoly1 = new Polygon();
@@ -786,7 +660,7 @@ public:
 private:
 	ExtrudedPolygon m_UpperBeak;
 };
-class PenguinLowerBeak : public drawable{
+class PenguinLowerBeak : public Drawable{
 public:
 	PenguinLowerBeak(){
 		Polygon* newPoly1 = new Polygon();
@@ -815,7 +689,7 @@ public:
 private:
 	ExtrudedPolygon m_LowerBeak;
 };
-class PenguinBeak : public drawable{
+class PenguinBeak : public Drawable{
 public:
 	PenguinBeak(Keyframe* _keyframe){
 		m_AnimationKeyFrame = _keyframe;
@@ -838,7 +712,7 @@ private:
 	PenguinUpperBeak m_UpperBeak;
 	PenguinLowerBeak m_LowerBeak;
 };
-class PenguinHead : public drawable{
+class PenguinHead : public Drawable{
 public:
 	PenguinHead(Keyframe* _frame){
 		Polygon* newPoly1 = new Polygon();
@@ -872,7 +746,7 @@ private:
 	LoftedPolygon m_head;
 	PenguinBeak* m_Beak;
 };
-class PenguinBody : public drawable{
+class PenguinBody : public Drawable{
 public:
 	PenguinBody(Keyframe* _keyframe){
 		Polygon* newPoly1 = new Polygon();
@@ -930,7 +804,7 @@ private:
 	PenguinWing* m_LWing;
 	PenguinWing* m_RWing;
 };
-class Penguin : public drawable{
+class Penguin : public Drawable{
 public:
 	Penguin(Keyframe* _frame){
 		m_keyframe = _frame;
@@ -968,7 +842,7 @@ private:
 };
 // This controller is used for drawing all the object on the
 // screen
-RenderController g_RenderController;
+
 
 // main() function
 // Initializes the user interface (and any user variables)
@@ -1636,10 +1510,17 @@ void display(void)
 		newPoly.SetVertex(newver,4);
 		//newPoly.draw();*/
 		glColor3f(1.0, 1.0, 1.0);
-		g_RenderController.SetMode(renderStyle);
+		if(renderStyle == WIREFRAME){
+			g_RenderController.SetMode(Wireframe);
+		}
+		else if(renderStyle == OUTLINED){
+			g_RenderController.SetMode(Outlined);
+		}
+		else if(renderStyle == SOLID){
+			g_RenderController.SetMode(Solid);
+		}
 		g_RenderController.Render();
 		//drawCube();
-
 	glPopMatrix();
 	//
 	// SAMPLE CODE **********
