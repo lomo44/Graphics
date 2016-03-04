@@ -16,7 +16,12 @@ void Drawable::draw(){
 	glRotatef(_euler[1],0,1,0); // Beta
 	glRotatef(_euler[2],0,0,1); // Gama
 	glScalef(_scale[0],_scale[1],_scale[2]);
-	glColor3ub(_colori.R(),_colori.G(),_colori.B());
+	if(this->m_RenderMode == Solid)
+		glColor3ub(_colori.R(),_colori.G(),_colori.B());
+	else{
+		//std::cout<<"w"<<std::endl;
+		glColor3ub(0,0,0);
+	}
 	drawObject();
 	glPopMatrix();
 }

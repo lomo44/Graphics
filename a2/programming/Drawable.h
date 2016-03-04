@@ -1,6 +1,7 @@
 /*
  * Drawable.h
  *
+ * Base Class For any OpenGL Rendering Object
  *  Created on: Mar 4, 2016
  *      Author:
  */
@@ -9,7 +10,8 @@
 #define DRAWABLE_H_
 
 #include "vector.h"
-
+#include "RenderController.h"
+#include <iostream>
 class Color3B{
 public:
 	union{
@@ -35,6 +37,8 @@ public:
 		_translate[0] = 0;
 		_translate[1] = 0;
 		_translate[2] = 0;
+		m_DrawWire = false;
+		m_RenderMode = Solid;
 	}
 	virtual ~Drawable(){;}
 	void translate(Vector dir){
@@ -63,6 +67,7 @@ public:
 	}
 	void scale(Vector scale){_scale = scale;}
 	void draw();
+	virtual void ChangeRenderMode(eRenderMode mode){m_RenderMode = mode;}
 	Vector getTranslation(){return _translate;}
 	Vector getReferenceCoord(){return _euler;}
 	Vector getScale(){return _scale;}
@@ -73,6 +78,8 @@ protected:
 	Vector _euler;
 	Vector _scale;
 	Color3B _colori;
+	bool m_DrawWire;
+	eRenderMode m_RenderMode;
 };
 
 #endif /* DRAWABLE_H_ */

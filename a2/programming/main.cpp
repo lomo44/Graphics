@@ -53,6 +53,7 @@
 #include "Matrix.h"
 #include "RenderController.h"
 #include "Drawable.h"
+#include "Primitives.h"
 typedef std::vector<GLfloat> vecGLfloat;
 // *************** GLOBAL VARIABLES *************************
 
@@ -237,188 +238,6 @@ void writeFrame(char* filename, bool pgm, bool frontBuffer);
 
 std::vector<Drawable*> primitive_list;
 
-class Polygon : public Drawable{
-public:
-	Polygon(){nofv = 0; isDrawReverse = false;}
-	virtual ~Polygon(){}
-	void SetVertex(Vector* vertexlist, int d, bool _isDrawReverse){
-		nofv = d;
-		float a = 0;
-		float b = 0;
-		float c = 0;
-		int start = 0;
-		int end = nofv;
-		int increment = 1;
-		isDrawReverse = _isDrawReverse;
-		if(isDrawReverse){
-			start = nofv-1;
-			end = -1;
-			increment = -1;
-		}
-		for(int i = start; i != end; i += increment){
-			//std::cout<<vertexlist[i][0]<<"|"<<vertexlist[i][1]<<"|"<<vertexlist[i][2]<<std::endl;
-			_vertexlist.push_back(vertexlist[i][0]);
-			_vertexlist.push_back(vertexlist[i][1]);
-			_vertexlist.push_back(vertexlist[i][2]);
-			a += vertexlist[i][0];
-			b += vertexlist[i][1];
-			c += vertexlist[i][2];
-		}
-		a = a/d;
-		b = b/d;
-		c = c/d;
-		mid[0] = a;
-		mid[1] = b;
-		mid[2] = c;
-	}
-	void SetReverse(bool _b){
-		if(_b != isDrawReverse)
-		{
-			isDrawReverse = _b;
-			std::reverse(_vertexlist.begin(),_vertexlist.end());
-			for(unsigned int i = 0; i < _vertexlist.size();i+=3){
-				GLfloat a = _vertexlist[i];
-				_vertexlist[i] = _vertexlist[i+2];
-				_vertexlist[i+2] = a;
-			}
-		}
-	}
-	Polygon* clone(){
-		Polygon* _clone = new Polygon();
-		Vector* _newvec = new Vector[nofv];
-		for(int i = 0 ; i < nofv; i++){
-			_newvec[i] = _vertexlist[i];
-		}
-		_clone->SetVertex(_newvec,nofv,isDrawReverse);
-		_clone->translate(this->getTranslation());
-		_clone->rotate(this->getReferenceCoord());
-		_clone->scale(this->getScale());
-		return _clone;
-	}
-	vecGLfloat& GetVertexlist(){return _vertexlist;}
-	int GetVertexCount(){return nofv;}
-	Vector& GetMid(){return mid;}
-	void SetMid(Vector _v){
-		mid = _v;
-	}
-protected:
-	void drawObject(){
-		glEnableClientState(GL_VERTEX_ARRAY);
-		glVertexPointer(3,GL_FLOAT,0,&_vertexlist[0]);
-		glDrawArrays(GL_POLYGON,0,nofv);
-		glDisableClientState(GL_VERTEX_ARRAY);
-	}
-private:
-	vecGLfloat _vertexlist;
-	Vector mid;
-	int nofv;
-	bool isDrawReverse;
-};
-class LoftedPolygon : public Drawable{
-// Note: Lofted Polygon Must Have same number of vertex for each face;
-public:
-	LoftedPolygon(){
-		_face1 = NULL;
-		_face2 = NULL;
-	}
-	~LoftedPolygon(){
-		delete _face1;
-		delete _face2;
-	}
-	void Setfaces(Polygon* face1, Polygon* face2){
-		if(face1->GetMid()[3] > face2->GetMid()[3]){
-			_face1 = face1;
-			_face2 = face2;
-		}
-		else{
-			_face1 = face2;
-			_face2 = face1;
-		}
-		vecGLfloat& _v1 = _face1->GetVertexlist();
-		vecGLfloat& _v2 = _face2->GetVertexlist();
-		int vc1 = _face1->GetVertexCount();
-		int vc2 = _face2->GetVertexCount();
-		assert(vc1 == vc2);
-		for(int i = 0; i < (vc1-1)*3; i+=3){
-			addVertex(_v1[i+3],_v1[i+4],_v1[i+5]);
-			addVertex(_v1[i],_v1[i+1],_v1[i+2]);
-			addVertex(_v2[i],_v2[i+1],_v2[i+2]);
-			addVertex(_v2[i+3],_v2[i+4],_v2[i+5]);
-		}
-		addVertex(_v1[0],_v1[1],_v1[2]);
-		addVertex(_v1[vc1*3-3],_v1[vc1*3-2],_v1[vc1*3-1]);
-		addVertex(_v2[vc1*3-3],_v2[vc1*3-2],_v2[vc1*3-1]);
-		addVertex(_v2[0],_v2[1],_v2[2]);
-		_face1->SetReverse(false);
-		_face2->SetReverse(true);
-	}
-protected:
-	void drawObject(){
-		_face1->setColor1i(_colori._c);
-		_face1->draw();
-		_face2->setColor1i(_colori._c);
-		_face2->draw();
-		glEnableClientState(GL_VERTEX_ARRAY);
-		glVertexPointer(3,GL_FLOAT,0,&_vertexlist[0]);
-		glDrawArrays(GL_QUADS,0,(int)(_vertexlist.size()/3));
-		glDisableClientState(GL_VERTEX_ARRAY);
-	}
-	LoftedPolygon* clone(){
-		LoftedPolygon* _new = new LoftedPolygon();
-		_new->Setfaces(_face1->clone(),_face2->clone());
-		return _new;
-	}
-private:
-	void addVertex(GLfloat x, GLfloat y, GLfloat z){
-		_vertexlist.push_back(x);
-		_vertexlist.push_back(y);
-		_vertexlist.push_back(z);
-	}
-	Polygon* _face1;
-	Polygon* _face2;
-	vecGLfloat _vertexlist;
-};
-class ExtrudedPolygon : public LoftedPolygon{
-public:
-	ExtrudedPolygon(){
-	}
-	~ExtrudedPolygon(){}
-	void SetBase(Polygon* face){
-		vecGLfloat& _vec = face->GetVertexlist();
-		Polygon* newface = new Polygon();
-		*(newface) = *(face);
-		vecGLfloat& newvec = newface->GetVertexlist();
-		Matrix* _new = new Matrix();
-		//depth.print();
-		_new->loadTranslational(depth[0],depth[1],depth[2]);
-		//_new->print();
-		Vector _temp;
-		for(unsigned int i = 0 ; i <= (_vec.size()-3);i+=3){
-			_temp[0] = _vec[i];
-			_temp[1] = _vec[i+1];
-			_temp[2] = _vec[i+2];
-			_temp = *(_new)*=_temp;
-			newvec[i] = (_temp[0]);
-			newvec[i+1]=(_temp[1]);
-			newvec[i+2] =(_temp[2]);
-		}
-		Vector& mid = newface->GetMid();
-		mid = *(_new)*=mid;
-		//vecGL
-		//newface->translate(depth);
-		//newface->SetReverse(true);
-		this->Setfaces(face,newface);
-	}
-	void SetDepth(Vector _depth){
-		//_depth.print();
-		depth = _depth;
-	}
-	void drawObject(){
-		LoftedPolygon::drawObject();
-	}
-private:
-	Vector depth;
-};
 class ReferenceAxis : public Drawable{
 private:
 	void drawObject(){
@@ -468,6 +287,10 @@ public:
 		m_palm.rotate(0,0,-(*m_angle));
 		m_leg.draw();
 		m_palm.draw();
+	}
+	void ChangeRenderMode(eRenderMode mode){
+		m_palm.ChangeRenderMode(mode);
+		m_leg.ChangeRenderMode(mode);
 	}
 private:
 	void initializePalm(){
@@ -531,6 +354,9 @@ public:
 	void drawObject(){
 		m_upperwing.draw();
 	}
+	void ChangeRenderMode(eRenderMode mode){
+		m_upperwing.ChangeRenderMode(mode);
+	}
 private:
 	ExtrudedPolygon m_upperwing;
 };
@@ -558,6 +384,9 @@ public:
 	void drawObject(){
 		m_lowerwing.draw();
 	}
+	void ChangeRenderMode(eRenderMode mode){
+		m_lowerwing.ChangeRenderMode(mode);
+	}
 private:
 	ExtrudedPolygon m_lowerwing;
 };
@@ -570,9 +399,11 @@ public:
 		m_upperwing = new PenguinUpperWing();
 		if(m_isLeft){
 			m_scale = _keyframe->getDOFPtr(Keyframe::L_ARM_SCALE);
+			m_rotate = _keyframe->getDOFPtr(Keyframe::L_ELBOW);
 		}
 		else{
 			m_scale = _keyframe->getDOFPtr(Keyframe::R_ARM_SCALE);
+			m_rotate = _keyframe->getDOFPtr(Keyframe::R_ELBOW);
 		}
 	}
 	~PenguinWing(){;}
@@ -580,12 +411,20 @@ public:
 	void drawObject(){
 		m_upperwing->draw();
 		m_lowerwing->translate(0,-0.8,0);
-		m_lowerwing->rotate(0,0,-5);
+		if(m_isLeft)
+			m_lowerwing->rotate(0,0,-*(m_rotate));
+		else
+			m_lowerwing->rotate(0,0,-*(m_rotate));
 		m_lowerwing->scale(1,*(m_scale),1);
 		m_lowerwing->draw();
 	}
+	void ChangeRenderMode(eRenderMode mode){
+		m_lowerwing->ChangeRenderMode(mode);
+		m_upperwing->ChangeRenderMode(mode);
+	}
 private:
 	float* m_scale;
+	float* m_rotate;
 	Keyframe* m_keyframe;
 	bool m_isLeft;
 	PenguinLowerWing* m_lowerwing;
@@ -625,6 +464,10 @@ public:
 		m_Hip.draw();
 		m_feet->draw();
 	}
+	void ChangeRenderMode(eRenderMode mode){
+		m_Hip.ChangeRenderMode(mode);
+		m_feet->ChangeRenderMode(mode);
+	}
 protected:
 	bool b_isLeft;
 	Keyframe* m_keyframe;
@@ -657,6 +500,9 @@ public:
 	void drawObject(){
 		m_UpperBeak.draw();
 	}
+	void ChangeRenderMode(eRenderMode mode){
+		m_UpperBeak.ChangeRenderMode(mode);
+	}
 private:
 	ExtrudedPolygon m_UpperBeak;
 };
@@ -686,6 +532,9 @@ public:
 	void drawObject(){
 		m_LowerBeak.draw();
 	}
+	void ChangeRenderMode(eRenderMode mode){
+		m_LowerBeak.ChangeRenderMode(mode);
+	}
 private:
 	ExtrudedPolygon m_LowerBeak;
 };
@@ -705,6 +554,10 @@ public:
 		m_LowerBeak.translate(0,-_temp,0);
 		m_UpperBeak.draw();
 		m_LowerBeak.draw();
+	}
+	void ChangeRenderMode(eRenderMode mode){
+		m_UpperBeak.ChangeRenderMode(mode);
+		m_LowerBeak.ChangeRenderMode(mode);
 	}
 private:
 	float* m_Displacement;
@@ -732,6 +585,7 @@ public:
 		m_head.setColor1i(COLOR_PENGUINHEAD);
 		m_head.Setfaces(newPoly1,newPoly2);
 		m_keyframe = _frame;
+
 		m_Beak = new PenguinBeak(_frame);
 	}
 	~PenguinHead(){;}
@@ -740,6 +594,10 @@ public:
 		m_head.draw();
 		m_Beak->translate(-0.65,0.65,0);
 		m_Beak->draw();
+	}
+	void ChangeRenderMode(eRenderMode mode){
+		m_head.ChangeRenderMode(mode);
+		m_Beak->ChangeRenderMode(mode);
 	}
 private:
 	Keyframe* m_keyframe;
@@ -795,6 +653,14 @@ public:
 		m_RWing->draw();
 		m_LWing->draw();
 	}
+	void ChangeRenderMode(eRenderMode mode){
+		//std::cout<<"ccc"<<std::endl;
+		m_Lhip->ChangeRenderMode(mode);
+		m_Rhip->ChangeRenderMode(mode);
+		m_LWing->ChangeRenderMode(mode);
+		m_RWing->ChangeRenderMode(mode);
+		m_body.ChangeRenderMode(mode);
+	}
 private:
 	float m_fWingTilt;
 	Keyframe* m_keyframe;
@@ -820,13 +686,18 @@ public:
 	~Penguin(){;}
 	Penguin* clone(){return new Penguin(m_keyframe);}
 	void drawObject(){
+		//std::cout<<*(m_fRotateX)<<std::endl;
 		this->rotate(*(m_fRotateX),*(m_fRotateY),*(m_fRotateZ));
-		this->rotate(*(m_fTranslateX),*(m_fTranslateY),*(m_fTranslateZ));
+		this->translate(*(m_fTranslateX),*(m_fTranslateY),*(m_fTranslateZ));
 		float rotate = (m_keyframe->getDOF(Keyframe::HEAD));
 		m_head->rotate(0,rotate,0);
 		m_head->translate(0,1,0);
 		m_head->draw();
 		m_body->draw();
+	}
+	void ChangeRenderMode(eRenderMode mode){
+		m_head->ChangeRenderMode(mode);
+		m_body->ChangeRenderMode(mode);
 	}
 private:
 	float* m_fTranslateX;
@@ -886,6 +757,7 @@ void initDS()
 	animationTimer = new Timer();
 	frameRateTimer = new Timer();
 	joint_ui_data  = new Keyframe();
+	//std::cout<<"wow"<<std::endl;
 	Penguin* mypenguin = new Penguin(joint_ui_data);
 	g_RenderController.add(mypenguin);
 	g_RenderController.add(new ReferenceAxis());
@@ -1486,7 +1358,6 @@ void display(void)
 	//   enumeration to determine how the geometry should be
 	//   rendered.
     ///////////////////////////////////////////////////////////
-
 	// SAMPLE CODE **********
 	//
 	glPushMatrix();
@@ -1509,6 +1380,7 @@ void display(void)
 		newver[3] = *(new Vector(0.0,1.0,0.0));
 		newPoly.SetVertex(newver,4);
 		//newPoly.draw();*/
+		//std::cout<<"wow"<<std::endl;
 		glColor3f(1.0, 1.0, 1.0);
 		if(renderStyle == WIREFRAME){
 			g_RenderController.SetMode(Wireframe);
