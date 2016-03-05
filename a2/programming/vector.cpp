@@ -238,4 +238,19 @@ float Vector::dot(const Vector& lhs, const Vector& rhs){
 			lhs[3] * rhs[3];
 }
 
+Vector Vector::cross(const Vector& lhs, const Vector& rhs){
+	Vector _new;
+	_new[0] = lhs[1]*rhs[2]-lhs[2]*rhs[1];
+	_new[1] = lhs[2]*rhs[0]-lhs[0]*rhs[2];
+	_new[2] = lhs[0]*rhs[1]-lhs[1]*rhs[0];
+	return _new;
+}
+
+void Vector::Normalize(){
+	float length = sqrt(v[0]*v[0]+v[1]*v[1]+v[2]*v[2]);
+	v[0]/=length;
+	v[1]/=length;
+	v[2]/=length;
+}
+
 

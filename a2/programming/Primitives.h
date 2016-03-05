@@ -35,13 +35,14 @@ public:
 	Vector& GetMid(){return mid;}
 	void SetMid(Vector _v){mid = _v;}
 	void ChangeRenderMode(eRenderMode mode){
-		std::cout<<"Polygon"<<std::endl;
+		//std::cout<<"Polygon"<<std::endl;
 		Drawable::ChangeRenderMode(mode);
 	}
 protected:
 	void drawObject();
 private:
 	vecGLfloat _vertexlist;
+	vecGLfloat _normallist;
 	Vector mid;
 	int nofv;
 	bool isDrawReverse;
@@ -79,9 +80,15 @@ private:
 		_vertexlist.push_back(y);
 		_vertexlist.push_back(z);
 	}
+	void addNormal(GLfloat x, GLfloat y, GLfloat z){
+		_normallist.push_back(x);
+		_normallist.push_back(y);
+		_normallist.push_back(z);
+	}
 	Polygon* _face1;
 	Polygon* _face2;
 	vecGLfloat _vertexlist;
+	vecGLfloat _normallist;
 };
 class ExtrudedPolygon : public LoftedPolygon{
 public:

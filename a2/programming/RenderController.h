@@ -17,6 +17,8 @@ enum eRenderMode{
 	Solid,
 	Wireframe,
 	Outlined,
+	Metallic,
+	Matte,
 	Unknown
 };
 

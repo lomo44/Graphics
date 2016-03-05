@@ -55,16 +55,15 @@ public:
 	Vector& operator/=(float scalar);
 
 	static float dot(const Vector& lhs, const Vector& rhs);
+	static Vector cross(const Vector& lhs, const Vector& rhs);
+	void Normalize();
 	// accessor methods
 	int    getDim()  const;
 	float* getData() const;
-	void print(){
-	}
 private:
 
 	// make a dim dimension vector from vec
 	Vector makeDim(int dim, const Vector& vec) const;
-
 	int d;
 	float* v;
 };

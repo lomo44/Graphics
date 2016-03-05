@@ -14,15 +14,38 @@
 #include <iostream>
 class Color3B{
 public:
-	union{
-		unsigned int _c;
-		unsigned char ARGB[4];
-	};
+	Color3B(){
+		this->_c = 0;
+		_f = new float[3];
+		_f[0] = ARGB[2];
+		_f[1] = ARGB[1];
+		_f[2] = ARGB[0];
+	}
+	Color3B(int _hex){
+		this->_c = _hex;
+		_f = new float[3];
+		_f[0] = ARGB[2];
+		_f[1] = ARGB[1];
+		_f[2] = ARGB[0];
+	}
 	int B(){return ARGB[0];}
 	int G(){return ARGB[1];}
 	int R(){return ARGB[2];}
 	int A(){return ARGB[3];}
 	void set(unsigned _co){_c = _co;}
+	float* getRGB3f(){
+		return _f;
+	}
+
+	Color3B& operator=(const unsigned int _hex){
+
+		return *(this);
+	}
+	union{
+		unsigned int _c;
+		unsigned char ARGB[4];
+	};
+	float* _f;
 };
 
 class Drawable{

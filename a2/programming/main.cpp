@@ -105,7 +105,7 @@ const GLdouble NEAR_CLIP   = 0.1;
 const GLdouble FAR_CLIP    = 1000.0;
 
 // Render settings
-enum { WIREFRAME , SOLID, OUTLINED };	// README: the different render styles
+enum { WIREFRAME , SOLID, OUTLINED, METALLIC, MATTE};	// README: the different render styles
 int renderStyle = WIREFRAME;			// README: the selected render style
 
 // Animation settings
@@ -191,8 +191,15 @@ const float ELBOW_MIN            =  0.0;
 const float ELBOW_MAX            = 75.0;
 const float KNEE_MIN             =  0.0;
 const float KNEE_MAX             = 75.0;
-
-
+const float LIGHT_MIN_DIST       = 2.0;
+const float LIGHT_MAX_DIST       = 10000.0;
+const float LIGHT_ANGLE_MIN      = 0.0;
+const float LIGHT_ANGLE_MAX      = 180.0;
+// Lightnining control
+enum {LIGHTON, LIGHTOFF};
+int  g_LigntningEnable = LIGHTOFF;
+float g_LightningDistance = 5;
+float g_LightningAngle = 0;
 // ***********  FUNCTION HEADER DECLARATIONS ****************
 
 
@@ -235,6 +242,10 @@ void writeFrame(char* filename, bool pgm, bool frontBuffer);
 #define COLOR_PENGUINHEAD 0x00656638
 #define COLOR_PENGUINWING 0x007a8b8b
 #define COLOR_PENGUINARM  0x00bcc5c5
+
+Color3B LIGHT_AMBIENT_ICE(0x00000000);
+Color3B LIGHT_DIFFUSE_ICE(0x00111111);
+Color3B LIGHT_SPECULAR_WHITE(0x00111111);
 
 std::vector<Drawable*> primitive_list;
 
@@ -711,9 +722,78 @@ private:
 	PenguinHead* m_head;
 	PenguinBody* m_body;
 };
-// This controller is used for drawing all the object on the
-// screen
 
+class Light : public Drawable{
+public:
+	Light(int num, float* ambient, float* diffuse, float* specular){
+		m_iLightNumber = num;
+		m_fAmbient = ambient;
+		m_fDiffuse = diffuse;
+		m_fSpecular = specular;
+		m_fPosition = new float[3];
+		m_fPosition[0] = 0;
+		m_fPosition[1] = 10000;
+		m_fPosition[2] = 100000000;
+	}
+	~Light(){
+		delete m_fAmbient;
+		delete m_fDiffuse;
+		delete m_fSpecular;
+	}
+	Light* clone(){return new Light(m_iLightNumber,m_fAmbient,m_fDiffuse,m_fSpecular);}
+	void drawObject(){
+		glLightfv(m_iLightNumber,GL_POSITION,m_fPosition);
+		glLightfv(m_iLightNumber,GL_SPECULAR,m_fSpecular);
+		glLightfv(m_iLightNumber,GL_DIFFUSE,m_fDiffuse);
+		glLightfv(m_iLightNumber,GL_AMBIENT,m_fAmbient);
+	}
+	void Enable(){
+		glEnable(m_iLightNumber);
+	}
+	void Disable(){
+		glDisable(m_iLightNumber);
+	}
+private:
+	int m_iLightNumber;
+	float* m_fAmbient;
+	float* m_fDiffuse;
+	float* m_fSpecular;
+	float* m_fPosition;
+};
+
+class LightningController{
+public:
+	LightningController(){
+		m_iLightCounter = GL_LIGHT0;
+	}
+	~LightningController(){
+		;
+	}
+	Light* addLight(float* ambient, float* diffuse, float* specular){
+		Light* newlight = new Light(m_iLightCounter,ambient,diffuse,specular);
+		m_vLightList.push_back(newlight);
+		m_iLightCounter++;
+		return newlight;
+	}
+	void EnableLighting(){
+		glEnable(GL_LIGHTING);
+	}
+	void DisableLighting(){
+		glDisable(GL_LIGHTING);
+	}
+	void Render(){
+		for(unsigned int i = 0; i < m_vLightList.size();i++){
+			m_vLightList[i]->draw();
+		}
+	}
+private:
+	std::vector<Light*> m_vLightList;
+	int m_iLightCounter;
+};
+
+// Control All the lightning
+LightningController g_LightningController;
+Light* g_GlobalLight;
 
 // main() function
 // Initializes the user interface (and any user variables)
@@ -761,6 +841,9 @@ void initDS()
 	Penguin* mypenguin = new Penguin(joint_ui_data);
 	g_RenderController.add(mypenguin);
 	g_RenderController.add(new ReferenceAxis());
+	g_GlobalLight = g_LightningController.addLight(LIGHT_AMBIENT_ICE.getRGB3f(),
+			LIGHT_DIFFUSE_ICE.getRGB3f(),
+			LIGHT_SPECULAR_WHITE.getRGB3f());
 }
 
 
@@ -1127,6 +1210,19 @@ void initGlui()
 	glui_spinner->set_float_limits(KNEE_MIN, KNEE_MAX, GLUI_LIMIT_CLAMP);
 	glui_spinner->set_speed(SPINNER_SPEED);
 
+	glui_joints->add_column(false);
+
+	glui_panel = glui_joints->add_panel("Lightning");
+
+	glui_spinner = glui_joints->add_spinner_to_panel(glui_panel, "Distance:", GLUI_SPINNER_FLOAT,&g_LightningDistance);
+	glui_spinner->set_float_limits(LIGHT_MIN_DIST,LIGHT_MAX_DIST,GLUI_LIMIT_CLAMP);
+	glui_spinner->set_speed(SPINNER_SPEED);
+
+	glui_spinner = glui_joints->add_spinner_to_panel(glui_panel, "Angle:", GLUI_SPINNER_FLOAT, &g_LightningAngle);
+	glui_spinner->set_float_limits(LIGHT_ANGLE_MIN,LIGHT_ANGLE_MAX,GLUI_LIMIT_CLAMP);
+	glui_spinner->set_speed(SPINNER_SPEED);
+
+
 
 	///////////////////////////////////////////////////////////
 	// TODO (for controlling light source position & additional
@@ -1194,6 +1290,8 @@ void initGlui()
 	glui_render->add_radiobutton_to_group(glui_radio_group, "Wireframe");
 	glui_render->add_radiobutton_to_group(glui_radio_group, "Solid");
 	glui_render->add_radiobutton_to_group(glui_radio_group, "Solid w/ outlines");
+	glui_render->add_radiobutton_to_group(glui_radio_group,"Metalic");
+	glui_render->add_radiobutton_to_group(glui_radio_group,"Matte");
 	//
 	// ***************************************************
 
@@ -1215,6 +1313,7 @@ void initGl(void)
 
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
+
 }
 
 
@@ -1315,6 +1414,8 @@ void display(void)
     glTranslatef(camXPos, camYPos, camZPos);
     glRotatef(g_fCamRotateX,0,1,0);
     glRotatef(g_fCamRotateY,1,0,0);
+
+
 	// Get the time for the current animation step, if necessary
 	if( animate_mode )
 	{
@@ -1383,20 +1484,28 @@ void display(void)
 		//std::cout<<"wow"<<std::endl;
 		glColor3f(1.0, 1.0, 1.0);
 		if(renderStyle == WIREFRAME){
+			g_LightningController.DisableLighting();
 			g_RenderController.SetMode(Wireframe);
 		}
 		else if(renderStyle == OUTLINED){
+			g_LightningController.DisableLighting();
 			g_RenderController.SetMode(Outlined);
 		}
 		else if(renderStyle == SOLID){
+			g_LightningController.DisableLighting();
 			g_RenderController.SetMode(Solid);
+		}
+		else if(renderStyle == METALLIC){
+			g_LightningController.EnableLighting();
+			g_GlobalLight->Enable();
+			g_RenderController.SetMode(Metallic);
 		}
 		g_RenderController.Render();
 		//drawCube();
 	glPopMatrix();
 	//
 	// SAMPLE CODE **********
-
+	g_LightningController.Render();
     // Execute any GL functions that are in the queue just to be safe
     glFlush();
 

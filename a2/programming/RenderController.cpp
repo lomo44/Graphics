@@ -43,14 +43,24 @@ void RenderController::SetMode(eRenderMode _mode){
 			}
 		}
 		else if(_mode == Solid){
-			glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
+			glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);;
 			glEnable(GL_CULL_FACE);
 			for(unsigned int i = 0; i < _renderqueue.size();i++){
 				_renderqueue[i]->ChangeRenderMode(Solid);
 			}
 		}
 		else if(_mode == Outlined){
+			//glDisable(GL_COLOR_MATERIAL);
 			glPolygonOffset(4,4);
+		}
+		else if(_mode == Metallic){
+			for(unsigned int i = 0; i < _renderqueue.size();i++){
+				_renderqueue[i]->ChangeRenderMode(Metallic);
+			}
+			glEnable(GL_CULL_FACE);
+			glEnable(GL_COLOR_MATERIAL);
+			glColorMaterial(GL_FRONT,GL_AMBIENT_AND_DIFFUSE);
+			glPolygonMode(GL_FRONT,GL_FILL);
 		}
 		lastmode = currentmode;
 		currentmode = _mode;
