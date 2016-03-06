@@ -25,7 +25,7 @@ void Polygon::SetVertex(Vector* vertexlist, int d, bool _isDrawReverse){
 	}
 	Vector normal = Vector::cross(vertexlist[1]-vertexlist[0],vertexlist[2]-vertexlist[1]);
 	normal.Normalize();
-	std::cout<<"X"<<normal[0]<<"Y"<<normal[1]<<"Z"<<normal[2]<<std::endl;
+	//std::cout<<"X"<<normal[0]<<"Y"<<normal[1]<<"Z"<<normal[2]<<std::endl;
 	for(int i = start; i != end; i += increment){
 		//std::cout<<vertexlist[i][0]<<"|"<<vertexlist[i][1]<<"|"<<vertexlist[i][2]<<std::endl;
 		_vertexlist.push_back(vertexlist[i][0]);

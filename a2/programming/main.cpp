@@ -191,15 +191,15 @@ const float ELBOW_MIN            =  0.0;
 const float ELBOW_MAX            = 75.0;
 const float KNEE_MIN             =  0.0;
 const float KNEE_MAX             = 75.0;
-const float LIGHT_MIN_DIST       = 2.0;
-const float LIGHT_MAX_DIST       = 10000.0;
+const float LIGHT_MIN_DIST       = 5.0;
+const float LIGHT_MAX_DIST       = 100.0;
 const float LIGHT_ANGLE_MIN      = 0.0;
 const float LIGHT_ANGLE_MAX      = 180.0;
 // Lightnining control
-enum {LIGHTON, LIGHTOFF};
-int  g_LigntningEnable = LIGHTOFF;
-float g_LightningDistance = 5;
+
+float g_LightningDistance = 20;
 float g_LightningAngle = 0;
+Vector g_LightningPosition;
 // ***********  FUNCTION HEADER DECLARATIONS ****************
 
 
@@ -246,6 +246,7 @@ void writeFrame(char* filename, bool pgm, bool frontBuffer);
 Color3B LIGHT_AMBIENT_ICE(0x00000000);
 Color3B LIGHT_DIFFUSE_ICE(0x00111111);
 Color3B LIGHT_SPECULAR_WHITE(0x00111111);
+
 
 std::vector<Drawable*> primitive_list;
 
@@ -723,29 +724,30 @@ private:
 	PenguinBody* m_body;
 };
 
+struct LightAttribute{
+	float* ambient;
+	float* diffuse;
+	float* specular;
+	Vector position;
+	Vector angle;
+};
+
 class Light : public Drawable{
 public:
-	Light(int num, float* ambient, float* diffuse, float* specular){
+	Light(int num, LightAttribute* _att){
 		m_iLightNumber = num;
-		m_fAmbient = ambient;
-		m_fDiffuse = diffuse;
-		m_fSpecular = specular;
-		m_fPosition = new float[3];
-		m_fPosition[0] = 0;
-		m_fPosition[1] = 10000;
-		m_fPosition[2] = 100000000;
+
+		glLightfv(m_iLightNumber,GL_SPECULAR,_att->specular);
+		glLightfv(m_iLightNumber,GL_DIFFUSE,_att->diffuse);
+		glLightfv(m_iLightNumber,GL_AMBIENT,_att->ambient);
+		m_Attribute = _att;
 	}
 	~Light(){
-		delete m_fAmbient;
-		delete m_fDiffuse;
-		delete m_fSpecular;
+		delete m_Attribute;
 	}
-	Light* clone(){return new Light(m_iLightNumber,m_fAmbient,m_fDiffuse,m_fSpecular);}
+	Light* clone(){return new Light(m_iLightNumber,m_Attribute);}
 	void drawObject(){
-		glLightfv(m_iLightNumber,GL_POSITION,m_fPosition);
-		glLightfv(m_iLightNumber,GL_SPECULAR,m_fSpecular);
-		glLightfv(m_iLightNumber,GL_DIFFUSE,m_fDiffuse);
-		glLightfv(m_iLightNumber,GL_AMBIENT,m_fAmbient);
+		glLightfv(m_iLightNumber,GL_POSITION,&(m_Attribute->position[0]));
 	}
 	void Enable(){
 		glEnable(m_iLightNumber);
@@ -753,12 +755,12 @@ public:
 	void Disable(){
 		glDisable(m_iLightNumber);
 	}
+	void MoveTo(Vector _newpos){
+		m_Attribute->position = _newpos;
+	}
 private:
 	int m_iLightNumber;
-	float* m_fAmbient;
-	float* m_fDiffuse;
-	float* m_fSpecular;
-	float* m_fPosition;
+	LightAttribute* m_Attribute;
 };
 
 class LightningController{
@@ -769,8 +771,8 @@ public:
 	~LightningController(){
 		;
 	}
-	Light* addLight(float* ambient, float* diffuse, float* specular){
-		Light* newlight = new Light(m_iLightCounter,ambient,diffuse,specular);
+	Light* addLight(LightAttribute* _att){
+		Light* newlight = new Light(m_iLightCounter,_att);
 		m_vLightList.push_back(newlight);
 		m_iLightCounter++;
 		return newlight;
@@ -841,9 +843,15 @@ void initDS()
 	Penguin* mypenguin = new Penguin(joint_ui_data);
 	g_RenderController.add(mypenguin);
 	g_RenderController.add(new ReferenceAxis());
-	g_GlobalLight = g_LightningController.addLight(LIGHT_AMBIENT_ICE.getRGB3f(),
-			LIGHT_DIFFUSE_ICE.getRGB3f(),
-			LIGHT_SPECULAR_WHITE.getRGB3f());
+	LightAttribute* _newlight = new LightAttribute();
+	_newlight->ambient = LIGHT_AMBIENT_ICE.getRGB3f();
+	_newlight->diffuse = LIGHT_DIFFUSE_ICE.getRGB3f();
+	_newlight->specular = LIGHT_SPECULAR_WHITE.getRGB3f();
+	g_LightningPosition[0] = 0;
+	g_LightningPosition[1] = 0;
+	g_LightningPosition[2] = 10;
+	_newlight->position = g_LightningPosition;
+	g_GlobalLight = g_LightningController.addLight(_newlight);
 }
 
 
@@ -1308,7 +1316,7 @@ void initGl(void)
 {
     // glClearColor (red, green, blue, alpha)
     // Ignore the meaning of the 'alpha' value for now
-    glClearColor(0.7f,0.7f,0.9f,1.0f);
+    glClearColor(0.2f,0.2f,0.2f,1.0f);
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
     glEnable(GL_DEPTH_TEST);
@@ -1501,11 +1509,19 @@ void display(void)
 			g_RenderController.SetMode(Metallic);
 		}
 		g_RenderController.Render();
+		Vector _temp = g_LightningPosition;
+		Matrix rotate;
+		rotate.loadRotational(eRotationalZ,g_LightningAngle);
+		Matrix translate;
+		translate.loadTranslational(g_LightningDistance,0,0);
+		Matrix t = rotate*translate;
+		g_GlobalLight->MoveTo(t*_temp);
+		g_LightningController.Render();
 		//drawCube();
 	glPopMatrix();
 	//
 	// SAMPLE CODE **********
-	g_LightningController.Render();
+
     // Execute any GL functions that are in the queue just to be safe
     glFlush();
 

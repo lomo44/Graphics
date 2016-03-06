@@ -32,6 +32,7 @@ Matrix::Matrix(const Matrix& rhs){
 void Matrix::loadRotational(eMatrixType _type, float angle){
 	_t = _type;
 	loadIdentity();
+	angle = angle*0.0174532;
 	if(_type == eRotationalX){
 		f[5] = std::cos(angle);
 		f[6] = -std::sin(angle);
@@ -73,13 +74,16 @@ void Matrix::loadIdentity(){
 	_t = eIdentity;
 }
 
-Vector Matrix::getColumn(int i){
+Vector Matrix::getColumn(int i) const{
 	assert(i <= 3);
 	Vector _ret;
-	_ret[0] = f[i+=4];
-	_ret[1] = f[i+=4];
-	_ret[2] = f[i+=4];
-	_ret[3] = f[i+=4];
+	_ret[0] = f[i];
+	i+=4;
+	_ret[1] = f[i];
+	i+=4;
+	_ret[2] = f[i];
+	i+=4;
+	_ret[3] = f[i];
 	return _ret;
 }
 
@@ -99,11 +103,13 @@ int Matrix::getDimension() const{
 
 Matrix Matrix::operator *(const Matrix& rhs){
 	Matrix _ret;
+	_ret.loadIdentity();
 	for(int i = 0;i < 4; i++){
+		//std::cout<<"a"<<std::endl;
 		for(int j = 0; j < 4; j++){
 			Vector a = this->getRow(i);
-			Vector b = this->getColumn(j);
-			_ret.f[(i<<2)+j] = Vector::dot(a,b);
+			Vector b = rhs.getColumn(j);
+			_ret.f[i*4+j] = Vector::dot(a,b);
 		}
 	}
 	return _ret;
@@ -129,11 +135,13 @@ Vector& Matrix::operator *=(Vector& rhs){
 
 void Matrix::print(){
 	for(int i = 0; i < d<<2;i++){
-		if(i & ~d == 3){
+
+		std::cout<<f[i]<<",";
+		if(i%d== 3){
 			std::cout<<std::endl;
 		}
-		std::cout<<f[i]<<",";
 	}
+	std::cout<<std::endl;
 }
 
 

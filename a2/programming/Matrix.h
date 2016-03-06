@@ -22,7 +22,7 @@ public:
 	void loadRotational(eMatrixType _type, float angle);
 	void loadTranslational(float x, float y, float z);
 	void loadIdentity();
-	Vector getColumn(int i);
+	Vector getColumn(int i) const;
 	Vector getRow(int i);
 	int getDimension() const;
 	Matrix  operator* (const Matrix& rhs);
