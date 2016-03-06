@@ -1508,6 +1508,11 @@ void display(void)
 			g_GlobalLight->Enable();
 			g_RenderController.SetMode(Metallic);
 		}
+		else if(renderStyle == MATTE){
+			g_LightningController.EnableLighting();
+			g_GlobalLight->Enable();
+			g_RenderController.SetMode(Matte);
+		}
 		g_RenderController.Render();
 		Vector _temp = g_LightningPosition;
 		Matrix rotate;

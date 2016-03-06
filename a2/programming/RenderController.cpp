@@ -66,6 +66,16 @@ void RenderController::SetMode(eRenderMode _mode){
 			glMaterialfv(GL_FRONT,GL_SPECULAR,specular);
 			glMaterialfv(GL_FRONT,GL_SHININESS,shineness);
 		}
+		else if(_mode == Matte){
+			glEnable(GL_CULL_FACE);
+			glEnable(GL_COLOR_MATERIAL);
+			glColorMaterial(GL_FRONT,GL_AMBIENT_AND_DIFFUSE);
+			glPolygonMode(GL_FRONT,GL_FILL);
+			GLfloat shineness[1] = {0.0f};
+			GLfloat specular[4] = {0.0f,0.0f,0.0f,1.0};
+			glMaterialfv(GL_FRONT,GL_SPECULAR,specular);
+			glMaterialfv(GL_FRONT,GL_SHININESS,shineness);
+		}
 		lastmode = currentmode;
 		currentmode = _mode;
 	}
