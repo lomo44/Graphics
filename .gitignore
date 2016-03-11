@@ -22,6 +22,10 @@ bld/
 [Bb]in/
 [Oo]bj/
 .settings/
+
+# Netbeans Generated Files
+nbproject/*.*
+
 # Visual Studio 2015 cache/options directory
 .vs/
 
@@ -212,3 +216,4 @@ GeneratedArtifacts/
 _Pvt_Extensions/
 ModelManifest.xml
 /GraphicLibrary/GraphicLibrary/CppApplication_1/dist/
+/util/CppApplication_1/dist/
