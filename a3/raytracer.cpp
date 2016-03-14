@@ -16,7 +16,7 @@
 #include <cmath>
 #include <iostream>
 #include <cstdlib>
-
+#include <stdint.h>
 Raytracer::Raytracer() : _lightSource(NULL) {
 	_root = new SceneDagNode();
 }
@@ -165,7 +165,7 @@ void Raytracer::traverseScene( SceneDagNode* node, Ray3D& ray ) {
 		// Perform intersection.
 		if (node->obj->intersect(ray, _worldToModel, _modelToWorld)) {
 			ray.intersection.mat = node->mat;
-		}
+		};
 	}
 	// Traverse the children.
 	childPtr = node->child;
@@ -240,7 +240,7 @@ void Raytracer::render( int width, int height, Point3D eye, Vector3D view,
 
 	initPixelBuffer();
 	viewToWorld = initInvViewMatrix(eye, view, up);
-
+	//std::cout<<viewToWorld<<std::endl;
 	// Construct a ray for each pixel.
 	for (int i = 0; i < _scrHeight; i++) {
 		for (int j = 0; j < _scrWidth; j++) {
@@ -251,14 +251,17 @@ void Raytracer::render( int width, int height, Point3D eye, Vector3D view,
 			imagePlane[0] = (-double(width)/2 + 0.5 + j)/factor;
 			imagePlane[1] = (-double(height)/2 + 0.5 + i)/factor;
 			imagePlane[2] = -1;
-
+			Vector3D _dir (imagePlane[0],imagePlane[1],imagePlane[2]);
+			Vector3D dir = viewToWorld * _dir;
+			origin = viewToWorld * origin;;
 			// TODO: Convert ray to world space and call 
 			// shadeRay(ray) to generate pixel colour. 	
-			
 			Ray3D ray;
+			ray.origin = origin;
+			ray.dir = dir;
 
-			Colour col = shadeRay(ray); 
-
+			Colour col = shadeRay(ray);
+			//std:: cout << "i:" <<i << "j:" << j <<"Hit: "<<ray.intersection.none<<std::endl;
 			_rbuffer[i*width+j] = int(col[0]*255);
 			_gbuffer[i*width+j] = int(col[1]*255);
 			_bbuffer[i*width+j] = int(col[2]*255);

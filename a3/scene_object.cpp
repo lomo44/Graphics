@@ -14,24 +14,32 @@
 
 bool UnitSquare::intersect( Ray3D& ray, const Matrix4x4& worldToModel,
 		const Matrix4x4& modelToWorld ) {
-    ray.origin = ray.origin * worldToModel;
-    ray.dir = ray.dir * worldToModel;
-    double _t = ray.dir.operator [2]/(-ray.origin.operator [2]);
+	if(!ray.intersection.none){
+		//std::cout<<"already"<<std::endl;
+		return false;
+	}
+    Point3D neworgin = worldToModel * ray.origin;
+    Vector3D newdir =  worldToModel * ray.dir;
+    newdir.normalize();
+    //std::cout<<newdir<<std::endl;
+    double _t = (-neworgin[2])/newdir[2];
+    //std::cout<<_t<<std::endl;
     if(_t >= 0 ){
-        double _x = ray.origin.[0] + _t * ray.dir[0];
-        double _y = ray.origin.[1] + _t * ray.dir[1];
+        double _x = neworgin[0] + _t * newdir[0];
+        double _y = neworgin[1] + _t * newdir[1];
         if(_x <= 0.5 && _x >= -0.5 && _y <= 0.5 && _y >= -0.5){
             ray.intersection.none = false;
             ray.intersection.t_value = _t;
             Point3D _int(_x*_t,_y*_t,0);
-            Point3D _norm(0,0,1);
-            _int = _int * (modelToWorld);
-            _norm = _norm * (modelToWorld);
+            Vector3D _norm(0,0,1);
+            _int =  (modelToWorld) * _int;
+            _norm = (modelToWorld.transpose()) * _norm;
+            _norm.normalize();
             ray.intersection.point = _int;
             ray.intersection.normal = _norm;
         }
     }
-	// TODO: implement intersection code for UnitSquare, which is
+	/* TODO: implement intersection code for UnitSquare, which is
 	// defined on the xy-plane, with vertices (0.5, 0.5, 0), 
 	// (-0.5, 0.5, 0), (-0.5, -0.5, 0), (0.5, -0.5, 0), and normal
 	// (0, 0, 1).
@@ -41,9 +49,7 @@ bool UnitSquare::intersect( Ray3D& ray, const Matrix4x4& worldToModel,
 	// intersection.normal, intersection.none, intersection.t_value.   
 	//
 	// HINT: Remember to first transform the ray into object space  
-	// to simplify the intersection test.
-    ray.dir = ray.dir * modelToWorld;
-    ray.origin = ray.origin * modelToWorld;
+	// to simplify the intersection test.*/
     return !ray.intersection.none;
 }
 
@@ -58,7 +64,48 @@ bool UnitSphere::intersect( Ray3D& ray, const Matrix4x4& worldToModel,
 	//
 	// HINT: Remember to first transform the ray into object space  
 	// to simplify the intersection test.
-	
-	return false;
+	if(!ray.intersection.none)
+		return false;
+	Point3D neworgin = worldToModel * ray.origin;
+	Vector3D newdir =  worldToModel * ray.dir;
+	Vector3D posOrgin(neworgin[0],neworgin[1],neworgin[2]);
+	newdir.normalize();
+	double t = (newdir.dot(posOrgin))*(newdir.dot(posOrgin))-
+			(posOrgin.length())*(posOrgin.length()) + 1;
+	if(t >= 0){
+		//std::cout<<t<<std::endl;
+		double d = 0;
+		if(t == 0){
+			d = -(newdir.dot(posOrgin));
+		}
+		else{
+			double d1 = -(newdir.dot(posOrgin)) + std::sqrt(t);
+			double d2 = -(newdir.dot(posOrgin)) - std::sqrt(t);
+			//std::cout<<d1<<std::endl;
+			//std::cout<<d2<<std::endl;
+			if(d1 > 0 && d2 > 0){
+				//std::cout<<"w"<<std::endl;
+				if(d2 > d1){
+					d = d1;
+				}
+				else{
+					d = d2;
+				}
+			}
+			else{
+				return false;
+			}
+		}
+		Point3D _newP(neworgin[0]+d*newdir[0],neworgin[1]+d*newdir[1],neworgin[2]+d*newdir[2]);
+		Vector3D _norm(_newP[0],_newP[1],_newP[2]);
+		ray.intersection.none = false;
+		_newP = modelToWorld * _newP;
+		_norm = (modelToWorld.transpose()) * _norm;
+		_norm.normalize();
+		ray.intersection.normal = _norm;
+		ray.intersection.point = _newP;
+		ray.intersection.t_value = d;
+	}
+	return !ray.intersection.none;
 }
 
