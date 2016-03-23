@@ -11,6 +11,8 @@
 #include <sstream>
 #include <stdlib.h>
 #include <string.h>
+#include <vector>
+#include "Vector.h"
 void OBJParser::parsefile(std::string filepath){
     std::cout<<filepath<<std::endl;
     std::fstream fs;
@@ -24,8 +26,9 @@ void OBJParser::parsefile(std::string filepath){
             ss>>buffer;
             if(buffer != "#" && buffer != "\0"){
                 if(buffer == "v" || buffer == "vn" || buffer == "vt"){
-                    if(buffer == "v")
-                        std::cout<<"Vertex Added: ";
+                	if(buffer == "v"){
+                    	std::cout<<"Vertex Added: ";
+                    }
                     else if(buffer == "vn")
                         std::cout<<"Normal Added: ";
                     else if(buffer == "vt")
@@ -72,11 +75,10 @@ void OBJParser::parsefile(std::string filepath){
     }
     fs.close();
 }
-
-void OBJParser::parseVertex(std::stringstream& ss){
-    std::string buffer;
-    ss>>buffer;
-    for(int i = 0;!ss.eof();i++){
-        ss>>buffer;
-    }
+void OBJParser::clearBuffer(){
+	m_Vbuffer.clear();
+	m_Nbuffer.clear();
+	m_Tbuffer.clear();
+	m_Fbuffer.clear();
+	m_pOutPutObject = NULL;
 }

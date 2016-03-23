@@ -26,7 +26,7 @@ template<class T> class Vector4{
             _t[0] = 0;
             _t[1] = 0;
             _t[2] = 0;
-            _t[3] = 0;
+            _t[3] = 1;
         }
         Vector4(T _a, T _b, T _c, T _d){
             _t = new T[4];
@@ -42,11 +42,23 @@ template<class T> class Vector4{
             _t[2] = _c;
             _t[3] = 1;
         }
+        Vector4(const Vector4<T>& rhs){
+        	_t = new T[4];
+        	_t[0] = rhs[0];
+        	_t[1] = rhs[1];
+        	_t[2] = rhs[2];
+        	_t[3] = rhs[3];
+        }
         ~Vector4(){
             delete _t;
         }
         inline Vector4<T>& operator=(const Vector4<T>& rhs){
-            memcpy(_t,&rhs[0],4*sizeof(T));
+        	_t = new T[4];
+        	_t[0] = rhs[0];
+        	_t[1] = rhs[1];
+        	_t[2] = rhs[2];
+        	_t[3] = rhs[3];
+            return *this;
         }
         inline T& operator[](int index){
             return _t[index];
