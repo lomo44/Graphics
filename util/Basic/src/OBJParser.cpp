@@ -77,7 +77,6 @@ void OBJParser::parseVertex(std::stringstream& ss){
     std::string buffer;
     ss>>buffer;
     for(int i = 0;!ss.eof();i++){
-        temp[i] = atof(buffer.c_str());
         ss>>buffer;
     }
 }

@@ -20,6 +20,7 @@ public:
     void parsefile(std::string filepath);
     ~OBJParser(){};
 private:
+    void clearBuffer();
     void parseVertex(std::stringstream& ss);
     void parseNormal(std::stringstream& ss);
     void parseTexture(std::stringstream& ss);
