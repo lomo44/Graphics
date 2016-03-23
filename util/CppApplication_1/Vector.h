@@ -4,12 +4,12 @@
  * and open the template in the editor.
  */
 
-/* 
+/*
  * File:   Vector.h
  * Author: john
  *
  * Created on March 10, 2016, 9:59 PM
- * 
+ *
  * New Vector Class for future implementations
  */
 
@@ -34,6 +34,13 @@ template<class T> class Vector4{
             _t[1] = _b;
             _t[2] = _c;
             _t[3] = _d;
+        }
+        Vector4(T _a, T _b, T _c){
+            _t = new T[4];
+            _t[0] = _a;
+            _t[1] = _b;
+            _t[2] = _c;
+            _t[3] = 1;
         }
         ~Vector4(){
             delete _t;
@@ -70,7 +77,7 @@ template<class T> class Vector4{
             ret[3] -= vec[3];
             return ret;
         }
-        
+
         inline Vector4<T>& operator-=(const Vector4<T>& vec){
             (*this)[0] -= vec[0];
             (*this)[1] -= vec[1];
@@ -137,7 +144,9 @@ template<class T> class Vector4{
         T* _t;
 };
 
+typedef Vector4<float> Vector4f;
+typedef Vector4<double> Vector4d;
+typedef Vector4<int> Vector4i
 
 
 #endif /* VECTOR_H */
-
