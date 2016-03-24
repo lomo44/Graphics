@@ -6,19 +6,19 @@
 
 #include "MeshObject.h"
 
-void MeshObjectSet::setNormallist(Vector4f* _list, int _count){
+void MeshObject::setNormallist(Vector4f* _list, int _count){
     this->m_pNormallist = _list;
     this->m_iNormalCount = _count;
 }
-void MeshObjectSet::setVertexlist(Vector4f* _list, int _count){
+void MeshObject::setVertexlist(Vector4f* _list, int _count){
     this->m_pVertexlist = _list;
     this->m_iVertexCount = _count;
 }
-void MeshObjectSet::setTexturelist(Vector4f* _list, int _count){
+void MeshObject::setTexturelist(Vector4f* _list, int _count){
     this->m_pTexturelist = _list;
     this->m_iTextureCount = _count;
 }
-void MeshObjectSet::setTrianglelist(Vector4v* _list, int _count){
+void MeshObject::setTrianglelist(Vector4v* _list, int _count){
     this->m_iTrianglelist = _list;
     this->m_iTriangleCount = _count;
 }

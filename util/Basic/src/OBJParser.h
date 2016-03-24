@@ -3,7 +3,9 @@
 #include <sstream>
 #include <vector>
 #include "Vector.h"
-#include "MeshObject.h"
+#include "newClass.h"
+
+//#include "Material.h"
 enum eObjEntryType{
     eObjEntryType_Vertex,
     eObjEntryType_Normal,
@@ -13,6 +15,8 @@ enum eObjEntryType{
     eObjEntryType_Unknown
 };
 
+class ObjectGroup;
+class MeshObject;
 
 class OBJParser{
 public:
@@ -20,16 +24,11 @@ public:
     void parsefile(std::string filepath);
     ~OBJParser(){};
 private:
-    void clearBuffer();
-    void parseVertex(std::stringstream& ss);
-    void parseNormal(std::stringstream& ss);
-    void parseTexture(std::stringstream& ss);
-    void parseFace(std::stringstream& ss);
-    void parseGroup(std::stringstream& ss);
-    
+    void clearBuffer();  
     std::vector<Vector4f> m_Vbuffer;
     std::vector<Vector4f> m_Nbuffer;
     std::vector<Vector4f> m_Tbuffer;
-    std::vector<Vector4f> m_Fbuffer;
-    MeshObjectSet* m_pOutPutObject;
+    std::vector<ObjectGroup> m_Gbuffer;
+    ObjectGroup m_CurrentGroup;
+    MeshObject* m_pOutPutObject;
 };

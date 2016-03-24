@@ -13,6 +13,9 @@
 #include <string.h>
 #include <vector>
 #include "Vector.h"
+#include "Face.h"
+#include "MeshObject.h"
+#include "ObjectGroup"
 void OBJParser::parsefile(std::string filepath){
     std::cout<<filepath<<std::endl;
     std::fstream fs;
@@ -25,21 +28,31 @@ void OBJParser::parsefile(std::string filepath){
             std::string buffer;
             ss>>buffer;
             if(buffer != "#" && buffer != "\0"){
-                if(buffer == "v" || buffer == "vn" || buffer == "vt"){
-                	if(buffer == "v"){
+                if(buffer == "g"){
+                    std::cout<<"Group Added"<<std::endl;
+                    
+                }else if(buffer == "v" || buffer == "vn" || buffer == "vt"){
+                    std::vector<Vector4f>& temp = m_Vbuffer;
+                    if(buffer == "v"){
                     	std::cout<<"Vertex Added: ";
                     }
-                    else if(buffer == "vn")
+                    else if(buffer == "vn"){
                         std::cout<<"Normal Added: ";
-                    else if(buffer == "vt")
-                        std::cout<<"Texture Added";
-                    float temp[4] = {};
-                    for(int i = 0;!ss.eof();i++){
-                        ss>>buffer;
-                        temp[i] = atof(buffer.c_str());
+                        temp = m_Nbuffer;
                     }
-                    temp[3] = 1.0;
-                    std::cout<<"X: "<<temp[0]<<" Y: "<<temp[1]<<" Z: "<<temp[2]<<std::endl;
+                    else if(buffer == "vt"){
+                        std::cout<<"Texture Added";
+                        temp = m_Tbuffer;
+                    }
+                    Vector4f vec;
+                    ss>>buffer;
+                    for(int i = 0;!ss.eof();i++){
+                        vec[i] = atof(buffer.c_str());
+                        ss>>buffer;
+                    }
+                    vec[3] = 1.0;
+                    std::cout<<"X: "<<vec[0]<<" Y: "<<vec[1]<<" Z: "<<vec[2]<<std::endl;
+                    temp.push_back(vec);
                 }else if(buffer == "f"){
                     std::cout<<"Face added: " ;
                     ss>>buffer;
@@ -79,6 +92,5 @@ void OBJParser::clearBuffer(){
 	m_Vbuffer.clear();
 	m_Nbuffer.clear();
 	m_Tbuffer.clear();
-	m_Fbuffer.clear();
 	m_pOutPutObject = NULL;
 }
