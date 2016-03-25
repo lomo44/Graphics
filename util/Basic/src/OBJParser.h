@@ -27,7 +27,8 @@ private:
     std::vector<Vector4f> m_Vbuffer;
     std::vector<Vector4f> m_Nbuffer;
     std::vector<Vector4f> m_Tbuffer;
-    std::vector<ObjectGroup*> m_Gbuffer;
-    ObjectGroup* m_CurrentGroup;
+    std::vector<Face*> m_Fbuffer;
+    std::string m_CurrentGroup;
+    int m_CurrentShadingNum;
     MeshObject* m_pOutPutObject;
 };

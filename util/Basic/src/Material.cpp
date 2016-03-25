@@ -3,7 +3,6 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 #include "Material.h"
 
 Material::Material(std::string _name, Attr_Material _attr){

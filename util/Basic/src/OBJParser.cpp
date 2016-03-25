@@ -12,7 +12,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <vector>
-#include "ObjectGroup.h"
 #include "Vector.h"
 #include "Face.h"
 #include "MeshObject.h"
@@ -35,12 +34,7 @@ void OBJParser::parsefile(std::string filepath){
             std::string buffer;
             ss>>buffer;
             if(buffer != "#" && buffer != "\0"){
-                if(buffer == "g"){
-                    std::cout<<"Group Added"<<std::endl;
-                    m_CurrentGroup = new ObjectGroup();
-                    ss>>buffer;
-                    m_CurrentGroup->m_sGroupName = buffer;
-                }else if(buffer == "v" || buffer == "vn" || buffer == "vt"){
+            	if(buffer == "v" || buffer == "vn" || buffer == "vt"){
                     std::vector<Vector4f>& temp = m_Vbuffer;
                     if(buffer == "v"){
                     	std::cout<<"Vertex Added: ";
@@ -65,27 +59,59 @@ void OBJParser::parsefile(std::string filepath){
                 }else if(buffer == "f"){
                     std::cout<<"Face added: " ;
                     ss>>buffer;
+                    std::vector<Vector4i> _list;
                     for(int i = 0 ; !ss.eof();i++){
-                        char* pt;
-                        char backslash = '/';
-                        //std::cout<<buffer;
-                        Vertexi temp;
-                        pt = strtok(&buffer[0],&backslash);
-                        for(;pt!=NULL;){
-                            int a = atoi(pt);
-                            std::cout<<a<<"/";
-                            pt = strtok(NULL,&backslash);
-                        }
-                        std::cout<<"-"; 
+                    	int startp = 0;
+                    	int numofslash = 0;
+                    	Vector4i v;
+                    	for(int j = 0;buffer[j]!='\0';j++){
+                    		if(buffer[j] == '/'||buffer[j+1]=='\0'){
+                    			int length = j-startp;
+                    			if(length != 0){
+                    				if(buffer[j+1]=='\0')
+                    					length++;
+                    				char temp[20];
+                    				strncpy(temp,&buffer[startp],length);
+                    				int index = atoi(&temp[0]);
+                    				v[numofslash] = index;
+                    			}
+                    			numofslash++;
+                    			startp = j+1;
+                    		}
+                    	}
                         ss>>buffer;
+                        _list.push_back(v);
+                    }
+                    if(_list.size() == 3){
+                    	Face* f1 = new Face();
+                    	f1->m_V1 = _list[0];
+                    	f1->m_V2 = _list[1];
+                    	f1->m_V3 = _list[2];
+                    	m_Fbuffer.push_back(f1);
+                    }
+                    if(_list.size() == 4){
+                    	Face* f1 = new Face();
+                    	Face* f2 = new Face();
+                    	f1->m_V1 = _list[0];
+                    	f1->m_V2 = _list[1];
+                    	f1->m_V3 = _list[2];
+                    	f2->m_V1 = _list[1];
+                    	f2->m_V2 = _list[2];
+                    	f2->m_V3 = _list[3];
+                    	m_Fbuffer.push_back(f1);
+                    	m_Fbuffer.push_back(f2);
                     }
                     std::cout<<std::endl;
-                        
+                }
+                else if(buffer == "s"){
+                    std::cout<<"Shade change: ";
+                    ss>>buffer;
+                    m_CurrentShadingNum = atoi(&buffer[0]);
                 }
                 else if(buffer == "g"){
-                    std::cout<<"Group added: ";
-                    ss>>buffer;
-                    std::cout<<atoi(&buffer[0])<<std::endl;
+                	std::cout<<"Group change: ";
+                	ss>>buffer;
+                	m_CurrentShadingNum = atoi(&buffer[0]);
                 }
                 else{
                     std::cout<<buffer<<std::endl;

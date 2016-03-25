@@ -27,7 +27,7 @@ template<class T> class Vector4{
             _t[0] = 0;
             _t[1] = 0;
             _t[2] = 0;
-            _t[3] = 1;
+            _t[3] = 0;
         }
         Vector4(T _a, T _b, T _c, T _d){
             _t = new T[4];
@@ -157,19 +157,9 @@ template<class T> class Vector4{
         T* _t;
 };
 
-template <typename T> struct Vertex{
-    Vector4<T> pos;
-    Vector4<T> norm;
-    Vector4<T> text;
-};
-
 typedef Vector4<float> Vector4f;
 typedef Vector4<double> Vector4d;
 typedef Vector4<int> Vector4i;
-typedef Vector4<Vertex<int> > Vector4vi;
-typedef Vector4<Vertex<float> >Vector4vf;
-typedef Vertex<int> Vertexi;
-typedef Vertex<float> Vertexf;
 
 
 #endif /* VECTOR_H */

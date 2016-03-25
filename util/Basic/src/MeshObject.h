@@ -15,7 +15,9 @@
 #define MESHOBJECT_H
 
 #include "Vector.h"
+#include <list>
 #include <vector>
+class Face;
 class MeshObject{
 public:
     MeshObject();
@@ -27,6 +29,7 @@ private:
     Vector4f* m_pVertexlist;
     Vector4f* m_pNormallist;
     Vector4f* m_pTexturelist;
+    Face* m_pTriangleList;
     int m_iVertexCount;
     int m_iNormalCount;
     int m_iTextureCount;

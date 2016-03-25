@@ -1,19 +1,17 @@
 #include "Vector.h"
 #include "Vertex.h"
-
+#include <vector>
+#include <string>
 #ifndef FACE_H
 #define FACE_H
 class Face{
 public:
     Face(){};
     ~Face(){};
-    int m_iGroupNumber;
     int m_iShadingGroup;
-    void addVertex(Vertexi _v){
-        m_Vertexlist.push_back(_v);
-    }
-private:
-    std::vector<Vertexi> m_Vertexlist;
+    Vector4i m_V1;
+    Vector4i m_V2;
+    Vector4i m_V3;
 };
 
 #endif

@@ -15,10 +15,7 @@
 #define MATERIAL_H
 
 #include <string>
-
-struct Attr_Material{
-    // TODO: Add Material Propteries
-};
+#include "Attribute.h"
 
 
 class Material{

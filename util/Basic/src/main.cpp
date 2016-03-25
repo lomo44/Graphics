@@ -23,23 +23,36 @@ using namespace std;
 /*
  * 
  */
+Vector4i test(string _temp){
+	int startp = 0;
+	int numofslash = 0;
+	Vector4i v;
+	for(int j = 0;_temp[j]!='\0';j++){
+		if(_temp[j] == '/'||_temp[j+1]=='\0'){
+			int length = j-startp;
+			if(length != 0){
+				if(_temp[j+1]=='\0')
+					length++;
+				char temp[20];
+				strncpy(temp,&_temp[startp],length);
+				int index = atoi(&temp[0]);
+				v[numofslash] = index;
+			}
+			numofslash++;
+			cout<<length<<endl;
+			startp = j+1;
+		}
+		//cout<<j<<endl;
+	}
+	return v;
+}
+
 int main(int argc, char** argv) {
-    /*Vector4<float> newvec(1,0,0,0);
-    Vector4<float> newvec2(0,1,0,0);
-    float fin = newvec.dot(newvec2);
-    Color4b c(0x00ffffff);
-    OBJParser newp;
-    newp.parsefile("");
     //fin.Print();
     //std::cout<<fin<<std::endl;
-    string temp = "/12///12";
-    char* pt;
-    char s = '/';
-    pt = strtok(&temp[0],&s);
-    cout<<temp<<endl;
-    cout<<pt<<endl;
-    pt = strtok(NULL,&s);
-    cout<<pt<<endl;
+    string temp = "12//13";
+    Vector4i ret = test(temp);
+    ret.Print();
     return 0;
 }
 
