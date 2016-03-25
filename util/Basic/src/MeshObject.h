@@ -16,19 +16,17 @@
 
 #include "Vector.h"
 #include <vector>
-class MeshObjectSet{
+class MeshObject{
 public:
-    MeshObjectSet();
-    ~MeshObjectSet();
+    MeshObject();
+    ~MeshObject();
     void setVertexlist(Vector4f* _list, int _count);
     void setNormallist(Vector4f* _list, int _count);
     void setTexturelist(Vector4f* _list, int _count);
-    void setTrianglelist(Vector4v* _list, int _count);
 private:
     Vector4f* m_pVertexlist;
     Vector4f* m_pNormallist;
     Vector4f* m_pTexturelist;
-    Vector4v* m_iTrianglelist;
     int m_iVertexCount;
     int m_iNormalCount;
     int m_iTextureCount;

@@ -19,6 +19,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <cmath>
+
 template<class T> class Vector4{
     public:
         Vector4(){
@@ -155,15 +156,20 @@ template<class T> class Vector4{
     private:
         T* _t;
 };
-struct Vertex{
-    int pos;
-    int norm;
-    int text;
+
+template <typename T> struct Vertex{
+    Vector4<T> pos;
+    Vector4<T> norm;
+    Vector4<T> text;
 };
 
 typedef Vector4<float> Vector4f;
 typedef Vector4<double> Vector4d;
 typedef Vector4<int> Vector4i;
-typedef Vector4<Vertex> Vector4v;
+typedef Vector4<Vertex<int> > Vector4vi;
+typedef Vector4<Vertex<float> >Vector4vf;
+typedef Vertex<int> Vertexi;
+typedef Vertex<float> Vertexf;
+
 
 #endif /* VECTOR_H */

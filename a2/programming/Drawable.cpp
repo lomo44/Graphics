@@ -21,9 +21,9 @@ void Drawable::draw(){
 	}
 	else if(this->m_RenderMode == Wireframe){
 		//std::cout<<"w"<<std::endl;
-		glColor3ub(0,0.5,0);
+		glColor3ub(255,255,255);
 	}
-	else if(this->m_RenderMode == Metallic){
+	else{
 		glColor3ub(_colori.R(),_colori.G(),_colori.B());
 	}
 	drawObject();

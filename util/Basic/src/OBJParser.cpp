@@ -12,7 +12,17 @@
 #include <stdlib.h>
 #include <string.h>
 #include <vector>
+#include "ObjectGroup.h"
 #include "Vector.h"
+#include "Face.h"
+#include "MeshObject.h"
+
+OBJParser::OBJParser(){
+    
+}
+OBJParser::~OBJParser(){
+    
+}
 void OBJParser::parsefile(std::string filepath){
     std::cout<<filepath<<std::endl;
     std::fstream fs;
@@ -25,21 +35,33 @@ void OBJParser::parsefile(std::string filepath){
             std::string buffer;
             ss>>buffer;
             if(buffer != "#" && buffer != "\0"){
-                if(buffer == "v" || buffer == "vn" || buffer == "vt"){
-                	if(buffer == "v"){
+                if(buffer == "g"){
+                    std::cout<<"Group Added"<<std::endl;
+                    m_CurrentGroup = new ObjectGroup();
+                    ss>>buffer;
+                    m_CurrentGroup->m_sGroupName = buffer;
+                }else if(buffer == "v" || buffer == "vn" || buffer == "vt"){
+                    std::vector<Vector4f>& temp = m_Vbuffer;
+                    if(buffer == "v"){
                     	std::cout<<"Vertex Added: ";
                     }
-                    else if(buffer == "vn")
+                    else if(buffer == "vn"){
                         std::cout<<"Normal Added: ";
-                    else if(buffer == "vt")
-                        std::cout<<"Texture Added";
-                    float temp[4] = {};
-                    for(int i = 0;!ss.eof();i++){
-                        ss>>buffer;
-                        temp[i] = atof(buffer.c_str());
+                        temp = m_Nbuffer;
                     }
-                    temp[3] = 1.0;
-                    std::cout<<"X: "<<temp[0]<<" Y: "<<temp[1]<<" Z: "<<temp[2]<<std::endl;
+                    else if(buffer == "vt"){
+                        std::cout<<"Texture Added";
+                        temp = m_Tbuffer;
+                    }
+                    Vector4f vec;
+                    ss>>buffer;
+                    for(int i = 0;!ss.eof();i++){
+                        vec[i] = atof(buffer.c_str());
+                        ss>>buffer;
+                    }
+                    vec[3] = 1.0;
+                    std::cout<<"X: "<<vec[0]<<" Y: "<<vec[1]<<" Z: "<<vec[2]<<std::endl;
+                    temp.push_back(vec);
                 }else if(buffer == "f"){
                     std::cout<<"Face added: " ;
                     ss>>buffer;
@@ -47,6 +69,7 @@ void OBJParser::parsefile(std::string filepath){
                         char* pt;
                         char backslash = '/';
                         //std::cout<<buffer;
+                        Vertexi temp;
                         pt = strtok(&buffer[0],&backslash);
                         for(;pt!=NULL;){
                             int a = atoi(pt);
@@ -79,6 +102,5 @@ void OBJParser::clearBuffer(){
 	m_Vbuffer.clear();
 	m_Nbuffer.clear();
 	m_Tbuffer.clear();
-	m_Fbuffer.clear();
 	m_pOutPutObject = NULL;
 }
