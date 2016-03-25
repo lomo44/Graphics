@@ -27,7 +27,7 @@ int main(int argc, char** argv) {
     float fin = newvec.dot(newvec2);
     Color4b c(0x00ffffff);
     OBJParser newp;
-    newp.parsefile("/home/john/Desktop/Obj/playground1.obj");
+    newp.parsefile("");
     //fin.Print();
     std::cout<<fin<<std::endl;
     return 0;
