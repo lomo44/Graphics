@@ -3,7 +3,6 @@
 #include <sstream>
 #include <vector>
 #include "Vector.h"
-#include "newClass.h"
 
 //#include "Material.h"
 enum eObjEntryType{
@@ -20,15 +19,15 @@ class MeshObject;
 
 class OBJParser{
 public:
-    OBJParser(){};
+    OBJParser();
     void parsefile(std::string filepath);
-    ~OBJParser(){};
+    ~OBJParser();
 private:
     void clearBuffer();  
     std::vector<Vector4f> m_Vbuffer;
     std::vector<Vector4f> m_Nbuffer;
     std::vector<Vector4f> m_Tbuffer;
-    std::vector<ObjectGroup> m_Gbuffer;
-    ObjectGroup m_CurrentGroup;
+    std::vector<ObjectGroup*> m_Gbuffer;
+    ObjectGroup* m_CurrentGroup;
     MeshObject* m_pOutPutObject;
 };

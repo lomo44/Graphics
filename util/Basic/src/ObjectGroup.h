@@ -15,20 +15,21 @@
 #define OBJECTGROUP_H
 #include <string>
 #include <vector>
-#include "Material.h"
-#include "Face.h"
+
+class Material;
+class Face;
 
 class ObjectGroup{
 public:
     ObjectGroup(){;}
     ~ObjectGroup(){;}
+    Material* m_GroupMaterial;
     std::string m_sGroupName;
-    Material m_GroupMaterial;
-    void addFace(Face _f){
-        m_Facelist.push_back(_f);
-    }
+    void addFace(Face _f);
 private:
     std::vector<Face> m_Facelist;
+    
+    
 };
 
 

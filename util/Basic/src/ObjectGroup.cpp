@@ -4,13 +4,10 @@
  * and open the template in the editor.
  */
 
+#include "ObjectGroup.h"
 #include "Material.h"
+#include "Face.h"
 
-Material::Material(std::string _name, Attr_Material _attr){
-    m_aMaterialAttribute = _attr;
-    m_sMaterialName = _name;
-}
-
-Material::~Material(){
-    
+void ObjectGroup::addFace(Face _f){
+    this->m_Facelist.push_back(_f);
 }

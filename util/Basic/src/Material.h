@@ -17,12 +17,13 @@
 #include <string>
 
 struct Attr_Material{
-    
+    // TODO: Add Material Propteries
 };
 
 
 class Material{
 public:
+    Material();
     Material(std::string _name, Attr_Material _attr);
     ~Material();
 private:

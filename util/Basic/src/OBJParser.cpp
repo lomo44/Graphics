@@ -12,10 +12,17 @@
 #include <stdlib.h>
 #include <string.h>
 #include <vector>
+#include "ObjectGroup.h"
 #include "Vector.h"
 #include "Face.h"
 #include "MeshObject.h"
-#include "ObjectGroup"
+
+OBJParser::OBJParser(){
+    
+}
+OBJParser::~OBJParser(){
+    
+}
 void OBJParser::parsefile(std::string filepath){
     std::cout<<filepath<<std::endl;
     std::fstream fs;
@@ -30,7 +37,9 @@ void OBJParser::parsefile(std::string filepath){
             if(buffer != "#" && buffer != "\0"){
                 if(buffer == "g"){
                     std::cout<<"Group Added"<<std::endl;
-                    
+                    m_CurrentGroup = new ObjectGroup();
+                    ss>>buffer;
+                    m_CurrentGroup->m_sGroupName = buffer;
                 }else if(buffer == "v" || buffer == "vn" || buffer == "vt"){
                     std::vector<Vector4f>& temp = m_Vbuffer;
                     if(buffer == "v"){
@@ -60,6 +69,7 @@ void OBJParser::parsefile(std::string filepath){
                         char* pt;
                         char backslash = '/';
                         //std::cout<<buffer;
+                        Vertexi temp;
                         pt = strtok(&buffer[0],&backslash);
                         for(;pt!=NULL;){
                             int a = atoi(pt);

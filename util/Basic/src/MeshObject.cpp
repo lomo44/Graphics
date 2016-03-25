@@ -5,7 +5,7 @@
  */
 
 #include "MeshObject.h"
-
+#include "Face.h"
 void MeshObject::setNormallist(Vector4f* _list, int _count){
     this->m_pNormallist = _list;
     this->m_iNormalCount = _count;
@@ -17,8 +17,4 @@ void MeshObject::setVertexlist(Vector4f* _list, int _count){
 void MeshObject::setTexturelist(Vector4f* _list, int _count){
     this->m_pTexturelist = _list;
     this->m_iTextureCount = _count;
-}
-void MeshObject::setTrianglelist(Vector4v* _list, int _count){
-    this->m_iTrianglelist = _list;
-    this->m_iTriangleCount = _count;
 }
