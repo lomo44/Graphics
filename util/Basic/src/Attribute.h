@@ -33,6 +33,7 @@ struct Attr_Intersection{
 	Vector4f m_Normal;
 	Vector4f m_IntersectionPoint;
 	Attr_Material* m_Material;
+	float m_distance; // t
 };
 
 #endif /* ATTRIBUTE_H_ */
