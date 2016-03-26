@@ -6,15 +6,12 @@
 
 #include "MeshObject.h"
 #include "Face.h"
-void MeshObject::setNormallist(Vector4f* _list, int _count){
-    this->m_pNormallist = _list;
-    this->m_iNormalCount = _count;
+MeshObject::MeshObject(Attr_MeshObject _attr){
+	m_Attribute = _attr;
 }
-void MeshObject::setVertexlist(Vector4f* _list, int _count){
-    this->m_pVertexlist = _list;
-    this->m_iVertexCount = _count;
-}
-void MeshObject::setTexturelist(Vector4f* _list, int _count){
-    this->m_pTexturelist = _list;
-    this->m_iTextureCount = _count;
+MeshObject::~MeshObject(){
+	delete m_Attribute.m_Normallist;
+	delete m_Attribute.m_Texturelist;
+	delete m_Attribute.m_Vertexlist;
+	delete m_Attribute.m_Trianglelist;
 }

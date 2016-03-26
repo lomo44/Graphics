@@ -15,25 +15,18 @@
 #define MESHOBJECT_H
 
 #include "Vector.h"
+#include "Attribute.h"
 #include <list>
 #include <vector>
-class Face;
+
+
+class Triangle;
 class MeshObject{
 public:
-    MeshObject();
+    MeshObject(Attr_MeshObject _attr);
     ~MeshObject();
-    void setVertexlist(Vector4f* _list, int _count);
-    void setNormallist(Vector4f* _list, int _count);
-    void setTexturelist(Vector4f* _list, int _count);
 private:
-    Vector4f* m_pVertexlist;
-    Vector4f* m_pNormallist;
-    Vector4f* m_pTexturelist;
-    Face* m_pTriangleList;
-    int m_iVertexCount;
-    int m_iNormalCount;
-    int m_iTextureCount;
-    int m_iTriangleCount;
+    Attr_MeshObject m_Attribute;
 };
 
 

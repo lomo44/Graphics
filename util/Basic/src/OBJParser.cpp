@@ -15,7 +15,7 @@
 #include "Vector.h"
 #include "Face.h"
 #include "MeshObject.h"
-
+#include "Attribute.h"
 OBJParser::OBJParser(){
     
 }
@@ -83,21 +83,24 @@ void OBJParser::parsefile(std::string filepath){
                         _list.push_back(v);
                     }
                     if(_list.size() == 3){
-                    	Face* f1 = new Face();
-                    	f1->m_V1 = _list[0];
-                    	f1->m_V2 = _list[1];
-                    	f1->m_V3 = _list[2];
+                    	Triangle f1;
+                    	f1.m_V1 = _list[0];
+                    	f1.m_V2 = _list[1];
+                    	f1.m_V3 = _list[2];
+                    	f1.m_iShadingGroup = this->m_CurrentShadingNum;
                     	m_Fbuffer.push_back(f1);
                     }
                     if(_list.size() == 4){
-                    	Face* f1 = new Face();
-                    	Face* f2 = new Face();
-                    	f1->m_V1 = _list[0];
-                    	f1->m_V2 = _list[1];
-                    	f1->m_V3 = _list[2];
-                    	f2->m_V1 = _list[1];
-                    	f2->m_V2 = _list[2];
-                    	f2->m_V3 = _list[3];
+                    	Triangle f1;
+                    	Triangle f2;
+                    	f1.m_V1 = _list[0];
+                    	f1.m_V2 = _list[1];
+                    	f1.m_V3 = _list[2];
+                    	f2.m_V1 = _list[1];
+                    	f2.m_V2 = _list[2];
+                    	f2.m_V3 = _list[3];
+                    	f1.m_iShadingGroup = this->m_CurrentShadingNum;
+                    	f2.m_iShadingGroup = this->m_CurrentShadingNum;
                     	m_Fbuffer.push_back(f1);
                     	m_Fbuffer.push_back(f2);
                     }
@@ -111,7 +114,7 @@ void OBJParser::parsefile(std::string filepath){
                 else if(buffer == "g"){
                 	std::cout<<"Group change: ";
                 	ss>>buffer;
-                	m_CurrentShadingNum = atoi(&buffer[0]);
+                	m_CurrentGroup= buffer;
                 }
                 else{
                     std::cout<<buffer<<std::endl;
@@ -122,11 +125,49 @@ void OBJParser::parsefile(std::string filepath){
     else{
         std::cout<<"File Not Found"<<std::endl;
     }
+    printParsedInformation();
     fs.close();
 }
 void OBJParser::clearBuffer(){
 	m_Vbuffer.clear();
 	m_Nbuffer.clear();
 	m_Tbuffer.clear();
-	m_pOutPutObject = NULL;
+}
+
+void OBJParser::printParsedInformation(){
+	std::cout<<"File Parsed"<<std::endl;
+	std::cout<<"Total Number of Vertex: "<<m_Vbuffer.size()<<std::endl;
+	std::cout<<"Total Number of Normal: "<<m_Nbuffer.size()<<std::endl;
+	std::cout<<"Total Number of Texture Point: "<<m_Tbuffer.size()<<std::endl;
+	std::cout<<"Total Number of Faces: "<<m_Fbuffer.size()<<std::endl;
+}
+
+MeshObject* OBJParser::getOutputObject(){
+	Vector4f* vertexlist = new Vector4f[this->m_Vbuffer.size()];
+	for(unsigned int i = 0 ; i < m_Vbuffer.size();i++){
+		vertexlist[i] = m_Vbuffer[i];
+	}
+	Vector4f* Normallist = new Vector4f[this->m_Nbuffer.size()];
+		for(unsigned int i = 0 ; i < m_Nbuffer.size();i++){
+			Normallist[i] = m_Nbuffer[i];
+	}
+	Vector4f* Textlist = new Vector4f[this->m_Tbuffer.size()];
+	for(unsigned int i = 0 ; i < m_Tbuffer.size();i++){
+		Textlist[i] = m_Tbuffer[i];
+	}
+	Triangle* face = new Triangle[m_Fbuffer.size()];
+	for(unsigned int i = 0; i < m_Fbuffer.size();i++){
+		face[i] = m_Fbuffer[i];
+	}
+	Attr_MeshObject _new;
+	_new.m_Normallist = Normallist;
+	_new.m_Texturelist = Textlist;
+	_new.m_Trianglelist = face;
+	_new.m_Vertexlist = vertexlist;
+	_new.m_iFaceCount = m_Fbuffer.size();
+	_new.m_iNormalCount = m_Nbuffer.size();
+	_new.m_iTextureCount = m_Tbuffer.size();
+	_new.m_iVertexCount = m_Vbuffer.size();
+	MeshObject* ret = new MeshObject(_new);
+	return ret;
 }
