@@ -37,7 +37,6 @@ void OBJParser::parsefile(std::string filepath){
             	if(buffer == "v" || buffer == "vn" || buffer == "vt"){
             		//std::cout<<buffer<<std::endl;
             		std::string vertex_type = buffer;
-                    std::vector<Vector4f>& temp = m_Vbuffer;
                     Vector4f vec;
                     ss>>buffer;
                     for(int i = 0;!ss.eof();i++){
@@ -166,7 +165,7 @@ MeshObject* OBJParser::getOutputObject(){
 	_new.m_Texturelist = Textlist;
 	_new.m_Trianglelist = face;
 	_new.m_Vertexlist = vertexlist;
-	_new.m_iFaceCount = m_Fbuffer.size();
+	_new.m_iTriangleCount = m_Fbuffer.size();
 	_new.m_iNormalCount = m_Nbuffer.size();
 	_new.m_iTextureCount = m_Tbuffer.size();
 	_new.m_iVertexCount = m_Vbuffer.size();

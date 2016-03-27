@@ -26,14 +26,14 @@ struct Attr_MeshObject{
 	int m_iNormalCount;
 	int m_iVertexCount;
 	int m_iTextureCount;
-	int m_iFaceCount;
+	int m_iTriangleCount;
 	Attr_Material m_ObjectMaterial;
 };
 
 struct Attr_Intersection{
 	Vector4f m_Normal;
 	Vector4f m_IntersectionPoint;
-	Attr_Material* m_Material;
+	Attr_Material m_Material;
 	float m_distance; // t
 };
 

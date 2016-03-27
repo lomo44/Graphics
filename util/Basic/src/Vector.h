@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <cmath>
 
+// 3d affine vectors
 template<class T> class Vector4{
     public:
         Vector4(){
@@ -90,7 +91,6 @@ template<class T> class Vector4{
             ret[3] -= vec[3];
             return ret;
         }
-
         inline Vector4<T>& operator-=(const Vector4<T>& vec){
             (*this)[0] -= vec[0];
             (*this)[1] -= vec[1];

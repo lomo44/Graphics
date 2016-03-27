@@ -21,12 +21,14 @@
 
 
 class Triangle;
+class Line;
 class MeshObject{
 public:
     MeshObject(Attr_MeshObject _attr);
     ~MeshObject();
     void print();
     void changeMaterial(Attr_Material _m);
+    Attr_Intersection* isIntersect(const Line& _l);
 private:
     Attr_MeshObject m_Attribute;
 };
