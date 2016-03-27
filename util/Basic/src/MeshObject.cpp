@@ -15,3 +15,16 @@ MeshObject::~MeshObject(){
 	delete m_Attribute.m_Vertexlist;
 	delete m_Attribute.m_Trianglelist;
 }
+
+void MeshObject::print(){
+	for(int i = 0 ; i < m_Attribute.m_iVertexCount;i++){
+		m_Attribute.m_Vertexlist[i].Print();
+	}
+	for(int i = 0 ; i < m_Attribute.m_iFaceCount;i++){
+		m_Attribute.m_Trianglelist[i].print();
+	}
+}
+
+void MeshObject::changeMaterial(Attr_Material _m){
+	m_Attribute.m_ObjectMaterial = _m;
+}

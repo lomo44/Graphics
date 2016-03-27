@@ -16,6 +16,7 @@
 #include "Color.h"
 #include "Matrix.h"
 #include "OBJParser.h"
+#include "MeshObject.h"
 #include <string>
 #include <string.h>
 using namespace std;
@@ -53,6 +54,10 @@ int main(int argc, char** argv) {
     string temp = "12//13";
     Vector4i ret = test(temp);
     ret.Print();
+    OBJParser* newparser  = new OBJParser();
+    newparser->parsefile("/h/u5/c5/04/c5lizhua/git/Graphics/Obj/FinalBaseMesh.obj");
+    MeshObject* out = newparser->getOutputObject();
+    out->print();
     return 0;
 }
 

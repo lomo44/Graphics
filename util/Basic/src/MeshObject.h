@@ -25,6 +25,8 @@ class MeshObject{
 public:
     MeshObject(Attr_MeshObject _attr);
     ~MeshObject();
+    void print();
+    void changeMaterial(Attr_Material _m);
 private:
     Attr_MeshObject m_Attribute;
 };

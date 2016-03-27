@@ -27,6 +27,7 @@ struct Attr_MeshObject{
 	int m_iVertexCount;
 	int m_iTextureCount;
 	int m_iFaceCount;
+	Attr_Material m_ObjectMaterial;
 };
 
 struct Attr_Intersection{

@@ -35,18 +35,9 @@ void OBJParser::parsefile(std::string filepath){
             ss>>buffer;
             if(buffer != "#" && buffer != "\0"){
             	if(buffer == "v" || buffer == "vn" || buffer == "vt"){
+            		//std::cout<<buffer<<std::endl;
+            		std::string vertex_type = buffer;
                     std::vector<Vector4f>& temp = m_Vbuffer;
-                    if(buffer == "v"){
-                    	std::cout<<"Vertex Added: ";
-                    }
-                    else if(buffer == "vn"){
-                        std::cout<<"Normal Added: ";
-                        temp = m_Nbuffer;
-                    }
-                    else if(buffer == "vt"){
-                        std::cout<<"Texture Added";
-                        temp = m_Tbuffer;
-                    }
                     Vector4f vec;
                     ss>>buffer;
                     for(int i = 0;!ss.eof();i++){
@@ -54,10 +45,21 @@ void OBJParser::parsefile(std::string filepath){
                         ss>>buffer;
                     }
                     vec[3] = 1.0;
-                    std::cout<<"X: "<<vec[0]<<" Y: "<<vec[1]<<" Z: "<<vec[2]<<std::endl;
-                    temp.push_back(vec);
+                    //std::cout<<"X: "<<vec[0]<<" Y: "<<vec[1]<<" Z: "<<vec[2]<<std::endl;
+                    if(vertex_type == "v"){
+                    	//std::cout<<"Vertex Added: ";
+                    	m_Vbuffer.push_back(vec);
+                    }
+                    else if(vertex_type == "vn"){
+                        //std::cout<<"Normal Added: ";
+                        m_Nbuffer.push_back(vec);
+                    }
+                    else if(vertex_type == "vt"){
+                        //std::cout<<"Texture Added";
+                        m_Tbuffer.push_back(vec);
+                    }
                 }else if(buffer == "f"){
-                    std::cout<<"Face added: " ;
+                    //std::cout<<"Face added: " ;
                     ss>>buffer;
                     std::vector<Vector4i> _list;
                     for(int i = 0 ; !ss.eof();i++){
@@ -107,12 +109,12 @@ void OBJParser::parsefile(std::string filepath){
                     std::cout<<std::endl;
                 }
                 else if(buffer == "s"){
-                    std::cout<<"Shade change: ";
+                    //std::cout<<"Shade change: ";
                     ss>>buffer;
                     m_CurrentShadingNum = atoi(&buffer[0]);
                 }
                 else if(buffer == "g"){
-                	std::cout<<"Group change: ";
+                	//std::cout<<"Group change: ";
                 	ss>>buffer;
                 	m_CurrentGroup= buffer;
                 }
