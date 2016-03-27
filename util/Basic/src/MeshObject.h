@@ -16,13 +16,14 @@
 
 #include "Vector.h"
 #include "Attribute.h"
+#include "RenderObject.h"
 #include <list>
 #include <vector>
 
 
 class Triangle;
 class Line;
-class MeshObject{
+class MeshObject : public RenderObject{
 public:
     MeshObject(Attr_MeshObject _attr);
     ~MeshObject();

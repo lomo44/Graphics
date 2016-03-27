@@ -17,7 +17,7 @@
 #include "MeshObject.h"
 #include "Attribute.h"
 OBJParser::OBJParser(){
-    
+    m_CurrentShadingNum = 0;
 }
 OBJParser::~OBJParser(){
     

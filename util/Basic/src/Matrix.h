@@ -16,11 +16,12 @@
 
 #include "Vector.h"
 #include <assert.h>
-enum eMatrixType{
+enum eTransformType{
 	eRotationalX,
 	eRotationalY,
 	eRotationalZ,
 	eTranslational,
+	eScalling,
 	eIdentity,
 	eUnknown,
 	eNULL
@@ -32,6 +33,8 @@ public:
             loadIdentity();
         }
 	Matrix4(const Matrix4<T>& rhs){
+			f = new T[16];
+			_t = rhs.getType();
             memcpy(f,rhs.f,sizeof(T)*(16));
         }
     Matrix4(T* _t){
@@ -41,7 +44,7 @@ public:
 	~Matrix4(){
             delete f;
         }
-	void loadRotational(eMatrixType _type, T angle){
+	void loadRotational(eTransformType _type, T angle){
             angle = angle*0.0174532;
             if(_type == eRotationalX){
                     f[5] = std::cos(angle);
@@ -68,6 +71,12 @@ public:
             f[7] = y;
             f[11] = z;
         }
+	void loadScaling(T x, T y, T z){
+		_t = eScalling;
+		f[0] = x;
+		f[5] = y;
+		f[10] = y;
+	}
 	void loadIdentity(){
             f = new T[16];
             int c =0;
@@ -82,6 +91,21 @@ public:
             }
             _t = eIdentity;
         }
+	void Rotate(eTransformType _t, T degree){
+		Matrix4<T> newm;
+		newm.loadRotational(_t,degree);
+		*this *= newm;
+	}
+	void Transform(T x, T y, T z){
+		Matrix4<T> newm;
+		newm.loadTranslational(x,y,z);
+		*this *= newm;
+	}
+	void Scale(T x, T y, T z){
+		Matrix4<T> newm;
+		newm.loadScaling(x,y,z);
+		*this *= newm;
+	}
 	Vector4<T> getColumn(int i) const{
             assert(i <= 3);
             Vector4<T> _ret;
@@ -104,7 +128,10 @@ public:
             _ret[3] = f[i+3];
             return _ret;
         }
-        T& operator[](int i){
+	eTransformType getType(){
+		return _t;
+	}
+     T& operator[](int i){
             return f[i];
         }
 	Matrix4<T>  operator* (const Matrix4<T>& rhs){
@@ -285,10 +312,12 @@ public:
 	
 private:
         T* f;
-	eMatrixType _t;
+	eTransformType _t;
 };
 
-
+typedef Matrix4<float> Matrix4f;
+typedef Matrix4<int> Matrix4i;
+typedef Matrix4<double> Matrix4d;
 
 #endif /* MATRIX_H */
 

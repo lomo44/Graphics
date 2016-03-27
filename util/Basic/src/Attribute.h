@@ -12,10 +12,19 @@
 struct Attr_Material{
     // TODO: Add Material Propteries
 	std::string m_MaterialName;
+	Vector4f m_DefuseColor;
+	Vector4f m_AmbientColor;
+	Vector4f m_SpecularColor;
+	float m_fSpecularWeight;
+	float m_fRefractiveIndex;
 };
 
 struct Attr_Lighting{
 	// TODO: Add Lightning Properties
+	Vector4f m_DefuseColor;
+	Vector4f m_AmbientColor;
+	Vector4f m_SpecularColor;
+	Vector4f m_LightPosition;
 };
 
 struct Attr_MeshObject{

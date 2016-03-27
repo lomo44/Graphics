@@ -11,7 +11,7 @@ public:
 	Line(){
 		m_StartPoint[3] = 1;
 	}
-	~Line();
+	~Line(){;}
 	Vector4f getPoint(float _t) const{
 		return m_StartPoint + m_Direction * _t;
 	}
