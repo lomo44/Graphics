@@ -9,11 +9,11 @@
 #define RENDEROBJECT_H_
 
 #include "Matrix.h"
-
+#include "Attribute.h"
 class RenderObject {
 public:
-	RenderObject();
-	virtual ~RenderObject();
+	RenderObject(){;}
+	virtual ~RenderObject(){;};
 	void rotate(eTransformType _rotate, float degree){
 		m_Transform.Rotate(_rotate,degree);
 		m_invTransform.Rotate(_rotate,-degree);
@@ -28,6 +28,7 @@ public:
 	}
 	const Matrix4f& getTransform(){return m_Transform;}
 	const Matrix4f& getInvTransform(){return m_invTransform;}
+	virtual Attr_Intersection* isIntersect(const Line& _l) = 0;
 private:
 	Matrix4f m_Transform;
 	Matrix4f m_invTransform;

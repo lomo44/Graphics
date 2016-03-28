@@ -12,10 +12,15 @@ Ray::Ray(Ray* _prior,Line _line, int _time) {
 	// TODO Auto-generated constructor stub
 	this->m_RayLine = _line;
 	m_iRecursiveTime = _time;
+	m_color[0] = 1;
+	m_color[1] = 1;
+	m_color[2] = 1;
+	m_color[3] = 1;
 	this->m_isDone = false;
 	this->m_pPriorRay = _prior;
 	this->m_pReflectedRay = NULL;
 	this->m_pRefractedRay = NULL;
+	this->m_pIntersectionProperties = NULL;
 }
 
 Ray::~Ray() {
@@ -37,7 +42,10 @@ bool Ray::checkDone(){
 			return false;
 		}
 		else{
+			m_isDone = true;
 			return true;
 		}
 	}
 }
+
+

@@ -46,4 +46,25 @@ struct Attr_Intersection{
 	float m_distance; // t
 };
 
+struct Attr_ViewFrustrum{
+	Vector4f m_ViewPoint;
+	Vector4f m_ViewDirection;
+	Vector4f m_ViewUpDirection;
+	float m_fFieldOfView;
+};
+
+struct Attr_Render{
+	int m_iScreenWidth;
+	int m_iScreenHeight;
+	Attr_ViewFrustrum m_ViewFrustrum;
+	std::string m_sFileName;
+};
+
+struct Attr_PixelBuffer{
+	int m_iWidth;
+	int m_iHeight;
+	unsigned char* m_Rbuffer;
+	unsigned char* m_Gbuffer;
+	unsigned char* m_Bbuffer;
+};
 #endif /* ATTRIBUTE_H_ */
