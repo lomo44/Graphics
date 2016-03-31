@@ -41,6 +41,9 @@ void PointLight::shade(Ray& _ray){
 		_ray.m_color.Normalize();
 	}
 	else{
+		_ray.m_color[0] = 0;
+		_ray.m_color[1] = 0;
+		_ray.m_color[2] = 0;
 		_ray.m_isDone = true;
 	}
 }

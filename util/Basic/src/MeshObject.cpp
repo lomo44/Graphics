@@ -7,6 +7,7 @@
 #include "MeshObject.h"
 #include "Face.h"
 #include <limits>
+#include <cmath>
 MeshObject::MeshObject(Attr_MeshObject _attr){
 	m_Attribute = _attr;
 }
@@ -68,6 +69,7 @@ Attr_Intersection* MeshObject::isIntersect(const Line& _l){
 				m_Attribute.m_Normallist[m_Attribute.m_Trianglelist[triangle_index].m_V3[3]],_ret_bary);
 		ret->m_Normal = norm;
 		ret->m_Normal.Normalize();
+		ret->m_fIntersectionAngle = acos(ret->m_Normal.dot(_l.m_Direction));
 		ret->m_distance = t;
 		return ret;
 	}

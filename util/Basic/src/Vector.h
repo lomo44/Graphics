@@ -159,13 +159,13 @@ template<class T> class Vector4{
 template<class T> inline Vector4<T> operator - (const Vector4<T>& rhs){
 	return Vector4<T>(-rhs[0],-rhs[1],-rhs[2],-rhs[3]);
 }
-template<class T> inline Vector4<T> operator - (const Vector4<T>& lhs, const Vector4<T>* rhs){
+template<class T> inline Vector4<T> operator - (const Vector4<T>& lhs, const Vector4<T>& rhs){
 	return Vector4<T>(lhs[0]-rhs[0],lhs[1]-rhs[1],lhs[2]-rhs[2],lhs[3]-rhs[3]);
 }
-template<class T> inline Vector4<T> operator + (const Vector4<T>& lhs, const Vector4<T>* rhs){
+template<class T> inline Vector4<T> operator + (const Vector4<T>& lhs, const Vector4<T>& rhs){
 	return Vector4<T>(lhs[0]+rhs[0],lhs[1]+rhs[1],lhs[2]+rhs[2],lhs[3]+rhs[3]);
 }
-template<class T> inline Vector4<T> operator * (const T lhs, const Vector4<T>* rhs){
+template<class T> inline Vector4<T> operator * (const float lhs, const Vector4<T>& rhs){
 	return Vector4<T>(lhs*rhs[0],lhs*rhs[1],lhs-rhs[2],lhs-rhs[3]);
 }
 typedef Vector4<float> Vector4f;

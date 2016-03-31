@@ -15,8 +15,8 @@ class Ray{
 public:
 	Ray(Ray* _prior,Line _line, int _time);
 	virtual ~Ray();
-	void reflect();
-	void refract();
+	Ray* reflect(const Vector4f& norm);
+	Ray* refract(const Vector4f& norm, Attr_Material* _from);
 	bool checkDone();
 	inline bool hasIntersect(){
 		return m_pIntersectionProperties!=NULL;
@@ -26,6 +26,7 @@ public:
 	Vector4f m_color;
 	bool m_isDone;
 	Attr_Intersection* m_pIntersectionProperties;
+	int m_iID;
 private:
 	int m_iRecursiveTime;
 	Ray* m_pPriorRay;

@@ -30,12 +30,19 @@ public:
 private:
 	void InitializePixelBuffer(int _width, int _height);
 	void InitializeRayList();
+	void InitializeViewToWorldMatrix();
+	void ExpandRayTracingTree();
+	void CollapseRayTracingTree();
+	void ShadingRay();
+	Attr_Intersection* CalculateIntersection(const Line& _l);
 	void FlushPixelBuffer();
 private:
-	Matrix4f* m_ViewToWorld;
+	Matrix4f m_ViewToWorld;
 	std::vector<RenderObject*> m_ObjectList;
 	std::vector<Light*> m_LightList;
-	std::queue<Ray*> m_RayList;
+	std::vector<Ray*> m_RayList;
+	std::queue<Ray*> m_RayBuffer;
+	std::queue<Ray*> m_ShadingBuffer;
 	Attr_PixelBuffer* m_pPixelBuffer;
 	Attr_Render* m_pRenderAttribute;
 };
