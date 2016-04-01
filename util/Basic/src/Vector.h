@@ -135,7 +135,7 @@ template<class T> class Vector4{
             _new[2] = (*this)[0]*rhs[1]-(*this)[1]*rhs[0];
             return _new;
         }
-        inline T dot(const Vector4<T>& rhs){
+        inline T dot(const Vector4<T>& rhs) const{
             return _t[0] * rhs[0] +
             _t[1] * rhs[1] +
             _t[2] * rhs[2] +
@@ -150,7 +150,7 @@ template<class T> class Vector4{
             _t[1]/= mag;
             _t[2]/= mag;
         }
-        inline void Print(){
+        inline void Print() const{
             std::cout<<_t[0]<<"|"<<_t[1]<<"|"<<_t[2]<<"|"<<_t[3]<<"|"<<std::endl;
         }
     private:

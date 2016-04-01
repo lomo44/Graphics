@@ -17,47 +17,45 @@
 #include "Matrix.h"
 #include "OBJParser.h"
 #include "MeshObject.h"
+#include "RayTracer.h"
+#include "Light.h"
 #include <string>
 #include <string.h>
 using namespace std;
 
-/*
- * 
- */
-Vector4i test(string _temp){
-	int startp = 0;
-	int numofslash = 0;
-	Vector4i v;
-	for(int j = 0;_temp[j]!='\0';j++){
-		if(_temp[j] == '/'||_temp[j+1]=='\0'){
-			int length = j-startp;
-			if(length != 0){
-				if(_temp[j+1]=='\0')
-					length++;
-				char temp[20];
-				strncpy(temp,&_temp[startp],length);
-				int index = atoi(&temp[0]);
-				v[numofslash] = index;
-			}
-			numofslash++;
-			cout<<length<<endl;
-			startp = j+1;
-		}
-		//cout<<j<<endl;
-	}
-	return v;
-}
-
 int main(int argc, char** argv) {
     //fin.Print();
     //std::cout<<fin<<std::endl;
-    string temp = "12//13";
-    Vector4i ret = test(temp);
-    ret.Print();
     OBJParser* newparser  = new OBJParser();
     newparser->parsefile("/h/u5/c5/04/c5lizhua/git/Graphics/Obj/FinalBaseMesh.obj");
     MeshObject* out = newparser->getOutputObject();
-    out->print();
+    //out->print();
+    Attr_Material* gold = new Attr_Material("gold",Vector4f(0.3,0.3,0.3),
+    		Vector4f(0.75164, 0.60648, 0.22648),Vector4f(0.628281, 0.555802, 0.366065),51.2,
+    		0,eMaterialType_opague);
+    out->changeMaterial(gold);
+    Attr_Lighting l1;
+    l1.m_AmbientColor = Vector4f(0.9,0.9,0.9);
+    l1.m_DefuseColor = Vector4f(0.9,0.9,0.9);
+    l1.m_SpecularColor = Vector4f(0.9,0.9,0.9);
+    l1.m_LightPosition = Vector4f(0,0,10);
+    PointLight* newlight = new PointLight(l1);
+    RayTracer newtracer;
+    newtracer.addLight(newlight);
+    newtracer.addObject(out);
+    Attr_Render* render = new Attr_Render();
+    Attr_ViewFrustrum* view = new Attr_ViewFrustrum();
+    view->m_ViewDirection = Vector4f(0,0,-1);
+    view->m_ViewPoint = Vector4f(0,0,5);
+    view->m_ViewUpDirection = Vector4f(0,1,0);
+    view->m_fFieldOfView = 60;
+    render->m_ViewFrustrum = view;
+    render->m_iAntiAliasingScale = 1;
+    render->m_iRayTracingDepth = 1;
+    render->m_iScreenHeight = 320;
+    render->m_iScreenWidth = 320;
+    render->m_sFileName = "view.bmp";
+    newtracer.render(render);
     return 0;
 }
 

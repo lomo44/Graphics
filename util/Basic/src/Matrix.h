@@ -16,6 +16,8 @@
 
 #include "Vector.h"
 #include <assert.h>
+#include <stdlib.h>
+#include <memory.h>
 enum eTransformType{
 	eRotationalX,
 	eRotationalY,
@@ -106,6 +108,16 @@ public:
 		newm.loadScaling(x,y,z);
 		*this *= newm;
 	}
+	Matrix4<T> Transpose(){
+		Matrix4<T> ret = *this;
+		std::swap(f[1],f[4]);
+		std::swap(f[2],f[8]);
+		std::swap(f[6],f[9]);
+		std::swap(f[3],f[12]);
+		std::swap(f[7],f[13]);
+		std::swap(f[11],f[14]);
+		return ret;
+	}
 	Vector4<T> getColumn(int i) const{
             assert(i <= 3);
             Vector4<T> _ret;
@@ -128,7 +140,7 @@ public:
             _ret[3] = f[i+3];
             return _ret;
         }
-	eTransformType getType(){
+	eTransformType getType() const {
 		return _t;
 	}
      T& operator[](int i){

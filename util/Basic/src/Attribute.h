@@ -9,14 +9,24 @@
 #define ATTRIBUTE_H_
 #include <string>
 #include "Face.h"
+
+enum eMaterialType{
+	eMaterialType_opague,
+	eMaterialType_transparent
+};
+
 struct Attr_Material{
-    // TODO: Add Material Propteries
+	Attr_Material(std::string name, Vector4f ambient, Vector4f diffuse, Vector4f specular, float exp,
+			float refractiveIndex, eMaterialType _type) :
+			m_MaterialName(name),m_AmbientColor(ambient), m_DefuseColor(diffuse), m_SpecularColor(specular),
+			m_fSpecularWeight(exp),m_fRefractiveIndex(refractiveIndex),m_eMaterialType(_type) {}
 	std::string m_MaterialName;
-	Vector4f m_DefuseColor;
 	Vector4f m_AmbientColor;
+	Vector4f m_DefuseColor;
 	Vector4f m_SpecularColor;
 	float m_fSpecularWeight;
 	float m_fRefractiveIndex;
+	eMaterialType m_eMaterialType;
 };
 
 struct Attr_Lighting{
@@ -36,14 +46,14 @@ struct Attr_MeshObject{
 	int m_iVertexCount;
 	int m_iTextureCount;
 	int m_iTriangleCount;
-	Attr_Material m_ObjectMaterial;
+	Attr_Material* m_ObjectMaterial;
 };
 
 struct Attr_Intersection{
 	Vector4f m_Normal;
 	Vector4f m_IntersectionPoint;
 	float m_fIntersectionAngle;
-	Attr_Material m_Material;
+	Attr_Material* m_Material;
 	float m_distance; // t
 };
 
@@ -57,8 +67,9 @@ struct Attr_ViewFrustrum{
 struct Attr_Render{
 	int m_iScreenWidth;
 	int m_iScreenHeight;
-	int m_iIteration;
-	Attr_ViewFrustrum m_ViewFrustrum;
+	int m_iRayTracingDepth;
+	int m_iAntiAliasingScale;
+	Attr_ViewFrustrum* m_ViewFrustrum;
 	std::string m_sFileName;
 };
 

@@ -32,6 +32,9 @@ void RayTracer::render(Attr_Render* _renderAttribute){
 	InitializeRayList();
 	ExpandRayTracingTree();
 	ShadingRay();
+	CollapseRayTracingTree();
+	ExtractRayListToPixelBuffer();
+	FlushPixelBuffer();
 }
 
 void RayTracer::ExpandRayTracingTree(){
@@ -79,10 +82,10 @@ Attr_Intersection* RayTracer::CalculateIntersection(const Line& _l){
 }
 
 void RayTracer::InitializeRayList(){
-	assert(m_pRenderAttribute==NULL);
+	assert(m_pRenderAttribute!=NULL);
 	Matrix4f viewToWord;
 	double factor = (double(this->m_pRenderAttribute->m_iScreenHeight)/2)\
-			/tan(this->m_pRenderAttribute->m_ViewFrustrum.m_fFieldOfView*M_PI/360.0);
+			/tan(this->m_pRenderAttribute->m_ViewFrustrum->m_fFieldOfView*M_PI/360.0);
 	int _height = this->m_pRenderAttribute->m_iScreenHeight;
 	int _width = this->m_pRenderAttribute->m_iScreenWidth;
 	for (int i = 0; i < _height; i++) {
@@ -91,6 +94,9 @@ void RayTracer::InitializeRayList(){
 			// image plane is at z = -1.
 			Vector4f origin;
 			Vector4f imagePlane;
+			/** ToDO:
+			 * Need to implement anti-aliasing, random sampling.
+			 */
 			imagePlane[0] = (-double(_width)/2 + 0.5 + j)/factor;
 			imagePlane[1] = (-double(_height)/2 + 0.5 + i)/factor;
 			imagePlane[2] = -1;
@@ -102,7 +108,7 @@ void RayTracer::InitializeRayList(){
 			Line newrayline;
 			newrayline.m_Direction = dir;
 			newrayline.m_StartPoint = origin;
-			Ray* newray = new Ray(NULL,newrayline,this->m_pRenderAttribute->m_iIteration);
+			Ray* newray = new Ray(NULL,newrayline,this->m_pRenderAttribute->m_iAntiAliasingScale);
 			newray->m_iID = i * _width + j;
 			m_RayBuffer.push(newray);
 			m_RayList.push_back(newray);
@@ -132,9 +138,9 @@ void RayTracer::FlushPixelBuffer(){
 }
 
 void RayTracer::InitializeViewToWorldMatrix(){
-	assert(m_pRenderAttribute == NULL);
-	Vector4f up = m_pRenderAttribute->m_ViewFrustrum.m_ViewUpDirection;
-	Vector4f dir = m_pRenderAttribute->m_ViewFrustrum.m_ViewDirection;
+	assert(m_pRenderAttribute != NULL);
+	Vector4f up = m_pRenderAttribute->m_ViewFrustrum->m_ViewUpDirection;
+	Vector4f dir = m_pRenderAttribute->m_ViewFrustrum->m_ViewDirection;
 	dir.Normalize();
 	up = up - up.dot(dir) * dir;
 	up.Normalize();
@@ -148,12 +154,13 @@ void RayTracer::InitializeViewToWorldMatrix(){
 	this->m_ViewToWorld[2] = -dir[0];
 	this->m_ViewToWorld[6] = -dir[1];
 	this->m_ViewToWorld[10] = -dir[2];
-	this->m_ViewToWorld[3] = m_pRenderAttribute->m_ViewFrustrum.m_ViewPoint[0];
-	this->m_ViewToWorld[7] = m_pRenderAttribute->m_ViewFrustrum.m_ViewPoint[1];
-	this->m_ViewToWorld[11] = m_pRenderAttribute->m_ViewFrustrum.m_ViewPoint[2];
+	this->m_ViewToWorld[3] = m_pRenderAttribute->m_ViewFrustrum->m_ViewPoint[0];
+	this->m_ViewToWorld[7] = m_pRenderAttribute->m_ViewFrustrum->m_ViewPoint[1];
+	this->m_ViewToWorld[11] = m_pRenderAttribute->m_ViewFrustrum->m_ViewPoint[2];
 }
 
 void RayTracer::ShadingRay(){
+	std::cout<<"Start Shading Ray"<<std::endl;
 	for(;m_ShadingBuffer.size()!=0;){
 		Ray* topray = m_ShadingBuffer.front();
 		m_ShadingBuffer.pop();
@@ -163,4 +170,38 @@ void RayTracer::ShadingRay(){
 		m_RayBuffer.push(topray);
 	}
 }
+
+void RayTracer::CollapseRayTracingTree(){
+	for(unsigned int i = 0; i < m_RayList.size();i++){
+		m_RayList[i]->CollapseRayTracingTree();
+	}
+}
+
+void RayTracer::ExtractRayListToPixelBuffer(){
+	/** TODO:
+	 * Modify this part to implement anti-aliasing
+	 */
+	unsigned int anti_aliasing_limit = 1;
+	unsigned int anti_aliasing_counter = 0;
+	unsigned int pixel_counter = 0;
+	float R = 0.0;
+	float G = 0.0;
+	float B = 0.0;
+	for(unsigned int i = 0; i < m_RayList.size();i++){
+		anti_aliasing_counter++;
+		R += m_RayList[i]->m_color[0];
+		G += m_RayList[i]->m_color[1];
+		B += m_RayList[i]->m_color[2];
+		if(anti_aliasing_counter == anti_aliasing_limit){
+			R = R / anti_aliasing_limit * 255;
+			G = G / anti_aliasing_limit * 255;
+			B = B / anti_aliasing_limit * 255;
+			m_pPixelBuffer->m_Rbuffer[pixel_counter] = int(R*255);
+			m_pPixelBuffer->m_Gbuffer[pixel_counter] = int(G*255);
+			m_pPixelBuffer->m_Bbuffer[pixel_counter] = int(B*255);
+			pixel_counter++;
+		}
+	}
+}
+
 

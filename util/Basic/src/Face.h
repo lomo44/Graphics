@@ -57,7 +57,12 @@ public:
     	Vector4f v0 = _a-_b;
     	Vector4f v1 = _c-_a;
     	Vector4f Norm = v0.cross(v1);
-    	float t = - Norm.dot(L.m_StartPoint)/Norm.dot(L.m_Direction);
+    	Norm.Normalize();
+    	float d = Norm.dot(_a);
+    	float a = - Norm.dot(L.m_StartPoint);
+    	float t = (d - Norm.dot(L.m_StartPoint))/Norm.dot(L.m_Direction);
+    	L.m_Direction.Print();
+    	std::cout<<d<<std::endl;
     	return t;
     }
     inline static bool isIntersect(const Vector4f& _barycorrd){

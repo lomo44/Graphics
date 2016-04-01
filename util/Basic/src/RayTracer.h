@@ -34,6 +34,7 @@ private:
 	void ExpandRayTracingTree();
 	void CollapseRayTracingTree();
 	void ShadingRay();
+	void ExtractRayListToPixelBuffer();
 	Attr_Intersection* CalculateIntersection(const Line& _l);
 	void FlushPixelBuffer();
 private:

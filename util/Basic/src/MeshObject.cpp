@@ -22,27 +22,33 @@ void MeshObject::print(){
 	for(int i = 0 ; i < m_Attribute.m_iVertexCount;i++){
 		m_Attribute.m_Vertexlist[i].Print();
 	}
+	for(int i = 0; i < m_Attribute.m_iNormalCount;i++){
+		m_Attribute.m_Normallist[i].Print();
+	}
 	for(int i = 0 ; i < m_Attribute.m_iTriangleCount;i++){
 		m_Attribute.m_Trianglelist[i].print();
 	}
 }
 
-void MeshObject::changeMaterial(Attr_Material _m){
+void MeshObject::changeMaterial(Attr_Material* _m){
 	m_Attribute.m_ObjectMaterial = _m;
 }
 
 Attr_Intersection* MeshObject::isIntersect(const Line& _l){
+	std::cout<<"Check Intersection MeshObject"<<std::endl;
+	Line temp = _l;
+	temp.m_Direction =   m_Transform * temp.m_Direction;
+	temp.m_StartPoint =  m_Transform * temp.m_StartPoint;
 	float t = std::numeric_limits<float>::max();
 	int triangle_index = -1;
 	Vector4f _ret_bary;
 	for(int i = 0; i < m_Attribute.m_iTriangleCount;i++){
+		std::cout<<"Total triangle: "<<m_Attribute.m_iTriangleCount<< ": " << i <<std::endl;
 		float _i = Triangle::getSurfaceIntersect(
 				m_Attribute.m_Vertexlist[m_Attribute.m_Trianglelist[i].m_V1[0]],
 				m_Attribute.m_Vertexlist[m_Attribute.m_Trianglelist[i].m_V2[0]],
 				m_Attribute.m_Vertexlist[m_Attribute.m_Trianglelist[i].m_V3[0]],_l);
-		if(_i <= 0)
-			break;
-		else{
+		if(_i > 0){
 			Vector4f _bary = Triangle::toBaryCentric(
 					m_Attribute.m_Vertexlist[m_Attribute.m_Trianglelist[i].m_V1[0]],
 					m_Attribute.m_Vertexlist[m_Attribute.m_Trianglelist[i].m_V2[0]],
@@ -57,17 +63,19 @@ Attr_Intersection* MeshObject::isIntersect(const Line& _l){
 		}
 	}
 	if(triangle_index == -1){
+		std::cout<<"No Intersection" <<std::endl;
 		return NULL;
 	}
 	else{
+		std::cout<<"Intersect"<<std::endl;
 		Attr_Intersection* ret = new Attr_Intersection();
-		ret->m_IntersectionPoint = _l.getPoint(t);
+		ret->m_IntersectionPoint = (m_invTransform) * _l.getPoint(t);
 		ret->m_Material = this->m_Attribute.m_ObjectMaterial;
 		Vector4f norm = Triangle::Interpolate_Barycentric(
 				m_Attribute.m_Normallist[m_Attribute.m_Trianglelist[triangle_index].m_V1[3]],
 				m_Attribute.m_Normallist[m_Attribute.m_Trianglelist[triangle_index].m_V2[3]],
 				m_Attribute.m_Normallist[m_Attribute.m_Trianglelist[triangle_index].m_V3[3]],_ret_bary);
-		ret->m_Normal = norm;
+		ret->m_Normal = (m_invTransform.Transpose()) * norm;
 		ret->m_Normal.Normalize();
 		ret->m_fIntersectionAngle = acos(ret->m_Normal.dot(_l.m_Direction));
 		ret->m_distance = t;

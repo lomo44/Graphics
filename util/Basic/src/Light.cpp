@@ -25,16 +25,16 @@ void PointLight::shade(Ray& _ray){
 		Vector4f reflect_direction = -light_direction + _ray.m_pIntersectionProperties->m_Normal*k;
 		float diffuse = std::max(0.0,(double)_ray.m_pIntersectionProperties->m_Normal.dot(light_direction));
 		float specular = std::pow(std::max(0.0,(double)ray_direction.dot(reflect_direction)),
-				_ray.m_pIntersectionProperties->m_Material.m_fSpecularWeight);
-		float red = this->m_LightingAttribute.m_AmbientColor[0]*_ray.m_pIntersectionProperties->m_Material.m_AmbientColor[0]+
-				this->m_LightingAttribute.m_AmbientColor[0]*_ray.m_pIntersectionProperties->m_Material.m_DefuseColor[0]*diffuse+
-				this->m_LightingAttribute.m_AmbientColor[0]*_ray.m_pIntersectionProperties->m_Material.m_SpecularColor[0]*specular;
-		float green = this->m_LightingAttribute.m_AmbientColor[0]*_ray.m_pIntersectionProperties->m_Material.m_AmbientColor[1]+
-						this->m_LightingAttribute.m_AmbientColor[0]*_ray.m_pIntersectionProperties->m_Material.m_DefuseColor[1]*diffuse+
-						this->m_LightingAttribute.m_AmbientColor[0]*_ray.m_pIntersectionProperties->m_Material.m_SpecularColor[1]*specular;
-		float blue = this->m_LightingAttribute.m_AmbientColor[0]*_ray.m_pIntersectionProperties->m_Material.m_AmbientColor[2]+
-						this->m_LightingAttribute.m_AmbientColor[0]*_ray.m_pIntersectionProperties->m_Material.m_DefuseColor[2]*diffuse+
-						this->m_LightingAttribute.m_AmbientColor[0]*_ray.m_pIntersectionProperties->m_Material.m_SpecularColor[2]*specular;
+				_ray.m_pIntersectionProperties->m_Material->m_fSpecularWeight);
+		float red = this->m_LightingAttribute.m_AmbientColor[0]*_ray.m_pIntersectionProperties->m_Material->m_AmbientColor[0]+
+				this->m_LightingAttribute.m_AmbientColor[0]*_ray.m_pIntersectionProperties->m_Material->m_DefuseColor[0]*diffuse+
+				this->m_LightingAttribute.m_AmbientColor[0]*_ray.m_pIntersectionProperties->m_Material->m_SpecularColor[0]*specular;
+		float green = this->m_LightingAttribute.m_AmbientColor[0]*_ray.m_pIntersectionProperties->m_Material->m_AmbientColor[1]+
+						this->m_LightingAttribute.m_AmbientColor[0]*_ray.m_pIntersectionProperties->m_Material->m_DefuseColor[1]*diffuse+
+						this->m_LightingAttribute.m_AmbientColor[0]*_ray.m_pIntersectionProperties->m_Material->m_SpecularColor[1]*specular;
+		float blue = this->m_LightingAttribute.m_AmbientColor[0]*_ray.m_pIntersectionProperties->m_Material->m_AmbientColor[2]+
+						this->m_LightingAttribute.m_AmbientColor[0]*_ray.m_pIntersectionProperties->m_Material->m_DefuseColor[2]*diffuse+
+						this->m_LightingAttribute.m_AmbientColor[0]*_ray.m_pIntersectionProperties->m_Material->m_SpecularColor[2]*specular;
 		_ray.m_color[0] *= red;
 		_ray.m_color[1] *= green;
 		_ray.m_color[2] *= blue;
