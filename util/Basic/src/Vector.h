@@ -84,7 +84,7 @@ template<class T> class Vector4{
             return *this;
         }
         inline Vector4<T>  operator- (const Vector4<T>& vec) const{
-            Vector4<T> ret = *this;
+            Vector4<T> ret;
             ret[0] -= vec[0];
             ret[1] -= vec[1];
             ret[2] -= vec[2];
