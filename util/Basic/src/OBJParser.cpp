@@ -69,12 +69,15 @@ void OBJParser::parsefile(std::string filepath){
                     		if(buffer[j] == '/'||buffer[j+1]=='\0'){
                     			int length = j-startp;
                     			if(length != 0){
-                    				if(buffer[j+1]=='\0')
+                    				if(buffer[j+1] == '\0')
                     					length++;
-                    				char temp[20];
+                    				char temp[100];
                     				strncpy(temp,&buffer[startp],length);
+                    				temp[length] = '\0';
                     				int index = atoi(&temp[0]);
                     				v[numofslash] = index;
+                    				if(index > 24461)
+                    				std::cout<<temp<<" "<<index << " " << length <<std::endl;
                     			}
                     			numofslash++;
                     			startp = j+1;
@@ -86,6 +89,7 @@ void OBJParser::parsefile(std::string filepath){
                     if(_list.size() == 3){
                     	Triangle f1;
                     	f1.m_V1 = _list[0];
+
                     	f1.m_V2 = _list[1];
                     	f1.m_V3 = _list[2];
                     	f1.m_iShadingGroup = this->m_CurrentShadingNum;
@@ -105,7 +109,6 @@ void OBJParser::parsefile(std::string filepath){
                     	m_Fbuffer.push_back(f1);
                     	m_Fbuffer.push_back(f2);
                     }
-                    std::cout<<std::endl;
                 }
                 else if(buffer == "s"){
                     //std::cout<<"Shade change: ";

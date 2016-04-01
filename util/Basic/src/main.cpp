@@ -52,8 +52,8 @@ int main(int argc, char** argv) {
     render->m_ViewFrustrum = view;
     render->m_iAntiAliasingScale = 1;
     render->m_iRayTracingDepth = 1;
-    render->m_iScreenHeight = 320;
-    render->m_iScreenWidth = 320;
+    render->m_iScreenHeight = 100;
+    render->m_iScreenWidth = 200;
     render->m_sFileName = "view.bmp";
     newtracer.render(render);
     return 0;

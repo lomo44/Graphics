@@ -168,11 +168,13 @@ public:
             return *this;
         }
 	Vector4<T>  operator* (const Vector4<T>& rhs){
+			//rhs.Print();
+			//this->getRow(0).Print();
             Vector4<T> _ret;
-            _ret[0] = _ret.dot(this->getRow(0));            
-            _ret[1] = _ret.dot(this->getRow(1));
-            _ret[2] = _ret.dot(this->getRow(2));
-            _ret[3] = _ret.dot(this->getRow(3));
+            _ret[0] = rhs.dot(this->getRow(0));
+            _ret[1] = rhs.dot(this->getRow(1));
+            _ret[2] = rhs.dot(this->getRow(2));
+            _ret[3] = rhs.dot(this->getRow(3));
             return _ret;
         }
 	Vector4<T>&  operator*=(Vector4<T>& rhs){
@@ -312,15 +314,14 @@ public:
         return true;
     }
 	void print(){
-            for(int i = 0; i < 4;i++){
-
-		std::cout<<f[i]<<",";
-		if(i % 4== 3){
-			std::cout<<std::endl;
+		for(int i = 0; i < 16;i++){
+			std::cout<<f[i]<<",";
+			if(i % 4== 3){
+				std::cout<<std::endl;
+			}
 		}
-            }
-            std::cout<<std::endl;
-        }
+		std::cout<<std::endl;
+	}
 	
 private:
         T* f;

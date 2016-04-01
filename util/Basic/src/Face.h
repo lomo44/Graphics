@@ -35,6 +35,7 @@ public:
     inline static Vector4f toBaryCentric(const Vector4f& _a,
     		const Vector4f& _b, const Vector4f& _c,
     		const Vector4f& _p){
+    	//std::cout<<"Checking Bary"<<std::endl;
     	Vector4f v0 = _b - _a;
     	Vector4f v1 = _c - _a;
     	Vector4f v2 = _p - _a;
@@ -54,15 +55,22 @@ public:
     inline static float getSurfaceIntersect(const Vector4f& _a,
     		const Vector4f& _b, const Vector4f& _c,
     		const Line& L){
+    	//std::cout<<"Checking Intersection"<<std::endl;
+    	//_a.Print();
+    	//_b.Print();
+    	//_c.Print();
     	Vector4f v0 = _a-_b;
+    	//v0.Print();
     	Vector4f v1 = _c-_a;
+    	//v1.Print();
     	Vector4f Norm = v0.cross(v1);
     	Norm.Normalize();
+    	//Norm.Print();
     	float d = Norm.dot(_a);
     	float a = - Norm.dot(L.m_StartPoint);
     	float t = (d - Norm.dot(L.m_StartPoint))/Norm.dot(L.m_Direction);
-    	L.m_Direction.Print();
-    	std::cout<<d<<std::endl;
+    	//L.m_Direction.Print();
+    	//std::cout<<t<<std::endl;
     	return t;
     }
     inline static bool isIntersect(const Vector4f& _barycorrd){

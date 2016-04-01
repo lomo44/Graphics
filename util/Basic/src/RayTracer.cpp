@@ -62,6 +62,7 @@ void RayTracer::ExpandRayTracingTree(){
 				m_ShadingBuffer.push(tempray);
 			}
 		}
+		std::cout<<m_RayBuffer.size()<<std::endl;
 	}
 	std::cout<<"Expanding Complete, Number Of Ray: "<<m_RayBuffer.size()<<std::endl;
 }
