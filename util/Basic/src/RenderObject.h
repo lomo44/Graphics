@@ -10,6 +10,7 @@
 
 #include "Matrix.h"
 #include "Attribute.h"
+#include "BoundingBox.h"
 class RenderObject {
 public:
 	RenderObject(){;}
@@ -32,6 +33,7 @@ public:
 	const Matrix4f& getInvTransform(){return m_invTransform;}
 	virtual Attr_Intersection* isIntersect(const Line& _l) = 0;
 protected:
+    BoundingBox* m_BoundingBox;
 	Matrix4f m_Transform;
 	Matrix4f m_invTransform;
 };

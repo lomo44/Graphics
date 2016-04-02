@@ -38,19 +38,21 @@ void OBJParser::parsefile(std::string filepath){
             		//std::cout<<buffer<<std::endl;
             		std::string vertex_type = buffer;
                     Vector4f vec;
-                    ss>>buffer;
                     for(int i = 0;!ss.eof();i++){
-                        vec[i] = atof(buffer.c_str());
                         ss>>buffer;
+                        vec[i] = atof(buffer.c_str());
                     }
-                    vec[3] = 1.0;
+                    
                     //std::cout<<"X: "<<vec[0]<<" Y: "<<vec[1]<<" Z: "<<vec[2]<<std::endl;
                     if(vertex_type == "v"){
-                    	//std::cout<<"Vertex Added: ";
+                    	//std::cout<<"Vertex Added: "
+                        vec[3] = 1.0;
                     	m_Vbuffer.push_back(vec);
+                        //vec.Print();
                     }
                     else if(vertex_type == "vn"){
                         //std::cout<<"Normal Added: ";
+                        vec[3] = 0.0;
                         m_Nbuffer.push_back(vec);
                     }
                     else if(vertex_type == "vt"){
@@ -76,8 +78,6 @@ void OBJParser::parsefile(std::string filepath){
                     				temp[length] = '\0';
                     				int index = atoi(&temp[0]);
                     				v[numofslash] = index;
-                    				if(index > 24461)
-                    				std::cout<<temp<<" "<<index << " " << length <<std::endl;
                     			}
                     			numofslash++;
                     			startp = j+1;
@@ -89,19 +89,22 @@ void OBJParser::parsefile(std::string filepath){
                     if(_list.size() == 3){
                     	Triangle f1;
                     	f1.m_V1 = _list[0];
-
                     	f1.m_V2 = _list[1];
                     	f1.m_V3 = _list[2];
                     	f1.m_iShadingGroup = this->m_CurrentShadingNum;
                     	m_Fbuffer.push_back(f1);
                     }
                     if(_list.size() == 4){
+                        for(unsigned i = 0; i < 4; i++){
+                            _list[i].Print();
+                        }
+                        std::cout<<std::endl;
                     	Triangle f1;
                     	Triangle f2;
                     	f1.m_V1 = _list[0];
                     	f1.m_V2 = _list[1];
                     	f1.m_V3 = _list[2];
-                    	f2.m_V1 = _list[1];
+                    	f2.m_V1 = _list[0];
                     	f2.m_V2 = _list[2];
                     	f2.m_V3 = _list[3];
                     	f1.m_iShadingGroup = this->m_CurrentShadingNum;

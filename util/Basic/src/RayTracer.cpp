@@ -39,6 +39,7 @@ void RayTracer::render(Attr_Render* _renderAttribute){
 
 void RayTracer::ExpandRayTracingTree(){
 	std::cout<<"Starting Expanding Ray Tracing Tree"<<std::endl;
+    int inte = 0;
 	for(;m_RayBuffer.size()!=0;){
 		Ray* tempray = m_RayBuffer.front();
 		m_RayBuffer.pop();
@@ -46,25 +47,33 @@ void RayTracer::ExpandRayTracingTree(){
 			m_ShadingBuffer.push(tempray);
 		}
 		else{
+            //std::cout<<"check ray"<<std::endl;
 			Attr_Intersection* intsec = CalculateIntersection(tempray->m_RayLine);
 			if(intsec!=NULL){
+                inte++;
+                //std::cout<<"Intersect"<<std::endl;
+                //intsec->m_Normal.Print();
+                tempray->m_pIntersectionProperties = intsec;
 				Ray* reflectray = tempray->reflect(intsec->m_Normal);
 				Ray* refractray = tempray->refract(intsec->m_Normal,NULL);
 				if(reflectray!=NULL)
 					m_RayBuffer.push(reflectray);
 				if(refractray!=NULL)
 					m_RayBuffer.push(refractray);
+                tempray->m_isDone = true;
+                m_ShadingBuffer.push(tempray);
 			}
 			else{
 				/* TODO Need to map the done ray into the environment
 				 * */
+                //std::cout<<"ray done" <<std::endl;
 				tempray->m_isDone = true;
 				m_ShadingBuffer.push(tempray);
 			}
 		}
-		std::cout<<m_RayBuffer.size()<<std::endl;
+		std::cout<<"Current Ray Remain: "<<m_RayBuffer.size()<<'\r';
 	}
-	std::cout<<"Expanding Complete, Number Of Ray: "<<m_RayBuffer.size()<<std::endl;
+	std::cout<<"Expanding Complete, Number Of Ray Intersects: "<<inte<<std::endl;
 }
 
 Attr_Intersection* RayTracer::CalculateIntersection(const Line& _l){
@@ -84,8 +93,7 @@ Attr_Intersection* RayTracer::CalculateIntersection(const Line& _l){
 
 void RayTracer::InitializeRayList(){
 	assert(m_pRenderAttribute!=NULL);
-	Matrix4f viewToWord;
-	double factor = (double(this->m_pRenderAttribute->m_iScreenHeight)/2)\
+	double factor = (double(this->m_pRenderAttribute->m_iScreenHeight)/2)
 			/tan(this->m_pRenderAttribute->m_ViewFrustrum->m_fFieldOfView*M_PI/360.0);
 	int _height = this->m_pRenderAttribute->m_iScreenHeight;
 	int _width = this->m_pRenderAttribute->m_iScreenWidth;
@@ -95,6 +103,7 @@ void RayTracer::InitializeRayList(){
 			// image plane is at z = -1.
 			Vector4f origin;
 			Vector4f imagePlane;
+            origin[3] = 1;
 			/** ToDO:
 			 * Need to implement anti-aliasing, random sampling.
 			 */
@@ -106,9 +115,12 @@ void RayTracer::InitializeRayList(){
 			origin = this->m_ViewToWorld * origin;;
 			// TODO: Convert ray to world space and call
 			// shadeRay(ray) to generate pixel colour.
+            //m_ViewToWorld.print();
 			Line newrayline;
 			newrayline.m_Direction = dir;
 			newrayline.m_StartPoint = origin;
+            //dir.Print();
+            //origin.Print();
 			Ray* newray = new Ray(NULL,newrayline,this->m_pRenderAttribute->m_iAntiAliasingScale);
 			newray->m_iID = i * _width + j;
 			m_RayBuffer.push(newray);
@@ -123,9 +135,16 @@ void RayTracer::InitializePixelBuffer(int _width, int _height){
 	m_pPixelBuffer->m_iHeight = _height;
 	m_pPixelBuffer->m_iWidth = _width;
 	int numbyte = _height * _width * sizeof(unsigned char);
-	m_pPixelBuffer->m_Bbuffer = new unsigned char(numbyte);
-	m_pPixelBuffer->m_Gbuffer = new unsigned char(numbyte);
-	m_pPixelBuffer->m_Rbuffer = new unsigned char(numbyte);
+	m_pPixelBuffer->m_Bbuffer = new unsigned char[numbyte];
+	m_pPixelBuffer->m_Gbuffer = new unsigned char[numbyte];
+	m_pPixelBuffer->m_Rbuffer = new unsigned char[numbyte];
+    for(unsigned int i = 0 ; i < _height; i++){
+        for(unsigned int j = 0; j < _width; j++){
+            m_pPixelBuffer->m_Rbuffer[i*_width + j] = 0;
+            m_pPixelBuffer->m_Bbuffer[i*_width + j] = 0;
+            m_pPixelBuffer->m_Gbuffer[i*_width + j] = 0;
+        }
+    }
 }
 
 void RayTracer::FlushPixelBuffer(){
@@ -143,8 +162,9 @@ void RayTracer::InitializeViewToWorldMatrix(){
 	Vector4f up = m_pRenderAttribute->m_ViewFrustrum->m_ViewUpDirection;
 	Vector4f dir = m_pRenderAttribute->m_ViewFrustrum->m_ViewDirection;
 	dir.Normalize();
-	up = up - up.dot(dir) * dir;
+	up = up - (up.dot(dir)) * dir;
 	up.Normalize();
+
 	Vector4f w = dir.cross(up);
 	this->m_ViewToWorld[0] = w[0];
 	this->m_ViewToWorld[4] = w[1];
@@ -161,7 +181,7 @@ void RayTracer::InitializeViewToWorldMatrix(){
 }
 
 void RayTracer::ShadingRay(){
-	std::cout<<"Start Shading Ray"<<std::endl;
+	//std::cout<<"Start Shading Ray"<<std::endl;
 	for(;m_ShadingBuffer.size()!=0;){
 		Ray* topray = m_ShadingBuffer.front();
 		m_ShadingBuffer.pop();
@@ -188,19 +208,25 @@ void RayTracer::ExtractRayListToPixelBuffer(){
 	float R = 0.0;
 	float G = 0.0;
 	float B = 0.0;
+    std::cout<<m_RayList.size()<<std::endl;
 	for(unsigned int i = 0; i < m_RayList.size();i++){
 		anti_aliasing_counter++;
 		R += m_RayList[i]->m_color[0];
 		G += m_RayList[i]->m_color[1];
 		B += m_RayList[i]->m_color[2];
-		if(anti_aliasing_counter == anti_aliasing_limit){
+		if(anti_aliasing_counter % anti_aliasing_limit == 0){
 			R = R / anti_aliasing_limit * 255;
 			G = G / anti_aliasing_limit * 255;
 			B = B / anti_aliasing_limit * 255;
-			m_pPixelBuffer->m_Rbuffer[pixel_counter] = int(R*255);
-			m_pPixelBuffer->m_Gbuffer[pixel_counter] = int(G*255);
-			m_pPixelBuffer->m_Bbuffer[pixel_counter] = int(B*255);
-			pixel_counter++;
+            //std::cout<<R<<" "<<G<<" "<<B<<std::endl;
+			m_pPixelBuffer->m_Rbuffer[pixel_counter] = int(R);
+			m_pPixelBuffer->m_Gbuffer[pixel_counter] = int(G);
+			m_pPixelBuffer->m_Bbuffer[pixel_counter] = int(B);
+            R = 0;
+            G = 0;
+            B = 0;
+            pixel_counter++;
+            anti_aliasing_counter = 0;
 		}
 	}
 }

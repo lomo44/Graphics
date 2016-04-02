@@ -69,7 +69,7 @@ float Ray::CalculateReflectance(const Vector4f& normal,
 }
 
 Ray* Ray::reflect(const Vector4f& norm){
-	if(m_pIntersectionProperties != NULL && m_iRecursiveTime >= 1){
+	if(m_pIntersectionProperties != NULL && m_iRecursiveTime > 1){
 		float reflectance = Ray::CalculateReflectance(norm,this->m_RayLine.m_Direction,NULL,
 				this->m_pIntersectionProperties->m_Material);
 		float scale = 2 * this->m_pIntersectionProperties->m_Normal.dot(this->m_RayLine.m_Direction);
@@ -91,7 +91,7 @@ Ray* Ray::reflect(const Vector4f& norm){
 }
 
 Ray* Ray::refract(const Vector4f& norm, Attr_Material* _from){
-	if(m_pIntersectionProperties != NULL && m_iRecursiveTime >= 1){
+	if(m_pIntersectionProperties != NULL && m_iRecursiveTime > 1){
 		float ni = 0;
 		float nt = 0;
 		if(_from == NULL){

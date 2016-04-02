@@ -42,7 +42,7 @@ template<class T> class Vector4{
             _t[0] = _a;
             _t[1] = _b;
             _t[2] = _c;
-            _t[3] = 1;
+            _t[3] = 0;
         }
         Vector4(const Vector4<T>& rhs){
         	_t = new T[4];
@@ -55,6 +55,7 @@ template<class T> class Vector4{
             delete _t;
         }
         inline Vector4<T>& operator=(const Vector4<T>& rhs){
+            if(_t==NULL)
         	_t = new T[4];
         	_t[0] = rhs[0];
         	_t[1] = rhs[1];
@@ -84,7 +85,7 @@ template<class T> class Vector4{
             return *this;
         }
         inline Vector4<T>  operator- (const Vector4<T>& vec) const{
-            Vector4<T> ret;
+            Vector4<T> ret = *this;
             ret[0] -= vec[0];
             ret[1] -= vec[1];
             ret[2] -= vec[2];
@@ -165,8 +166,8 @@ template<class T> inline Vector4<T> operator - (const Vector4<T>& lhs, const Vec
 template<class T> inline Vector4<T> operator + (const Vector4<T>& lhs, const Vector4<T>& rhs){
 	return Vector4<T>(lhs[0]+rhs[0],lhs[1]+rhs[1],lhs[2]+rhs[2],lhs[3]+rhs[3]);
 }
-template<class T> inline Vector4<T> operator * (const float lhs, const Vector4<T>& rhs){
-	return Vector4<T>(lhs*rhs[0],lhs*rhs[1],lhs-rhs[2],lhs-rhs[3]);
+template<class T> inline Vector4<T> operator * (const T lhs, const Vector4<T>& rhs){
+	return Vector4<T>(lhs*rhs[0],lhs*rhs[1],lhs*rhs[2],lhs*rhs[3]);
 }
 typedef Vector4<float> Vector4f;
 typedef Vector4<double> Vector4d;

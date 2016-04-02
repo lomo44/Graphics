@@ -13,7 +13,9 @@ public:
 	}
 	~Line(){;}
 	Vector4f getPoint(float _t) const{
-		return m_StartPoint + m_Direction * _t;
+        Vector4f ret = m_StartPoint + m_Direction * _t;
+        ret[3] = 1;
+		return ret;
 	}
 	Vector4f m_StartPoint;
 	Vector4f m_Direction;
@@ -56,9 +58,18 @@ public:
     		const Vector4f& _b, const Vector4f& _c,
     		const Line& L){
     	//std::cout<<"Checking Intersection"<<std::endl;
-    	//_a.Print();
-    	//_b.Print();
-    	//_c.Print();
+        /*std::cout<<"A: ";
+    	_a.Print();
+        std::cout<<" B: ";
+    	_b.Print();
+        std::cout<<" C: ";
+    	_c.Print();
+        std::cout<<std::endl;*/
+        /*std::cout<<"StartFrom: " <<std::endl;
+         L.m_StartPoint.Print();
+        std::cout<< "Direction: "<<std::endl;
+         L.m_Direction.Print();
+        std::cout<<std::endl;*/
     	Vector4f v0 = _a-_b;
     	//v0.Print();
     	Vector4f v1 = _c-_a;
@@ -67,15 +78,14 @@ public:
     	Norm.Normalize();
     	//Norm.Print();
     	float d = Norm.dot(_a);
-    	float a = - Norm.dot(L.m_StartPoint);
     	float t = (d - Norm.dot(L.m_StartPoint))/Norm.dot(L.m_Direction);
     	//L.m_Direction.Print();
     	//std::cout<<t<<std::endl;
     	return t;
     }
     inline static bool isIntersect(const Vector4f& _barycorrd){
-    	if(_barycorrd[0] >= 0 && _barycorrd[1] >= 0 && _barycorrd[2]>=0 &&
-    			_barycorrd[0] + _barycorrd[1] + _barycorrd[2] <1){
+    	if((_barycorrd[0] >= 0) && (_barycorrd[1] >= 0) && (_barycorrd[2]>=0) &&
+    			(_barycorrd[0] + _barycorrd[1] + _barycorrd[2] <1)){
     		return true;
     	}
     	else{
@@ -85,7 +95,11 @@ public:
     inline static Vector4f Interpolate_Barycentric(const Vector4f& _a,
     		const Vector4f& _b, const Vector4f& _c,
     		const Vector4f& _barry){
-    	return _a * _barry[0] + _b * _barry[1] + _c * _barry[2];
+        //std::cout<<"wow"<<std::endl;
+        Vector4f ret = _a * _barry[0] + _b * _barry[1] + _c * _barry[2];
+        ret.Normalize();
+    	return ret;
+        //std::cout<<"wow"<<std::endl;
     }
 };
 
