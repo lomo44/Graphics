@@ -51,7 +51,7 @@ void RayTracer::ExpandRayTracingTree(){
 			Attr_Intersection* intsec = CalculateIntersection(tempray->m_RayLine);
 			if(intsec!=NULL){
                 inte++;
-                //std::cout<<"Intersect"<<std::endl;
+                std::cout<<"Intersect"<<std::endl;
                 //intsec->m_Normal.Print();
                 tempray->m_pIntersectionProperties = intsec;
 				Ray* reflectray = tempray->reflect(intsec->m_Normal);
@@ -61,6 +61,9 @@ void RayTracer::ExpandRayTracingTree(){
 				if(refractray!=NULL)
 					m_RayBuffer.push(refractray);
                 tempray->m_isDone = true;
+                tempray->m_color[0]= 1.0;
+                tempray->m_color[1]= 1.0;
+                tempray->m_color[2]= 1.0;
                 m_ShadingBuffer.push(tempray);
 			}
 			else{
@@ -68,6 +71,9 @@ void RayTracer::ExpandRayTracingTree(){
 				 * */
                 //std::cout<<"ray done" <<std::endl;
 				tempray->m_isDone = true;
+                tempray->m_color[0]= 0.0;
+                tempray->m_color[1]= 0.0;
+                tempray->m_color[2]= 0.0;
 				m_ShadingBuffer.push(tempray);
 			}
 		}
@@ -78,7 +84,7 @@ void RayTracer::ExpandRayTracingTree(){
 
 Attr_Intersection* RayTracer::CalculateIntersection(const Line& _l){
 	Attr_Intersection* _intersection = NULL;
-	float t = std::numeric_limits<float>::max();
+	double t = std::numeric_limits<double>::max();
 	for(unsigned int i = 0; i < m_ObjectList.size();i++){
 		Attr_Intersection* temp = m_ObjectList[i]->isIntersect(_l);
 		if(temp!=NULL){

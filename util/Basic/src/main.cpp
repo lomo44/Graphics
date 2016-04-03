@@ -41,11 +41,11 @@ int main(int argc, char** argv) {
     l1.m_LightPosition = Vector4f(0,0,10,1);
     PointLight* newlight = new PointLight(l1);
     RayTracer newtracer;
-    newtracer.addLight(newlight);
+    //newtracer.addLight(newlight);
     newtracer.addObject(out);
     Attr_Render* render = new Attr_Render();
     Attr_ViewFrustrum* view = new Attr_ViewFrustrum();
-    view->m_ViewDirection = Vector4f(0,0,-1);
+    view->m_ViewDirection = Vector4f(0,1,-1);
     view->m_ViewPoint = Vector4f(0,0,6,1);
     view->m_ViewUpDirection = Vector4f(0,1,0);
     view->m_fFieldOfView = 60;

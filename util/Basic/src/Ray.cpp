@@ -92,8 +92,8 @@ Ray* Ray::reflect(const Vector4f& norm){
 
 Ray* Ray::refract(const Vector4f& norm, Attr_Material* _from){
 	if(m_pIntersectionProperties != NULL && m_iRecursiveTime > 1){
-		float ni = 0;
-		float nt = 0;
+		float ni = 0.0;
+		float nt = 0.0;
 		if(_from == NULL){
 			// From Environment To Material;
 			ni = 1.0;

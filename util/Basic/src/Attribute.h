@@ -24,8 +24,8 @@ struct Attr_Material{
 	Vector4f m_AmbientColor;
 	Vector4f m_DefuseColor;
 	Vector4f m_SpecularColor;
-	float m_fSpecularWeight;
-	float m_fRefractiveIndex;
+	double m_fSpecularWeight;
+	double m_fRefractiveIndex;
 	eMaterialType m_eMaterialType;
 };
 
@@ -54,7 +54,7 @@ struct Attr_Intersection{
 	Vector4f m_IntersectionPoint;
 	float m_fIntersectionAngle;
 	Attr_Material* m_Material;
-	float m_distance; // t
+	double m_distance; // t
 };
 
 struct Attr_ViewFrustrum{
