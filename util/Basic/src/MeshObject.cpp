@@ -56,16 +56,16 @@ void MeshObject::changeMaterial(Attr_Material* _m){
 
 Attr_Intersection* MeshObject::isIntersect(const Line& _l){
 	//std::cout<<"Check Intersection MeshObject"<<std::endl;
+
+	if(!this->m_BoundingBox->checkIntersect(_l))
+		return NULL;
 	Line temp = _l;
 	temp.m_Direction =   m_Transform * temp.m_Direction;
 	temp.m_StartPoint =  m_Transform * temp.m_StartPoint;
-	float t = std::numeric_limits<double>::max();
+	float t = std::numeric_limits<float>::max();
 	int triangle_index = -1;
 	Vector4f _ret_bary;
 	for(int i = 0; i < m_Attribute.m_iTriangleCount;i++){
-		//std::cout<<"Total triangle: "<<m_Attribute.m_iTriangleCount<< ": " << i <<std::endl;
-		//std::cout<<m_Attribute.m_Trianglelist[i].m_V3[0]<<std::endl;
-		//m_Attribute.m_Trianglelist[i].m_V1.Print();
 		float _i = Triangle::getSurfaceIntersect(
 				m_Attribute.m_Vertexlist[m_Attribute.m_Trianglelist[i].m_V1[0]-1],
 				m_Attribute.m_Vertexlist[m_Attribute.m_Trianglelist[i].m_V2[0]-1],
@@ -91,8 +91,6 @@ Attr_Intersection* MeshObject::isIntersect(const Line& _l){
 		return NULL;
 	}
 	else{
-		//..std::cout<<"Intersect"<<std::endl;
-        //_ret_bary.Print();
 		Attr_Intersection* ret = new Attr_Intersection();
 		ret->m_IntersectionPoint = (m_invTransform) * _l.getPoint(t);
 		ret->m_Material = this->m_Attribute.m_ObjectMaterial;

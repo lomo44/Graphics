@@ -51,8 +51,6 @@ void RayTracer::ExpandRayTracingTree(){
 			Attr_Intersection* intsec = CalculateIntersection(tempray->m_RayLine);
 			if(intsec!=NULL){
                 inte++;
-                std::cout<<"Intersect"<<std::endl;
-                //intsec->m_Normal.Print();
                 tempray->m_pIntersectionProperties = intsec;
 				Ray* reflectray = tempray->reflect(intsec->m_Normal);
 				Ray* refractray = tempray->refract(intsec->m_Normal,NULL);
@@ -61,30 +59,23 @@ void RayTracer::ExpandRayTracingTree(){
 				if(refractray!=NULL)
 					m_RayBuffer.push(refractray);
                 tempray->m_isDone = true;
-                tempray->m_color[0]= 1.0;
-                tempray->m_color[1]= 1.0;
-                tempray->m_color[2]= 1.0;
                 m_ShadingBuffer.push(tempray);
 			}
 			else{
 				/* TODO Need to map the done ray into the environment
 				 * */
-                //std::cout<<"ray done" <<std::endl;
 				tempray->m_isDone = true;
-                tempray->m_color[0]= 0.0;
-                tempray->m_color[1]= 0.0;
-                tempray->m_color[2]= 0.0;
 				m_ShadingBuffer.push(tempray);
 			}
 		}
-		std::cout<<"Current Ray Remain: "<<m_RayBuffer.size()<<'\r';
+		std::cout<<"\rCurrent Ray Remain: "<<m_RayBuffer.size();
 	}
 	std::cout<<"Expanding Complete, Number Of Ray Intersects: "<<inte<<std::endl;
 }
 
 Attr_Intersection* RayTracer::CalculateIntersection(const Line& _l){
 	Attr_Intersection* _intersection = NULL;
-	double t = std::numeric_limits<double>::max();
+	double t = std::numeric_limits<float>::max();
 	for(unsigned int i = 0; i < m_ObjectList.size();i++){
 		Attr_Intersection* temp = m_ObjectList[i]->isIntersect(_l);
 		if(temp!=NULL){
@@ -119,16 +110,10 @@ void RayTracer::InitializeRayList(){
 			Vector4f _dir (imagePlane[0],imagePlane[1],imagePlane[2]);
 			Vector4f dir = this->m_ViewToWorld * _dir;
 			origin = this->m_ViewToWorld * origin;;
-			// TODO: Convert ray to world space and call
-			// shadeRay(ray) to generate pixel colour.
-            //m_ViewToWorld.print();
 			Line newrayline;
 			newrayline.m_Direction = dir;
 			newrayline.m_StartPoint = origin;
-            //dir.Print();
-            //origin.Print();
 			Ray* newray = new Ray(NULL,newrayline,this->m_pRenderAttribute->m_iAntiAliasingScale);
-			newray->m_iID = i * _width + j;
 			m_RayBuffer.push(newray);
 			m_RayList.push_back(newray);
 		}
@@ -214,7 +199,6 @@ void RayTracer::ExtractRayListToPixelBuffer(){
 	float R = 0.0;
 	float G = 0.0;
 	float B = 0.0;
-    std::cout<<m_RayList.size()<<std::endl;
 	for(unsigned int i = 0; i < m_RayList.size();i++){
 		anti_aliasing_counter++;
 		R += m_RayList[i]->m_color[0];
