@@ -8,12 +8,15 @@
 #ifndef BOUNDINGBOX_H_
 #define BOUNDINGBOX_H_
 #include "Vector.h"
+#include "RenderObject.h"
+#include "Attribute.h"
 class Line;
 class Face;
-class BoundingBox {
+class BoundingBox : public RenderObject{
 public:
 	BoundingBox(const Vector4f& _MaxXYZ, const Vector4f& _MinXYZ);
     bool checkIntersect(const Line& _l);
+    Attr_Intersection* isIntersect(const Line& _l);
     inline static int isNotin2DPlane(float x_max, float x_min, 
         float y_max, float y_min, float px,
     float py){

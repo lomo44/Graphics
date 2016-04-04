@@ -217,8 +217,8 @@ void RayTracer::ExtractRayListToPixelBuffer(){
 			G = G / anti_aliasing_limit * 255;
 			B = B / anti_aliasing_limit * 255;
             if(R!=0 && G != 0 && B != 0)
-            std::cout<<int(R)<<" "<<int(G)<<" "<<int(B)<<std::endl;
-            int ID = m_RayList[i]->m_iID;
+            //std::cout<<int(R)<<" "<<int(G)<<" "<<int(B)<<std::endl;
+            //int ID = m_RayList[i]->m_iID;
             // TODO: Bug here
 			m_pPixelBuffer->m_Rbuffer[pixel_counter] = int(R);
 			m_pPixelBuffer->m_Gbuffer[pixel_counter] = int(G);

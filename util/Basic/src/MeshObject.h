@@ -25,10 +25,11 @@ class Triangle;
 class Line;
 class MeshObject : public RenderObject{
 public:
-    MeshObject(Attr_MeshObject _attr);
+    MeshObject(Attr_MeshObject& _attr);
     ~MeshObject();
     void print();
     void changeMaterial(Attr_Material* _m);
+    MeshObject* clone();
     Attr_Intersection* isIntersect(const Line& _l);
 private:
     Attr_MeshObject m_Attribute;

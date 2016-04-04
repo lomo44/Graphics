@@ -10,7 +10,7 @@
 
 #include "Matrix.h"
 #include "Attribute.h"
-#include "BoundingBox.h"
+class BoundingBox;
 class RenderObject {
 public:
 	RenderObject(){;}

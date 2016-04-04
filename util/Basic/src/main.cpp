@@ -27,34 +27,38 @@ int main(int argc, char** argv) {
     //fin.Print();
     //std::cout<<fin<<std::endl;
     OBJParser* newparser  = new OBJParser();
-    newparser->parsefile("/home/john/Code/Graphics/model/bullet.obj");
+    //newparser->parsefile("/home/john/Code/Graphics/model/bullet.obj");
+    newparser->parsefile("/homes/l/lizhuan1/NetBeansProjects/Graphics/model/chair.obj");
     MeshObject* out = newparser->getOutputObject();
     //out->print();
     Attr_Material* gold = new Attr_Material("gold",Vector4f(0.3,0.3,0.3),
     		Vector4f(0.75164, 0.60648, 0.22648),Vector4f(0.628281, 0.555802, 0.366065),51.2,
     		0,eMaterialType_opague);
     out->changeMaterial(gold);
+    
     Attr_Lighting l1;
     l1.m_AmbientColor = Vector4f(0.9,0.9,0.9);
     l1.m_DefuseColor = Vector4f(0.9,0.9,0.9);
     l1.m_SpecularColor = Vector4f(0.9,0.9,0.9);
     l1.m_LightPosition = Vector4f(0,10,0,1);
     PointLight* newlight = new PointLight(l1);
+    
+    out->rotate(eRotationalX,90);
     RayTracer newtracer;
     newtracer.addLight(newlight);
     newtracer.addObject(out);
     Attr_Render* render = new Attr_Render();
     Attr_ViewFrustrum* view = new Attr_ViewFrustrum();
     view->m_ViewDirection = Vector4f(-1,-1,-1);
-    view->m_ViewPoint = Vector4f(15,15,15,1);
+    view->m_ViewPoint = Vector4f(5,5,5,1);
     view->m_ViewUpDirection = Vector4f(0,1,0);
     view->m_fFieldOfView = 60;
     render->m_ViewFrustrum = view;
     render->m_iAntiAliasingScale = 1;
     render->m_iRayTracingDepth = 1;
-    render->m_iScreenHeight = 1024;
-    render->m_iScreenWidth = 768;
-    render->m_sFileName = "/home/john/Code/Graphics/model/view2.bmp";
+    render->m_iScreenHeight = 300;
+    render->m_iScreenWidth = 400;
+    render->m_sFileName = "view3.bmp";
     newtracer.render(render);
     return 0;
 }

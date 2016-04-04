@@ -9,7 +9,7 @@
 #include "BoundingBox.h"
 #include <limits>
 #include <cmath>
-MeshObject::MeshObject(Attr_MeshObject _attr){
+MeshObject::MeshObject(Attr_MeshObject& _attr){
 	m_Attribute = _attr;
     Vector4f MaxXYZ = Vector4f(std::numeric_limits<float>::min(),
             std::numeric_limits<float>::min()
@@ -59,9 +59,9 @@ Attr_Intersection* MeshObject::isIntersect(const Line& _l){
 
 	
 	Line temp = _l;
-	temp.m_Direction =   m_Transform * temp.m_Direction;
-	temp.m_StartPoint =  m_Transform * temp.m_StartPoint;
-        if(!this->m_BoundingBox->checkIntersect(temp))
+	temp.m_Direction =   m_invTransform * _l.m_Direction;
+	temp.m_StartPoint =  m_invTransform * _l.m_StartPoint;
+        if(!this->m_BoundingBox->isIntersect(_l))
 		return NULL;
 	float t = std::numeric_limits<float>::max();
 	int triangle_index = -1;
@@ -105,4 +105,10 @@ Attr_Intersection* MeshObject::isIntersect(const Line& _l){
 		ret->m_distance = t;
 		return ret;
 	}
+}
+
+MeshObject* MeshObject::clone(){
+    MeshObject* newmesh = new MeshObject(this->m_Attribute);
+    newmesh->m_Transform = this->m_Transform;
+    newmesh->m_invTransform = this->m_invTransform;
 }
