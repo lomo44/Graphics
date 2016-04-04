@@ -121,6 +121,7 @@ void RayTracer::InitializeRayList(){
 			newrayline.m_Direction = dir;
 			newrayline.m_StartPoint = origin;
 			Ray* newray = new Ray(NULL,newrayline,this->m_pRenderAttribute->m_iAntiAliasingScale);
+            newray->m_iID = i*_height + j;
 			m_RayBuffer.push(newray);
 			m_RayList.push_back(newray);
 		}
@@ -152,7 +153,7 @@ void RayTracer::FlushPixelBuffer(){
 			m_pPixelBuffer->m_iWidth,m_pPixelBuffer->m_iHeight,
 			m_pPixelBuffer->m_Rbuffer,
 			m_pPixelBuffer->m_Gbuffer,
-			m_pPixelBuffer->m_Rbuffer);
+			m_pPixelBuffer->m_Bbuffer);
 }
 
 void RayTracer::InitializeViewToWorldMatrix(){
@@ -216,7 +217,8 @@ void RayTracer::ExtractRayListToPixelBuffer(){
 			G = G / anti_aliasing_limit * 255;
 			B = B / anti_aliasing_limit * 255;
             if(R!=0 && G != 0 && B != 0)
-            std::cout<<R<<" "<<G<<" "<<B<<std::endl;
+            std::cout<<int(R)<<" "<<int(G)<<" "<<int(B)<<std::endl;
+            int ID = m_RayList[i]->m_iID;
             // TODO: Bug here
 			m_pPixelBuffer->m_Rbuffer[pixel_counter] = int(R);
 			m_pPixelBuffer->m_Gbuffer[pixel_counter] = int(G);
