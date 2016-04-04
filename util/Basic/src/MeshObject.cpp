@@ -56,12 +56,13 @@ void MeshObject::changeMaterial(Attr_Material* _m){
 
 Attr_Intersection* MeshObject::isIntersect(const Line& _l){
 	//std::cout<<"Check Intersection MeshObject"<<std::endl;
-
-	
+        _l.m_StartPoint.Print();
 	Line temp = _l;
-	temp.m_Direction =   m_invTransform * _l.m_Direction;
-	temp.m_StartPoint =  m_invTransform * _l.m_StartPoint;
-        if(!this->m_BoundingBox->isIntersect(_l))
+        m_Transform.print();
+	temp.m_Direction =   m_Transform * _l.m_Direction;
+	temp.m_StartPoint =  m_Transform * _l.m_StartPoint;
+        //m_Transform.print();
+        if(!this->m_BoundingBox->isIntersect(temp))
 		return NULL;
 	float t = std::numeric_limits<float>::max();
 	int triangle_index = -1;
@@ -70,13 +71,13 @@ Attr_Intersection* MeshObject::isIntersect(const Line& _l){
 		float _i = Triangle::getSurfaceIntersect(
 				m_Attribute.m_Vertexlist[m_Attribute.m_Trianglelist[i].m_V1[0]-1],
 				m_Attribute.m_Vertexlist[m_Attribute.m_Trianglelist[i].m_V2[0]-1],
-				m_Attribute.m_Vertexlist[m_Attribute.m_Trianglelist[i].m_V3[0]-1],_l);
+				m_Attribute.m_Vertexlist[m_Attribute.m_Trianglelist[i].m_V3[0]-1],temp);
         //std::cout<<_i<<std::endl;
 		if(!(_i< 0)){
 			Vector4f _bary = Triangle::toBaryCentric(
 					m_Attribute.m_Vertexlist[m_Attribute.m_Trianglelist[i].m_V1[0]-1],
 					m_Attribute.m_Vertexlist[m_Attribute.m_Trianglelist[i].m_V2[0]-1],
-					m_Attribute.m_Vertexlist[m_Attribute.m_Trianglelist[i].m_V3[0]-1],_l.getPoint(_i));
+					m_Attribute.m_Vertexlist[m_Attribute.m_Trianglelist[i].m_V3[0]-1],temp.getPoint(_i));
             //_bary.Print();
 			if(Triangle::isIntersect(_bary)){
 				if(_i < t){
@@ -93,7 +94,7 @@ Attr_Intersection* MeshObject::isIntersect(const Line& _l){
 	}
 	else{
 		Attr_Intersection* ret = new Attr_Intersection();
-		ret->m_IntersectionPoint = (m_invTransform) * _l.getPoint(t);
+		ret->m_IntersectionPoint = (m_invTransform) * temp.getPoint(t);
 		ret->m_Material = this->m_Attribute.m_ObjectMaterial;
 		Vector4f norm = Triangle::Interpolate_Barycentric(
 				m_Attribute.m_Normallist[m_Attribute.m_Trianglelist[triangle_index].m_V1[2]-1],
@@ -101,7 +102,7 @@ Attr_Intersection* MeshObject::isIntersect(const Line& _l){
 				m_Attribute.m_Normallist[m_Attribute.m_Trianglelist[triangle_index].m_V3[2]-1],_ret_bary);
 		ret->m_Normal = (m_invTransform.Transpose()) * norm;
 		ret->m_Normal.Normalize();
-		ret->m_fIntersectionAngle = acos(ret->m_Normal.dot(_l.m_Direction));
+		ret->m_fIntersectionAngle = acos(ret->m_Normal.dot(temp.m_Direction));
 		ret->m_distance = t;
 		return ret;
 	}

@@ -24,6 +24,11 @@
 using namespace std;
 
 int main(int argc, char** argv) {
+    /*Vector4f tempv(0,0,1);
+    Matrix4f temp;
+    temp.Rotate(eRotationalX,90);
+    temp.print();
+    temp.Transpose().print();*/
     //fin.Print();
     //std::cout<<fin<<std::endl;
     OBJParser* newparser  = new OBJParser();

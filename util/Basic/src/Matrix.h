@@ -39,10 +39,10 @@ public:
 			_t = rhs.getType();
             memcpy(f,rhs.f,sizeof(T)*(16));
         }
-    Matrix4(T* _t){
-        f = _t;
-        this->_t = eUnknown;
-    }
+        Matrix4(T* _t){
+            f = _t;
+            this->_t = eUnknown;
+        }
 	~Matrix4(){
             delete f;
         }
@@ -96,26 +96,26 @@ public:
 	void Rotate(eTransformType _t, T degree){
 		Matrix4<T> newm;
 		newm.loadRotational(_t,degree);
-		*this *= newm;
+		*this = newm * *this;
 	}
 	void Transform(T x, T y, T z){
 		Matrix4<T> newm;
 		newm.loadTranslational(x,y,z);
-		*this *= newm;
+		*this = newm * *this;
 	}
 	void Scale(T x, T y, T z){
 		Matrix4<T> newm;
 		newm.loadScaling(x,y,z);
-		*this *= newm;
+		*this = newm * *this;
 	}
 	Matrix4<T> Transpose(){
 		Matrix4<T> ret = *this;
-		std::swap(f[1],f[4]);
-		std::swap(f[2],f[8]);
-		std::swap(f[6],f[9]);
-		std::swap(f[3],f[12]);
-		std::swap(f[7],f[13]);
-		std::swap(f[11],f[14]);
+		std::swap(ret[1],ret[4]);
+		std::swap(ret[2],ret[8]);
+		std::swap(ret[6],ret[9]);
+		std::swap(ret[3],ret[12]);
+		std::swap(ret[7],ret[13]);
+		std::swap(ret[11],ret[14]);
 		return ret;
 	}
 	Vector4<T> getColumn(int i) const{
