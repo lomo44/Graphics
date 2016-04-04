@@ -57,11 +57,12 @@ void MeshObject::changeMaterial(Attr_Material* _m){
 Attr_Intersection* MeshObject::isIntersect(const Line& _l){
 	//std::cout<<"Check Intersection MeshObject"<<std::endl;
 
-	if(!this->m_BoundingBox->checkIntersect(_l))
-		return NULL;
+	
 	Line temp = _l;
 	temp.m_Direction =   m_Transform * temp.m_Direction;
 	temp.m_StartPoint =  m_Transform * temp.m_StartPoint;
+        if(!this->m_BoundingBox->checkIntersect(temp))
+		return NULL;
 	float t = std::numeric_limits<float>::max();
 	int triangle_index = -1;
 	Vector4f _ret_bary;
