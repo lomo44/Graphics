@@ -53,10 +53,15 @@ bool BoundingBox::checkIntersect(const Line& _l){
         Vector4f p5 = _l.getPoint(t5);
         Vector4f p6 = _l.getPoint(t6); 
         i *= BoundingBox::isNotin2DPlane(m_MaxXYZ[0],m_MinXYZ[0],m_MaxXYZ[2],m_MinXYZ[2],p1[0],p1[2]);
+        if(i == 0) return true;
         i *= BoundingBox::isNotin2DPlane(m_MaxXYZ[0],m_MinXYZ[0],m_MaxXYZ[2],m_MinXYZ[2],p2[0],p2[2]);
+        if(i == 0) return true;
         i *= BoundingBox::isNotin2DPlane(m_MaxXYZ[1],m_MinXYZ[1],m_MaxXYZ[2],m_MinXYZ[2],p3[1],p3[2]);
+        if(i == 0) return true;
         i *= BoundingBox::isNotin2DPlane(m_MaxXYZ[1],m_MinXYZ[1],m_MaxXYZ[2],m_MinXYZ[2],p4[1],p4[2]);
+        if(i == 0) return true;
         i *= BoundingBox::isNotin2DPlane(m_MaxXYZ[0],m_MinXYZ[0],m_MaxXYZ[1],m_MinXYZ[1],p5[0],p5[1]);
+        if(i == 0) return true;
         i *= BoundingBox::isNotin2DPlane(m_MaxXYZ[0],m_MinXYZ[0],m_MaxXYZ[1],m_MinXYZ[1],p6[0],p6[1]);
         if(i==1){
             return false;

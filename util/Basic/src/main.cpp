@@ -27,7 +27,7 @@ int main(int argc, char** argv) {
     //fin.Print();
     //std::cout<<fin<<std::endl;
     OBJParser* newparser  = new OBJParser();
-    newparser->parsefile("/homes/l/lizhuan1/NetBeansProjects/Graphics/model/man.obj");
+    newparser->parsefile("/home/john/Code/Graphics/model/chair.obj");
     MeshObject* out = newparser->getOutputObject();
     //out->print();
     Attr_Material* gold = new Attr_Material("gold",Vector4f(0.3,0.3,0.3),
@@ -46,14 +46,14 @@ int main(int argc, char** argv) {
     Attr_Render* render = new Attr_Render();
     Attr_ViewFrustrum* view = new Attr_ViewFrustrum();
     view->m_ViewDirection = Vector4f(-1,-1,-1);
-    view->m_ViewPoint = Vector4f(40,40,40,1);
+    view->m_ViewPoint = Vector4f(4,4,4,1);
     view->m_ViewUpDirection = Vector4f(0,1,0);
     view->m_fFieldOfView = 60;
     render->m_ViewFrustrum = view;
     render->m_iAntiAliasingScale = 1;
     render->m_iRayTracingDepth = 1;
-    render->m_iScreenHeight = 800;
-    render->m_iScreenWidth = 800;
+    render->m_iScreenHeight = 100;
+    render->m_iScreenWidth = 100;
     render->m_sFileName = "view2.bmp";
     newtracer.render(render);
     return 0;

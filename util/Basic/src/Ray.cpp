@@ -12,9 +12,9 @@ Ray::Ray(Ray* _prior,Line _line, int _time) {
 	// TODO Auto-generated constructor stub
 	this->m_RayLine = _line;
 	m_iRecursiveTime = _time;
-	m_color[0] = 1;
-	m_color[1] = 1;
-	m_color[2] = 1;
+	m_color[0] = 0;
+	m_color[1] = 0;
+	m_color[2] = 0;
 	m_color[3] = 1;
 	this->m_isDone = false;
 	this->m_pPriorRay = _prior;
