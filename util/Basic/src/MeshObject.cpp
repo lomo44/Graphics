@@ -71,7 +71,7 @@ Attr_Intersection* MeshObject::isIntersect(const Line& _l){
 				m_Attribute.m_Vertexlist[m_Attribute.m_Trianglelist[i].m_V2[0]-1],
 				m_Attribute.m_Vertexlist[m_Attribute.m_Trianglelist[i].m_V3[0]-1],_l);
         //std::cout<<_i<<std::endl;
-		if(!(i< 0)){
+		if(!(_i< 0)){
 			Vector4f _bary = Triangle::toBaryCentric(
 					m_Attribute.m_Vertexlist[m_Attribute.m_Trianglelist[i].m_V1[0]-1],
 					m_Attribute.m_Vertexlist[m_Attribute.m_Trianglelist[i].m_V2[0]-1],

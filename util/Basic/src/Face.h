@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <limits>
 #ifndef FACE_H
 #define FACE_H
 
@@ -55,19 +56,20 @@ public:
         ret[2] = C.magnitude()/area2;
         return ret;
     }
-    inline static float getSurfaceIntersect(const Vector4f& _a,
+    inline static double getSurfaceIntersect(const Vector4f& _a,
     		const Vector4f& _b, const Vector4f& _c,
     		const Line& L){
     	Vector4f v0 = _b-_a;
     	Vector4f v1 = _c-_a;
     	Vector4f Norm = v0.cross(v1);
-    	float d = Norm.dot(_a);
-    	float t = (d - Norm.dot(L.m_StartPoint))/Norm.dot(L.m_Direction);
+    	double d = Norm.dot(_a);
+    	double t = (d - Norm.dot(L.m_StartPoint))/Norm.dot(L.m_Direction);
     	return t;
     }
     inline static bool isIntersect(const Vector4f& _barycorrd){
-    	if((_barycorrd[0] < 0) || (_barycorrd[1] < 0) || (_barycorrd[2] < 0) ||
-    			(_barycorrd[0] + _barycorrd[1]  > 1)){
+    	if((_barycorrd[0] < 0.0) || (_barycorrd[1] < 0.0) || (_barycorrd[2] < 0.0) ||
+    			std::fabs(_barycorrd[0] + _barycorrd[1] + _barycorrd[2]- 1.0) >
+                0.0001){
     		return false;
     	}
     	else{
@@ -78,7 +80,7 @@ public:
     		const Vector4f& _b, const Vector4f& _c,
     		const Vector4f& _barry){
         //std::cout<<"wow"<<std::endl;
-        Vector4f ret = _c * _barry[0] + _b * _barry[1] + _a * _barry[2];
+        Vector4f ret = _a * _barry[0] + _b * _barry[1] + _c * _barry[2];
         ret.Normalize();
     	return ret;
         //std::cout<<"wow"<<std::endl;

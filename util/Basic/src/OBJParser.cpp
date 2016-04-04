@@ -61,18 +61,22 @@ void OBJParser::parsefile(std::string filepath){
                     }
                 }else if(buffer == "f"){
                     //std::cout<<"Face added: " ;
-                    ss>>buffer;
                     std::vector<Vector4i> _list;
-                    for(int i = 0 ; !ss.eof();i++){
+                    std::vector<std::string> string_list;
+                    while(ss>>buffer){
+                        string_list.push_back(buffer);
+                    }
+                    for(int i = 0 ; i<string_list.size();i++){
+                        buffer = string_list[i];
                     	int startp = 0;
                     	int numofslash = 0;
                     	Vector4i v;
                     	for(int j = 0;buffer[j]!='\0';j++){
                     		if(buffer[j] == '/'||buffer[j+1]=='\0'){
                     			int length = j-startp;
+                                        if(buffer[j+1] == '\0')
+                    			length++;
                     			if(length != 0){
-                    				if(buffer[j+1] == '\0')
-                    					length++;
                     				char temp[100];
                     				strncpy(temp,&buffer[startp],length);
                     				temp[length] = '\0';
@@ -82,10 +86,13 @@ void OBJParser::parsefile(std::string filepath){
                     			numofslash++;
                     			startp = j+1;
                     		}
-                    	}
-                        ss>>buffer;
+                    	}   
                         _list.push_back(v);
                     }
+                    for(unsigned i = 0; i < _list.size(); i++){
+                           _list[i].Print();
+                     }
+                    std::cout<<std::endl;
                     if(_list.size() == 3){
                     	Triangle f1;
                     	f1.m_V1 = _list[0];
@@ -94,11 +101,8 @@ void OBJParser::parsefile(std::string filepath){
                     	f1.m_iShadingGroup = this->m_CurrentShadingNum;
                     	m_Fbuffer.push_back(f1);
                     }
-                    if(_list.size() == 4){
-                        for(unsigned i = 0; i < 4; i++){
-                            _list[i].Print();
-                        }
-                        std::cout<<std::endl;
+                    else if(_list.size() == 4){
+
                     	Triangle f1;
                     	Triangle f2;
                     	f1.m_V1 = _list[0];
