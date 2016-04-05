@@ -27,10 +27,10 @@ void PointLight::shade(Ray& _ray){
         Vector4f raydir = -_ray.m_RayLine.m_Direction;
         raydir.Normalize();
         raydir[3] = 0;
-        Vector4f ref = 2 * sec2light.dot(_ray.m_pIntersectionProperties->m_Normal) * 
-                _ray.m_pIntersectionProperties->m_Normal - sec2light;
+        Vector4f ref = 2 * sec2light.dot(_ray.m_pIntersectionProperties->m_InterpolatedNormal) * 
+                _ray.m_pIntersectionProperties->m_InterpolatedNormal - sec2light;
         float specular = std::pow(std::max(0.0,(double)ref.dot(raydir)),_ray.m_pIntersectionProperties->m_Material->m_fSpecularWeight);
-        float diffuse = std::max(0.0,(double)sec2light.dot(_ray.m_pIntersectionProperties->m_Normal));
+        float diffuse = std::max(0.0,(double)sec2light.dot(_ray.m_pIntersectionProperties->m_InterpolatedNormal));
         Ired = _ray.m_pIntersectionProperties->m_Material->m_AmbientColor[0]*this->m_LightingAttribute.m_AmbientColor[0]+
                 _ray.m_pIntersectionProperties->m_Material->m_DefuseColor[0]*diffuse*this->m_LightingAttribute.m_DefuseColor[0]+
                 _ray.m_pIntersectionProperties->m_Material->m_SpecularColor[0]*specular*this->m_LightingAttribute.m_SpecularColor[0];
@@ -40,18 +40,26 @@ void PointLight::shade(Ray& _ray){
         Iblue = _ray.m_pIntersectionProperties->m_Material->m_AmbientColor[2]*this->m_LightingAttribute.m_AmbientColor[2]+
                 _ray.m_pIntersectionProperties->m_Material->m_DefuseColor[2]*diffuse*this->m_LightingAttribute.m_DefuseColor[2]+
                 _ray.m_pIntersectionProperties->m_Material->m_SpecularColor[2]*specular*this->m_LightingAttribute.m_SpecularColor[2];
-        _ray.m_color[0] += Ired;
-        _ray.m_color[1] += Igreen;
-        _ray.m_color[2] += Iblue;
+        _ray.m_color[0] *= Ired;
+        _ray.m_color[1] *= Igreen;
+        _ray.m_color[2] *= Iblue;
         if(_ray.m_color[0]>1) _ray.m_color[0] = 1;
         if(_ray.m_color[1]>1) _ray.m_color[1] = 1;
         if(_ray.m_color[2]>1) _ray.m_color[2] = 1;
         _ray.m_isDone = true;
     }
     else{
-        _ray.m_color[0] = 0;
-        _ray.m_color[1] = 0;
-        _ray.m_color[2] = 0;
+        if(_ray.m_iID==-1){
+            _ray.m_color[0] = 1;
+            _ray.m_color[1] = 1;
+            _ray.m_color[2] = 1;
+        }
+        else{
+            _ray.m_color[0] = 0;
+            _ray.m_color[1] = 0;
+            _ray.m_color[2] = 0;
+        }
+        
         _ray.m_isDone = true;
     }
 		/*Vector4f light_direction = this->m_LightingAttribute.m_LightPosition-

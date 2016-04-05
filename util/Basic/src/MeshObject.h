@@ -27,7 +27,7 @@ class MeshObject : public RenderObject{
 public:
     MeshObject(Attr_MeshObject& _attr);
     ~MeshObject();
-    void print();
+    void printMeshObjectInfo();
     void changeMaterial(Attr_Material* _m);
     MeshObject* clone();
     Attr_Intersection* isIntersect(const Line& _l);

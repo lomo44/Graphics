@@ -19,6 +19,7 @@ public:
 	 * */
 	void rotate(eTransformType _rotate, float degree){
 		m_Transform.Rotate(_rotate,degree);
+        std::cout<<"w"<<std::endl;
 		m_invTransform.Rotate(_rotate,-degree);
 	}
 	void transform(float x, float y, float z){

@@ -30,8 +30,11 @@ void RayTracer::render(Attr_Render* _renderAttribute){
 			_renderAttribute->m_iScreenHeight);
 	InitializeViewToWorldMatrix();
 	InitializeRayList();
-	ExpandRayTracingTree();
-	ShadingRay();
+    for(;m_RayBuffer.size()!=0;){
+        std::cout<<"expanding"<<std::endl;
+        ExpandRayTracingTree();
+        ShadingRay();
+    }   
 	CollapseRayTracingTree();
 	ExtractRayListToPixelBuffer();
 	FlushPixelBuffer();
@@ -43,39 +46,27 @@ void RayTracer::ExpandRayTracingTree(){
 	for(;m_RayBuffer.size()!=0;){
 		Ray* tempray = m_RayBuffer.front();
 		m_RayBuffer.pop();
-		if(tempray->checkDone()){
-			m_ShadingBuffer.push(tempray);
+        //std::cout<<"check ray"<<std::endl;
+        Attr_Intersection* intsec = CalculateIntersection(tempray->m_RayLine);
+        if(intsec!=NULL){
+            if(tempray->m_iID == -1){
+                std::cout<<"dealing reflect"<<std::endl;
+            }
+            tempray->m_color[0] = 1.0;
+            tempray->m_color[1] = 1.0;
+            tempray->m_color[2] = 1.0;
+            inte++;
+            tempray->m_pIntersectionProperties = intsec;
+            Ray* reflectray = tempray->reflect(intsec->m_PlanarNormal);
+            Ray* refractray = tempray->refract(intsec->m_PlanarNormal,NULL);
+            if(reflectray!=NULL)
+                m_RayBuffer.push(reflectray);
+            if(refractray!=NULL)
+                m_RayBuffer.push(refractray);
 		}
-		else{
-            //std::cout<<"check ray"<<std::endl;
-			Attr_Intersection* intsec = CalculateIntersection(tempray->m_RayLine);
-                if(intsec!=NULL){
-                inte++;
-                tempray->m_pIntersectionProperties = intsec;
-				Ray* reflectray = tempray->reflect(intsec->m_Normal);
-				Ray* refractray = tempray->refract(intsec->m_Normal,NULL);
-				if(reflectray!=NULL)
-					m_RayBuffer.push(reflectray);
-				if(refractray!=NULL)
-					m_RayBuffer.push(refractray);
-                tempray->m_isDone = true;
-                m_ShadingBuffer.push(tempray);
-                /*tempray->m_color[0] = 1.0;
-                tempray->m_color[1] = 1.0;
-                tempray->m_color[2] = 1.0;*/
-
-                }
-			else{
-				/* TODO Need to map the done ray into the environment
-				 * */
-				tempray->m_isDone = true;
-				m_ShadingBuffer.push(tempray);
-                                                /*tempray->m_color[0] = 0.0;
-                tempray->m_color[1] = 0.0;
-                tempray->m_color[2] = 0.0;*/
-			}
-		}
-		std::cout<<"\rCurrent Ray Remain: "<<m_RayBuffer.size();
+        tempray->m_isDone = true;
+        m_ShadingBuffer.push(tempray);
+		//std::cout<<"\rCurrent Ray Remain: "<<m_RayBuffer.size();
 	}
 	std::cout<<"Expanding Complete, Number Of Ray Intersects: "<<inte<<std::endl;
 }
@@ -120,7 +111,7 @@ void RayTracer::InitializeRayList(){
 			Line newrayline;
 			newrayline.m_Direction = dir;
 			newrayline.m_StartPoint = origin;
-			Ray* newray = new Ray(NULL,newrayline,this->m_pRenderAttribute->m_iAntiAliasingScale);
+			Ray* newray = new Ray(NULL,newrayline,this->m_pRenderAttribute->m_iRayTracingDepth);
             newray->m_iID = i*_height + j;
 			m_RayBuffer.push(newray);
 			m_RayList.push_back(newray);
@@ -187,7 +178,6 @@ void RayTracer::ShadingRay(){
 		for(unsigned int i = 0; i< m_LightList.size();i++){
 			m_LightList[i]->shade(*topray);
 		}
-		m_RayBuffer.push(topray);
 	}
 }
 

@@ -37,7 +37,7 @@ public:
 	Matrix4(const Matrix4<T>& rhs){
 			f = new T[16];
 			_t = rhs.getType();
-            memcpy(f,rhs.f,sizeof(T)*(16));
+            memcpy(&f[0],&rhs.f[0],sizeof(T)*16);
         }
         Matrix4(T* _t){
             f = _t;
@@ -55,7 +55,7 @@ public:
                     f[10] = std::cos(angle);
             }
             else if(_type == eRotationalY){
-                    f[1] = std::cos(angle);
+                    f[0] = std::cos(angle);
                     f[2] = std::sin(angle);
                     f[8] = -std::sin(angle);
                     f[10] = std::cos(angle);
@@ -96,7 +96,8 @@ public:
 	void Rotate(eTransformType _t, T degree){
 		Matrix4<T> newm;
 		newm.loadRotational(_t,degree);
-		*this = newm * *this;
+		*this = newm * (*this);
+        //this->print();
 	}
 	void Transform(T x, T y, T z){
 		Matrix4<T> newm;
@@ -157,7 +158,7 @@ public:
             }
             return _ret;
         }
-	Matrix4<T>&  operator*=(Matrix4<T>& rhs){
+	Matrix4<T>&  operator*=(const Matrix4<T>& rhs){
             for(int i = 0;i < 4; i++){
                     for(int j = 0; j < 4; j++){
                             Vector4<T> a = this->getRow(i);
@@ -313,7 +314,7 @@ public:
 
         return true;
     }
-	void print(){
+	void print() const{
 		for(int i = 0; i < 16;i++){
 			std::cout<<f[i]<<",";
 			if(i % 4== 3){
@@ -322,10 +323,15 @@ public:
 		}
 		std::cout<<std::endl;
 	}
-	
+	Matrix4<T>& operator=(const Matrix4<T>& rhs){
+        f = new T[16];
+        memcpy(&f[0],&rhs.f[0],sizeof(T)*16);
+        return *this;
+    }
 private:
-        T* f;
+        
 	eTransformType _t;
+    T* f;
 };
 
 typedef Matrix4<float> Matrix4f;

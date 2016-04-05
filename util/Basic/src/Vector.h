@@ -107,11 +107,26 @@ template<class T> class Vector4{
             ret[3] *= scalar;
             return ret;
         }
+        inline Vector4<T> operator*(const Vector4<T>& vec){
+            Vector4<T> ret = *this;
+            ret[0] *= vec[0];
+            ret[1] *= vec[1];
+            ret[2] *= vec[2];
+            ret[3] *= vec[3];
+            return ret;
+        }
         inline Vector4<T>& operator*=(T scalar){
             *this[0] *= scalar;
             *this[1] *= scalar;
             *this[2] *= scalar;
             *this[3] *= scalar;
+            return *this;
+        }
+        inline Vector4<T>& operator*=(const Vector4<T>& vec){
+            (*this)[0] *= vec[0];
+            (*this)[1] *= vec[1];
+            (*this)[2] *= vec[2];
+            (*this)[3] *= vec[3];
             return *this;
         }
         inline Vector4<T>  operator/ (T scalar) const{

@@ -50,7 +50,8 @@ struct Attr_MeshObject{
 };
 
 struct Attr_Intersection{
-	Vector4f m_Normal;
+	Vector4f m_InterpolatedNormal;
+    Vector4f m_PlanarNormal;
 	Vector4f m_IntersectionPoint;
 	float m_fIntersectionAngle;
 	Attr_Material* m_Material;

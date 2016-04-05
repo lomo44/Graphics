@@ -35,14 +35,14 @@ public:
     Vector4i m_V1;		// coord/texture/normal
     Vector4i m_V2;
     Vector4i m_V3;
-    inline static Vector4f toBaryCentric(const Vector4f& _a,
+    inline static Vector4d toBaryCentric(const Vector4f& _a,
     		const Vector4f& _b, const Vector4f& _c,
     		const Vector4f& _p){
-        Vector4f ret;
+        Vector4d ret;
         Vector4f edge1 = _b - _a;
         Vector4f edge2 = _c - _a;
         Vector4f N = edge1.cross(edge2);
-        float area2 = N.magnitude();
+        double area2 = N.magnitude();
         Vector4f vp0 = _p - _a;
         Vector4f vp1 = _p - _b;
         Vector4f vp2 = _p - _c;
@@ -56,20 +56,28 @@ public:
         ret[2] = C.magnitude()/area2;
         return ret;
     }
-    inline static double getSurfaceIntersect(const Vector4f& _a,
+    inline static float getSurfaceIntersect(const Vector4f& _a,
     		const Vector4f& _b, const Vector4f& _c,
     		const Line& L){
     	Vector4f v0 = _b-_a;
     	Vector4f v1 = _c-_a;
     	Vector4f Norm = v0.cross(v1);
-    	double d = Norm.dot(_a);
-    	double t = (d - Norm.dot(L.m_StartPoint))/Norm.dot(L.m_Direction);
+    	float d = Norm.dot(_a);
+    	float t = (d - Norm.dot(L.m_StartPoint))/Norm.dot(L.m_Direction);
     	return t;
     }
-    inline static bool isIntersect(const Vector4f& _barycorrd){
+    inline static Vector4f getPlanarNormal(const Vector4f& _a,
+    		const Vector4f& _b, const Vector4f& _c){
+        Vector4f v0 = _b-_a;
+    	Vector4f v1 = _c-_a;
+    	Vector4f Norm = v0.cross(v1);
+        Norm.Normalize();
+        return Norm;
+    }
+    inline static bool isIntersect(const Vector4d& _barycorrd){
     	if((_barycorrd[0] < 0.0) || (_barycorrd[1] < 0.0) || (_barycorrd[2] < 0.0) ||
     			std::fabs(_barycorrd[0] + _barycorrd[1] + _barycorrd[2]- 1.0) >
-                0.0001){
+                0.01){
     		return false;
     	}
     	else{
