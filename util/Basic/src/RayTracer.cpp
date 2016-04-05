@@ -49,9 +49,6 @@ void RayTracer::ExpandRayTracingTree(){
         //std::cout<<"check ray"<<std::endl;
         Attr_Intersection* intsec = CalculateIntersection(tempray->m_RayLine);
         if(intsec!=NULL){
-            tempray->m_color[0] = 1.0;
-            tempray->m_color[1] = 1.0;
-            tempray->m_color[2] = 1.0;
             inte++;
             tempray->m_pIntersectionProperties = intsec;
             std::vector<Ray*> reflectray = tempray->reflect(intsec->m_PlanarNormal);

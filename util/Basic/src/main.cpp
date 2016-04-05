@@ -37,17 +37,21 @@ int main(int argc, char** argv) {
     //std::cout<<fin<<std::endl;
     
     OBJParser* newparser  = new OBJParser();
-    newparser->parsefile("/home/john/Code/Graphics/model/chair.obj");
-    //newparser->parsefile("/homes/l/lizhuan1/NetBeansProjects/Graphics/model/chair.obj");
+    //newparser->parsefile("/home/john/Code/Graphics/model/chair.obj");
+    newparser->parsefile("/homes/l/lizhuan1/NetBeansProjects/Graphics/model/chair.obj");
     MeshObject* out = newparser->getOutputObject();
     //out->print();
     Attr_Material* gold = new Attr_Material("gold",Vector4f(0.3,0.3,0.3),
     		Vector4f(0.75164, 0.60648, 0.22648),Vector4f(0.628281, 0.555802, 0.366065),51.2,
     		0,eMaterialType_opague);
+    Attr_Material* gold_glossy = new Attr_Material("gold",Vector4f(0.3,0.3,0.3),
+        Vector4f(0.75164, 0.60648, 0.22648),Vector4f(0.628281, 0.555802, 0.366065),51.2,
+        0,eMaterialType_glossy);
+    gold_glossy->m_iGlossySamepleCount = 20;
     
     Attr_Material* metal = new Attr_Material("metal",Vector4f(0.1,0.1,0.1),
-            Vector4f(0.1529,0.1529,0.1529),Vector4f(0.36,0.36,0.36),20,0,eMaterialType_opague);
-    
+            Vector4f(0.1529,0.1529,0.1529),Vector4f(0.6,0.66,0.6),20,0,eMaterialType_glossy);
+    metal->m_iGlossySamepleCount = 10;
     out->changeMaterial(gold);
     
     Attr_Lighting l1;
@@ -62,7 +66,7 @@ int main(int argc, char** argv) {
     out2->rotate(eRotationalY,90);
     out2->getTransform().print();
     out2->getInvTransform().print();
-    out2->changeMaterial(metal);
+    out2->changeMaterial(gold_glossy);
     RayTracer newtracer;
     newtracer.addLight(newlight);
     newtracer.addObject(out);

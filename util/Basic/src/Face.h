@@ -4,6 +4,7 @@
 #include <string>
 #include <iostream>
 #include <limits>
+#include <assert.h>
 #ifndef FACE_H
 #define FACE_H
 
@@ -71,7 +72,9 @@ public:
         Vector4f v0 = _b-_a;
     	Vector4f v1 = _c-_a;
     	Vector4f Norm = v0.cross(v1);
+        
         Norm.Normalize();
+        assert(Norm[3] == 0);
         return Norm;
     }
     inline static bool isIntersect(const Vector4d& _barycorrd){

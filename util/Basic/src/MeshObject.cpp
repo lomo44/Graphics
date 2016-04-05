@@ -108,8 +108,10 @@ Attr_Intersection* MeshObject::isIntersect(const Line& _l){
         if(norm.dot(norm1) < 0)
             norm1 = -norm1;
 		ret->m_InterpolatedNormal = (m_invTransform.Transpose()) * norm;
+        assert(norm1[3] == 0);
         ret->m_PlanarNormal = (m_invTransform.Transpose()) *norm1;
-		ret->m_fIntersectionAngle = acos(ret->m_InterpolatedNormal.dot(temp.m_Direction));
+        ret->m_PlanarNormal[3] = 0;
+        assert(ret->m_PlanarNormal[3] == 0);
 		ret->m_distance = t;
 		return ret;
 	}

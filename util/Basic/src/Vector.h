@@ -138,10 +138,10 @@ template<class T> class Vector4{
             return ret;
         }
         inline Vector4<T>  operator/= (T scalar) const{
-            *this[0] /= scalar;
-            *this[1] /= scalar;
-            *this[2] /= scalar;
-            *this[3] /= scalar;
+            _t[0] /= scalar;
+            _t[1] /= scalar;
+            _t[2] /= scalar;
+            _t[3] /= scalar;
             return *this;
         }
         inline Vector4<T> cross(const Vector4<T>& rhs){
@@ -168,6 +168,12 @@ template<class T> class Vector4{
         }
         inline void Print() const{
             std::cout<<_t[0]<<"|"<<_t[1]<<"|"<<_t[2]<<"|"<<_t[3]<<"|"<<std::endl;
+        }
+        inline void clamp(T _uplimit){
+            if(_t[0] > _uplimit) _t[0] = _uplimit;
+            if(_t[1] > _uplimit) _t[1] = _uplimit;
+            if(_t[2] > _uplimit) _t[2] = _uplimit;
+            if(_t[3] > _uplimit) _t[3] = _uplimit;
         }
     private:
         T* _t;

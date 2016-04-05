@@ -49,27 +49,35 @@ float Ray::CalculateReflectance(const Vector4f& normal,
 }
 
 std::vector<Ray*>& Ray::reflect(const Vector4f& norm){
+    //norm.Print();
     assert(norm[3]==0);
 	if(m_pIntersectionProperties != NULL && m_iRecursiveTime > 1){
-        float reflectance = Ray::CalculateReflectance(norm,this->m_RayLine.m_Direction,NULL,
-            this->m_pIntersectionProperties->m_Material);
-        Vector4f dir = this->m_RayLine.m_Direction - (norm * 2.0 * 
-                norm.dot(this->m_RayLine.m_Direction));
-        Line ref_dir;
-        ref_dir.m_Direction = dir;
-        ref_dir.m_StartPoint = this->m_pIntersectionProperties->m_IntersectionPoint + (float)0.001 * norm;
-        if(m_pIntersectionProperties->m_Material->m_eMaterialType == eMaterialType_opague){
-            Ray* newray = new Ray(this, ref_dir , this->m_iRecursiveTime-1);
-            newray->m_fLightIntensity = reflectance;
-            newray->m_iID = -1;
-            this->m_pReflectedRayList.push_back(newray); 
-        }
-        else if(m_pIntersectionProperties->m_Material->m_eMaterialType == eMaterialType_glossy){
-            for(unsigned int i = 0; i < m_pIntersectionProperties->m_Material->m_iGlossySamepleCount;
-                    i++){
-                // TODO: add glossy reflection here.
+            float reflectance = Ray::CalculateReflectance(norm,this->m_RayLine.m_Direction,NULL,
+                this->m_pIntersectionProperties->m_Material);
+            Vector4f dir = this->m_RayLine.m_Direction - (norm * 2.0 * 
+                    norm.dot(this->m_RayLine.m_Direction));
+            Line ref_dir;
+            ref_dir.m_Direction = dir;
+            ref_dir.m_StartPoint = this->m_pIntersectionProperties->m_IntersectionPoint + (float)0.001 * norm;
+            if(m_pIntersectionProperties->m_Material->m_eMaterialType == eMaterialType_opague){
+                Ray* newray = new Ray(this, ref_dir , this->m_iRecursiveTime-1);
+                newray->m_fLightIntensity = reflectance;
+                newray->m_iID = -1;
+                this->m_pReflectedRayList.push_back(newray); 
             }
-        }
+            if(m_pIntersectionProperties->m_Material->m_eMaterialType == eMaterialType_glossy){
+                Vector4f horizontal = this->m_RayLine.m_Direction.cross(this->m_pIntersectionProperties->m_PlanarNormal);
+                Vector4f projection = horizontal.cross(this->m_pIntersectionProperties->m_PlanarNormal);
+                for(unsigned int i = 0; i < m_pIntersectionProperties->m_Material->m_iGlossySamepleCount;
+                        i++){
+                    Ray* newray = new Ray(this, ref_dir, this->m_iRecursiveTime-1);
+                    Vector4f newdir = newray->jitter(horizontal,projection,this->m_pIntersectionProperties->m_PlanarNormal,0.6);
+                    newray->m_fLightIntensity = newdir.dot(ref_dir.m_Direction);
+                    newray->m_iID = -1;
+                    this->m_pReflectedRayList.push_back(newray);
+                    // TODO: add glossy reflection here.
+                }
+            }
 	}
     return m_pReflectedRayList;
 }
@@ -114,17 +122,25 @@ Ray* Ray::refract(const Vector4f& norm, Attr_Material* _from){
 
 void Ray::RecursiveCollapse(Ray* ray){   
 	if(ray->hasReflectedRay() || ray->hasRefractedRay()){
-		if(ray->hasReflectedRay()){
-            for(unsigned int i = 0;i < m_pReflectedRayList.size();i++){
-                Ray* tempray = m_pReflectedRayList[i];
-                RecursiveCollapse(tempray);
-                m_color *= tempray->getColor();
+            if(ray->hasReflectedRay()){
+                Vector4f tempcolor;
+                float total_intensity = 0.0;
+                unsigned int numray = m_pReflectedRayList.size();
+                for(unsigned int i = 0;i < m_pReflectedRayList.size();i++){
+                    Ray* tempray = m_pReflectedRayList[i];
+                    RecursiveCollapse(tempray);
+                    tempcolor += tempray->getColor();
+                    total_intensity += tempray->m_fLightIntensity;
+                    delete tempray;
+                }
+                tempcolor /= total_intensity;
+                m_color *= tempcolor;
+                m_color.clamp(1.0);
             }
-		}
-		if(m_pRefractedRay != NULL){
-			RecursiveCollapse(m_pRefractedRay);
-			m_color *= m_pRefractedRay->m_fLightIntensity * m_pRefractedRay->m_color;
-			delete m_pRefractedRay;
-		}
+            if(m_pRefractedRay != NULL){
+                RecursiveCollapse(m_pRefractedRay);
+                m_color *= m_pRefractedRay->m_fLightIntensity * m_pRefractedRay->m_color;
+                delete m_pRefractedRay;
+            }
 	}
 }
