@@ -79,7 +79,7 @@ Ray* Ray::reflect(const Vector4f& norm){
                 norm.dot(this->m_RayLine.m_Direction));
 		Line ref_dir;
 		ref_dir.m_Direction = dir;
-		ref_dir.m_StartPoint = this->m_pIntersectionProperties->m_IntersectionPoint;
+		ref_dir.m_StartPoint = this->m_pIntersectionProperties->m_IntersectionPoint + (float)0.001 * norm;;
 		Ray* newray = new Ray(this, ref_dir , this->m_iRecursiveTime-1);
 		newray->m_fLightIntensity = reflectance;
 		newray->m_iID = -1;
@@ -136,18 +136,7 @@ void Ray::RecursiveCollapse(Ray* ray){
             //std::cout<<ray->m_iID<<std::endl;
             //std::cout<<m_pReflectedRay->m_color[0]<<" "<<m_pReflectedRay->m_color[1]<<" "<<m_pReflectedRay->m_color[2]<<std::endl;
 			RecursiveCollapse(m_pReflectedRay);
-			//m_color *= m_pReflectedRay->m_fLightIntensity * m_pReflectedRay->m_color;
-            if(m_pReflectedRay->hasIntersect()){
-                m_color[0] = 1.0;
-                m_color[1] = 1.0;
-                m_color[2] = 1.0;
-            }
-            else{
-                //std::cout<<"no"<<std::endl;
-                m_color[0] = 0.0;
-                m_color[1] = 0.0;
-                m_color[2] = 1.0;
-            }
+			m_color *= m_pReflectedRay->m_fLightIntensity * m_pReflectedRay->m_color;
 			delete m_pReflectedRay;
 		}
 		if(m_pRefractedRay != NULL){
