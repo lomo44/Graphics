@@ -19,36 +19,15 @@ Ray::Ray(Ray* _prior,Line _line, int _time) {
 	m_color[3] = -1; // will change to 1 if it hit something;
 	this->m_isDone = false;
 	this->m_pPriorRay = _prior;
-	this->m_pReflectedRay = NULL;
 	this->m_pRefractedRay = NULL;
 	this->m_pIntersectionProperties = NULL;
 	this->m_iID = -1;
 	this->m_fLightIntensity = 1.0;
+
 }
 
 Ray::~Ray() {
 	// TODO Auto-generated destructor stub
-}
-
-bool Ray::checkDone(){
-	if(m_isDone){
-		return true;
-	}
-	else{
-		if(m_pReflectedRay!=NULL && !m_pReflectedRay->checkDone()){
-			return false;
-		}
-		else if(m_pRefractedRay!=NULL && !m_pRefractedRay->checkDone()){
-			return false;
-		}
-		else if(this->m_iRecursiveTime>0){
-			return false;
-		}
-		else{
-			m_isDone = true;
-			return true;
-		}
-	}
 }
 float Ray::CalculateReflectance(const Vector4f& normal,
 			const Vector4f& incident, Attr_Material* from, Attr_Material* to){
@@ -69,31 +48,36 @@ float Ray::CalculateReflectance(const Vector4f& normal,
 	return (rorth * rorth + rpar * rpar) / 2;
 }
 
-Ray* Ray::reflect(const Vector4f& norm){
+std::vector<Ray*>& Ray::reflect(const Vector4f& norm){
     assert(norm[3]==0);
 	if(m_pIntersectionProperties != NULL && m_iRecursiveTime > 1){
-        //std::cout<<"reflect"<<std::endl;
-		float reflectance = Ray::CalculateReflectance(norm,this->m_RayLine.m_Direction,NULL,
-				this->m_pIntersectionProperties->m_Material);
-		Vector4f dir = this->m_RayLine.m_Direction - (norm * 2.0 * 
+        float reflectance = Ray::CalculateReflectance(norm,this->m_RayLine.m_Direction,NULL,
+            this->m_pIntersectionProperties->m_Material);
+        Vector4f dir = this->m_RayLine.m_Direction - (norm * 2.0 * 
                 norm.dot(this->m_RayLine.m_Direction));
-		Line ref_dir;
-		ref_dir.m_Direction = dir;
-		ref_dir.m_StartPoint = this->m_pIntersectionProperties->m_IntersectionPoint + (float)0.001 * norm;;
-		Ray* newray = new Ray(this, ref_dir , this->m_iRecursiveTime-1);
-		newray->m_fLightIntensity = reflectance;
-		newray->m_iID = -1;
-		this->m_pReflectedRay = newray;
-		return newray;
+        Line ref_dir;
+        ref_dir.m_Direction = dir;
+        ref_dir.m_StartPoint = this->m_pIntersectionProperties->m_IntersectionPoint + (float)0.001 * norm;
+        if(m_pIntersectionProperties->m_Material->m_eMaterialType == eMaterialType_opague){
+            Ray* newray = new Ray(this, ref_dir , this->m_iRecursiveTime-1);
+            newray->m_fLightIntensity = reflectance;
+            newray->m_iID = -1;
+            this->m_pReflectedRayList.push_back(newray); 
+        }
+        else if(m_pIntersectionProperties->m_Material->m_eMaterialType == eMaterialType_glossy){
+            for(unsigned int i = 0; i < m_pIntersectionProperties->m_Material->m_iGlossySamepleCount;
+                    i++){
+                // TODO: add glossy reflection here.
+            }
+        }
 	}
-	else{
-		m_isDone = true;
-		return NULL;
-	}
+    return m_pReflectedRayList;
 }
 
 Ray* Ray::refract(const Vector4f& norm, Attr_Material* _from){
 	if(m_pIntersectionProperties != NULL && m_iRecursiveTime > 1){
+        if(this->m_pIntersectionProperties->m_Material->m_eMaterialType==eMaterialType_opague)
+			return NULL;
 		float ni = 0.0;
 		float nt = 0.0;
 		if(_from == NULL){
@@ -107,8 +91,6 @@ Ray* Ray::refract(const Vector4f& norm, Attr_Material* _from){
 			ni = m_pIntersectionProperties->m_Material->m_fRefractiveIndex;
 			nt = 1.0;
 		}
-		if(m_pReflectedRay->m_fLightIntensity >= 1.0)
-			return NULL;
 		Vector4f vertical = this->m_pIntersectionProperties->m_InterpolatedNormal.dot(this->m_RayLine.m_Direction) *
 				this->m_pIntersectionProperties->m_InterpolatedNormal;
 		Vector4f horizontal = ni/nt * (this->m_RayLine.m_Direction - vertical);
@@ -131,13 +113,13 @@ Ray* Ray::refract(const Vector4f& norm, Attr_Material* _from){
 }
 
 void Ray::RecursiveCollapse(Ray* ray){   
-	if(ray->m_pReflectedRay != NULL || ray->m_pReflectedRay != NULL){
-		if(m_pReflectedRay != NULL){
-            //std::cout<<ray->m_iID<<std::endl;
-            //std::cout<<m_pReflectedRay->m_color[0]<<" "<<m_pReflectedRay->m_color[1]<<" "<<m_pReflectedRay->m_color[2]<<std::endl;
-			RecursiveCollapse(m_pReflectedRay);
-			m_color *= m_pReflectedRay->m_fLightIntensity * m_pReflectedRay->m_color;
-			delete m_pReflectedRay;
+	if(ray->hasReflectedRay() || ray->hasRefractedRay()){
+		if(ray->hasReflectedRay()){
+            for(unsigned int i = 0;i < m_pReflectedRayList.size();i++){
+                Ray* tempray = m_pReflectedRayList[i];
+                RecursiveCollapse(tempray);
+                m_color *= tempray->getColor();
+            }
 		}
 		if(m_pRefractedRay != NULL){
 			RecursiveCollapse(m_pRefractedRay);

@@ -70,7 +70,7 @@ int main(int argc, char** argv) {
     Attr_Render* render = new Attr_Render();
     Attr_ViewFrustrum* view = new Attr_ViewFrustrum();
     view->m_ViewDirection = Vector4f(-1,-1,-1);
-    view->m_ViewPoint = Vector4f(4,4,4,1);
+    view->m_ViewPoint = Vector4f(3.8,3.8,3.8,1);
     view->m_ViewUpDirection = Vector4f(0,1,0);
     view->m_fFieldOfView = 60;
     render->m_ViewFrustrum = view;

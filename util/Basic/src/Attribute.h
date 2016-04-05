@@ -12,7 +12,8 @@
 
 enum eMaterialType{
 	eMaterialType_opague,
-	eMaterialType_transparent
+	eMaterialType_transparent,
+    eMaterialType_glossy,
 };
 
 struct Attr_Material{
@@ -26,6 +27,7 @@ struct Attr_Material{
 	Vector4f m_SpecularColor;
 	double m_fSpecularWeight;
 	double m_fRefractiveIndex;
+    int m_iGlossySamepleCount;
 	eMaterialType m_eMaterialType;
 };
 
