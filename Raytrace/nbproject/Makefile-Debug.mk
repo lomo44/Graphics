@@ -36,6 +36,7 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 # Object Files
 OBJECTFILES= \
 	${OBJECTDIR}/_ext/b7aea6c5/BoundingBox.o \
+	${OBJECTDIR}/_ext/b7aea6c5/Cylinder.o \
 	${OBJECTDIR}/_ext/b7aea6c5/Light.o \
 	${OBJECTDIR}/_ext/b7aea6c5/MeshObject.o \
 	${OBJECTDIR}/_ext/b7aea6c5/OBJParser.o \
@@ -74,6 +75,11 @@ ${OBJECTDIR}/_ext/b7aea6c5/BoundingBox.o: ../util/Basic/src/BoundingBox.cpp
 	${MKDIR} -p ${OBJECTDIR}/_ext/b7aea6c5
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/b7aea6c5/BoundingBox.o ../util/Basic/src/BoundingBox.cpp
+
+${OBJECTDIR}/_ext/b7aea6c5/Cylinder.o: ../util/Basic/src/Cylinder.cpp 
+	${MKDIR} -p ${OBJECTDIR}/_ext/b7aea6c5
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/b7aea6c5/Cylinder.o ../util/Basic/src/Cylinder.cpp
 
 ${OBJECTDIR}/_ext/b7aea6c5/Light.o: ../util/Basic/src/Light.cpp 
 	${MKDIR} -p ${OBJECTDIR}/_ext/b7aea6c5
