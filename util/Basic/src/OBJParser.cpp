@@ -89,9 +89,6 @@ void OBJParser::parsefile(std::string filepath){
                     	}   
                         _list.push_back(v);
                     }
-                    for(unsigned i = 0; i < _list.size(); i++){
-                           _list[i].Print();
-                     }
                     std::cout<<std::endl;
                     if(_list.size() == 3){
                     	Triangle f1;

@@ -11,7 +11,6 @@
 #include "RenderObject.h"
 #include "Attribute.h"
 class Line;
-class Face;
 class BoundingBox : public RenderObject{
 public:
 	BoundingBox(const Vector4f& _MaxXYZ, const Vector4f& _MinXYZ);
@@ -31,8 +30,6 @@ public:
     Vector4f m_MaxXYZ;
     Vector4f m_MinXYZ;
 private:
-    void InitializeBoundingbox();
-
     Vector4f* m_pVectorList;
 };
 

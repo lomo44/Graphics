@@ -7,6 +7,7 @@
 
 #include "BoundingBox.h"
 #include "Face.h"
+
 #include <assert.h>
 BoundingBox::BoundingBox(const Vector4f& _MaxXYZ, const Vector4f& _MinXYZ) {
 	// TODO Auto-generated constructor stub
@@ -71,9 +72,6 @@ bool BoundingBox::checkIntersect(const Line& temp){
         }
     }
     return false;
-}
-
-void BoundingBox::InitializeBoundingbox(){
 }
 
 Attr_Intersection* BoundingBox::isIntersect(const Line& _l){

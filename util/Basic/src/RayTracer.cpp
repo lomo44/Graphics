@@ -63,7 +63,7 @@ void RayTracer::ExpandRayTracingTree(){
 		}
         tempray->m_isDone = true;
         m_ShadingBuffer.push(tempray);
-		//std::cout<<"\rCurrent Ray Remain: "<<m_RayBuffer.size();
+		std::cout<<"\rCurrent Ray Remain: "<<m_RayBuffer.size();
 	}
 	std::cout<<"Expanding Complete, Number Of Ray Intersects: "<<inte<<std::endl;
 }

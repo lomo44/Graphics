@@ -39,6 +39,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/_ext/b7aea6c5/Light.o \
 	${OBJECTDIR}/_ext/b7aea6c5/MeshObject.o \
 	${OBJECTDIR}/_ext/b7aea6c5/OBJParser.o \
+	${OBJECTDIR}/_ext/b7aea6c5/PolygonPlane.o \
 	${OBJECTDIR}/_ext/b7aea6c5/Ray.o \
 	${OBJECTDIR}/_ext/b7aea6c5/RayTracer.o \
 	${OBJECTDIR}/_ext/b7aea6c5/bmp_io.o \
@@ -88,6 +89,11 @@ ${OBJECTDIR}/_ext/b7aea6c5/OBJParser.o: ../util/Basic/src/OBJParser.cpp
 	${MKDIR} -p ${OBJECTDIR}/_ext/b7aea6c5
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/b7aea6c5/OBJParser.o ../util/Basic/src/OBJParser.cpp
+
+${OBJECTDIR}/_ext/b7aea6c5/PolygonPlane.o: ../util/Basic/src/PolygonPlane.cpp 
+	${MKDIR} -p ${OBJECTDIR}/_ext/b7aea6c5
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/b7aea6c5/PolygonPlane.o ../util/Basic/src/PolygonPlane.cpp
 
 ${OBJECTDIR}/_ext/b7aea6c5/Ray.o: ../util/Basic/src/Ray.cpp 
 	${MKDIR} -p ${OBJECTDIR}/_ext/b7aea6c5
