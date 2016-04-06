@@ -39,8 +39,8 @@ int main(int argc, char** argv) {
     //std::cout<<fin<<std::endl;
     
     OBJParser* newparser  = new OBJParser();
-    newparser->parsefile("/home/john/Code/Graphics/model/chair.obj");
-    //newparser->parsefile("/homes/l/lizhuan1/NetBeansProjects/Graphics/model/chair.obj");
+    //newparser->parsefile("/home/john/Code/Graphics/model/chair.obj");
+    newparser->parsefile("/homes/l/lizhuan1/NetBeansProjects/Graphics/model/chair.obj");
     MeshObject* out = newparser->getOutputObject();
     //out->print();
     Attr_Material* gold = new Attr_Material("gold",Vector4f(0.3,0.3,0.3),
@@ -98,6 +98,9 @@ int main(int argc, char** argv) {
     render->m_iScreenHeight = 200;
     render->m_iScreenWidth = 300;
     render->m_sFileName = "view2.bmp";
+    render->m_bShadowEnable = true;
+    render->m_bEnvironmentAmbientEnable = true;
+    render->m_EnvironmentAmbient = Vector4f(0.1,0.1,0.1);
     newtracer.render(render);
     return 0;
 }

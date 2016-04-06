@@ -10,6 +10,7 @@
 
 #include "Attribute.h"
 #include "Matrix.h"
+#include "Light.h"
 #include <queue>
 #include <vector>
 class Ray;
@@ -25,6 +26,7 @@ public:
 		m_ObjectList.push_back(_obj);
 	}
 	void addLight(Light* _light){
+        _light->m_iID = m_LightList.size();
 		m_LightList.push_back(_light);
 	}
 private:
@@ -34,8 +36,11 @@ private:
 	void ExpandRayTracingTree();
 	void CollapseRayTracingTree();
 	void ShadingRay();
+    // TODO
+    void CalculateShadow(Ray* _ray);
 	void ExtractRayListToPixelBuffer();
 	Attr_Intersection* CalculateIntersection(const Line& _l);
+    bool checkIntersection(const Line& _l);
 	void FlushPixelBuffer();
 private:
 	Matrix4f m_ViewToWorld;

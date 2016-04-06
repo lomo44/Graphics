@@ -23,7 +23,6 @@ Ray::Ray(Ray* _prior,Line _line, int _time) {
 	this->m_pIntersectionProperties = NULL;
 	this->m_iID = -1;
 	this->m_fLightIntensity = 1.0;
-
 }
 
 Ray::~Ray() {
@@ -59,18 +58,34 @@ std::vector<Ray*>& Ray::reflect(const Vector4f& norm){
             Line ref_dir;
             ref_dir.m_Direction = dir;
             ref_dir.m_StartPoint = this->m_pIntersectionProperties->m_IntersectionPoint + (float)0.001 * norm;
+            // Mirror reflection
             if(m_pIntersectionProperties->m_Material->m_eMaterialType == eMaterialType_opague){
                 Ray* newray = new Ray(this, ref_dir , this->m_iRecursiveTime-1);
+                if(this->m_bShadowEnabled){
+                    newray->enableShadow(this->m_iNumOfLighting);
+                }
+                else{
+                    newray->disableShadow();
+                }
                 newray->m_fLightIntensity = reflectance;
                 newray->m_iID = -1;
                 this->m_pReflectedRayList.push_back(newray); 
             }
+            // glossy reflection
             if(m_pIntersectionProperties->m_Material->m_eMaterialType == eMaterialType_glossy){
-                Vector4f horizontal = this->m_RayLine.m_Direction.cross(this->m_pIntersectionProperties->m_PlanarNormal);
-                Vector4f projection = horizontal.cross(this->m_pIntersectionProperties->m_PlanarNormal);
+                Vector4f horizontal = ref_dir.m_Direction.cross(this->m_pIntersectionProperties->m_PlanarNormal);
+                Vector4f projection = this->m_pIntersectionProperties->m_PlanarNormal.cross(horizontal);
+                horizontal.Normalize();
+                projection.Normalize();
                 for(unsigned int i = 0; i < m_pIntersectionProperties->m_Material->m_iGlossySamepleCount;
                         i++){
                     Ray* newray = new Ray(this, ref_dir, this->m_iRecursiveTime-1);
+                    if(this->m_bShadowEnabled){
+                        newray->enableShadow(this->m_iNumOfLighting);
+                    }
+                    else{
+                        newray->disableShadow();
+                    }
                     Vector4f newdir = newray->jitter(horizontal,projection,this->m_pIntersectionProperties->m_PlanarNormal,0.6);
                     newray->m_fLightIntensity = newdir.dot(ref_dir.m_Direction);
                     newray->m_iID = -1;
@@ -125,7 +140,7 @@ void Ray::RecursiveCollapse(Ray* ray){
             if(ray->hasReflectedRay()){
                 Vector4f tempcolor;
                 float total_intensity = 0.0;
-                unsigned int numray = m_pReflectedRayList.size();
+                /**sum up the weighted average of the reflected ray*/
                 for(unsigned int i = 0;i < m_pReflectedRayList.size();i++){
                     Ray* tempray = m_pReflectedRayList[i];
                     RecursiveCollapse(tempray);

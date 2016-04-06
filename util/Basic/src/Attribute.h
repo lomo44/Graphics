@@ -72,8 +72,11 @@ struct Attr_Render{
 	int m_iScreenHeight;
 	int m_iRayTracingDepth;
 	int m_iAntiAliasingScale;
+    bool m_bShadowEnable;
+    bool m_bEnvironmentAmbientEnable;
 	Attr_ViewFrustrum* m_ViewFrustrum;
 	std::string m_sFileName;
+    Vector4f m_EnvironmentAmbient;
 };
 
 struct Attr_PixelBuffer{

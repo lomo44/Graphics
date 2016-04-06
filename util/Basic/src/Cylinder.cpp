@@ -13,6 +13,7 @@
 
 #include "Cylinder.h"
 #include "PolygonPlane.h"
+#include "BoundingBox.h"
 #include <cmath>
 #include <limits>
 
@@ -23,6 +24,7 @@ Cylinder::Cylinder(float _radius, float _height) {
     m_pTopLid->setAsCircle(Vector4f(0,1,0),Vector4f(0,_height,0,1),_radius);
     m_pBottomLid = new PolygonPlane();
     m_pBottomLid->setAsCircle(Vector4f(0,-1,0),Vector4f(0,0.0,0,1),_radius);
+    this->m_BoundingBox = new BoundingBox(Vector4f(_radius,_height,_radius), Vector4f(-_radius,0,-_radius));
 }
 
 Cylinder::Cylinder(const Cylinder& orig) {
@@ -35,6 +37,8 @@ Attr_Intersection* Cylinder::isIntersect(const Line& _l){
     Line raydir = _l;
     raydir.m_Direction =   m_Transform * _l.m_Direction;
 	raydir.m_StartPoint =  m_Transform * _l.m_StartPoint;
+    if(this->m_BoundingBox->isIntersect(raydir)==NULL)
+        return NULL;
     int intersecting_location = -2; // 0->body, -1-> bot lid, 1-> top lid
     // solving the quadratic formula
     float ret_t = std::numeric_limits<float>::max();

@@ -33,6 +33,28 @@ public:
     inline bool hasRefractedRay(){
         return m_pRefractedRay != NULL;
     }
+    inline void enableShadow(unsigned int _numoplightsrc){
+        m_bShadowEnabled = true;
+        m_iNumOfLighting = _numoplightsrc;
+        m_bLightingList = new bool[_numoplightsrc];
+        for(unsigned int i =0 ; i < _numoplightsrc ; i++){
+            m_bLightingList[i] = false;
+        }
+    }
+    inline void disableShadow(){
+        m_bShadowEnabled = false;
+    }
+    inline void setBlockedLight(unsigned int _num, bool _bool){
+        assert(_num < m_iNumOfLighting && _num >= 0);
+        m_bLightingList[_num] = _bool;
+    }
+    inline bool checkBlockedLight(unsigned int _num){
+        assert(_num < m_iNumOfLighting && _num >= 0);
+        return m_bLightingList[_num];
+    }
+    inline bool setAmbientColor(const Vector4f& _color){
+        m_color = _color;
+    }
     static float CalculateReflectance(const Vector4f& normal,
 			const Vector4f& incident, Attr_Material* from, Attr_Material* to);
     inline Vector4f getColor(){
@@ -57,10 +79,15 @@ public:
 	Line m_RayLine;
 	Vector4f m_color;
 	bool m_isDone;
+    bool m_bShadowEnabled;
 	Attr_Intersection* m_pIntersectionProperties;
 	int m_iID;
 	float m_fLightIntensity;
     int m_iRecursiveTime;
+    
+    // if the ray can be shade by light 1, then m_bLightingList[1] = true;
+    int m_iNumOfLighting;
+    bool* m_bLightingList;
 private:
 	void RecursiveCollapse(Ray* ray);
 	Ray* m_pPriorRay;

@@ -51,8 +51,12 @@ void RayTracer::ExpandRayTracingTree(){
         if(intsec!=NULL){
             inte++;
             tempray->m_pIntersectionProperties = intsec;
-            std::vector<Ray*> reflectray = tempray->reflect(intsec->m_PlanarNormal);
+            
+            std::vector<Ray*> reflectray = tempray->reflect(intsec->m_PlanarNormal);  
             Ray* refractray = tempray->refract(intsec->m_PlanarNormal,NULL);
+            if(tempray->m_bShadowEnabled){
+                CalculateShadow(tempray);
+            }
             if(tempray->hasReflectedRay()){
                 for(unsigned int i =0; i < reflectray.size();i++){
                     m_RayBuffer.push(reflectray[i]);
@@ -82,6 +86,17 @@ Attr_Intersection* RayTracer::CalculateIntersection(const Line& _l){
 	}
 	return _intersection;
 }
+/* TODO: Can add check intersection method for every render object to speed 
+ up the scanning process.*/
+bool RayTracer::checkIntersection(const Line& _l){
+    for(unsigned int i =0 ;i < m_ObjectList.size();i++){
+        Attr_Intersection* temp = m_ObjectList[i]->isIntersect(_l);
+        if(temp!=NULL){
+            return true;
+        }
+    }
+    return false;
+}
 
 void RayTracer::InitializeRayList(){
 	assert(m_pRenderAttribute!=NULL);
@@ -110,6 +125,13 @@ void RayTracer::InitializeRayList(){
 			newrayline.m_StartPoint = origin;
 			Ray* newray = new Ray(NULL,newrayline,this->m_pRenderAttribute->m_iRayTracingDepth);
             newray->m_iID = i*_height + j;
+            if(this->m_pRenderAttribute->m_bShadowEnable){
+                //std::cout<<this->m_LightList.size()<<std::endl;
+                newray->enableShadow(this->m_LightList.size());
+            }
+            else{
+                newray->disableShadow();
+            }
 			m_RayBuffer.push(newray);
 			m_RayList.push_back(newray);
 		}
@@ -219,4 +241,24 @@ void RayTracer::ExtractRayListToPixelBuffer(){
 	}
 }
 
-
+void RayTracer::CalculateShadow(Ray* _ray){
+    // Assume ray has an intersection point;
+    //std::cout<<"www"<<std::endl;
+    for(unsigned int i =0 ; i < m_LightList.size(); i++){
+        Vector4f ptolight = m_LightList[i]->m_LightingAttribute.m_LightPosition - 
+                _ray->m_pIntersectionProperties->m_IntersectionPoint;
+        //ptolight.Print();
+        ptolight.Normalize();
+        Line _testray;
+        _testray.m_Direction = ptolight;
+        _testray.m_StartPoint = _ray->m_pIntersectionProperties->m_IntersectionPoint + (float)0.0001 * 
+                _ray->m_pIntersectionProperties->m_PlanarNormal;
+        bool intersect = checkIntersection(_testray);
+        if(intersect == true){
+            _ray->setBlockedLight(i,true);
+        }
+        else{
+            _ray->setBlockedLight(i,false);
+        }
+    }
+}

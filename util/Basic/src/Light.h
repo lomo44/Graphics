@@ -15,7 +15,7 @@ public:
 	Light(){}
 	virtual ~Light(){}
 	virtual void shade(Ray& _ray) = 0;
-protected:
+    int m_iID;
 	Attr_Lighting m_LightingAttribute;
 };
 
