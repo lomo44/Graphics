@@ -26,7 +26,8 @@ PolygonPlane::~PolygonPlane() {
     ;
 }
 
-void PolygonPlane::setBound(const Vector4f& _normal, Vector4f* _list, int _vertexcount){
+void PolygonPlane::setAsPolygon(const Vector4f& _normal, Vector4f* _list, int _vertexcount){
+    this->m_ePolygonType = ePolygonType_simple;
     m_Normal = _normal;
     if(_list != NULL){
         assert(_vertexcount >= 3);     
@@ -34,8 +35,16 @@ void PolygonPlane::setBound(const Vector4f& _normal, Vector4f* _list, int _verte
         m_pBoundingPoint = _list;
         m_fd =  m_Normal.dot(_list[0]); 
     }
-
 }
+
+void PolygonPlane::setAsCircle(const Vector4f& _normal, const Vector4f& _center, float _radius){
+    this->m_ePolygonType = ePolygonType_circle;
+    m_Normal = _normal;
+    m_fRadius = _radius;
+    m_Center = _center;
+    m_fd = m_Normal.dot(_center);
+}
+
 
 Attr_Intersection* PolygonPlane::isIntersect(const Line& _l){
     float t = (m_fd - m_Normal.dot(_l.m_StartPoint))/m_Normal.dot(_l.m_Direction);
@@ -46,34 +55,41 @@ Attr_Intersection* PolygonPlane::isIntersect(const Line& _l){
     Vector4f p1,p2;
     bool isinside = false;
     if(!(t < 0)){
+        if(this->m_ePolygonType == ePolygonType_simple){
             if(m_NumOfBoundingPoint == 0){
-            // infinite bounding plane
-            isinside = true;
-        }
-        else{
-            // polygon is bound by something
-            for (i=0;i<m_NumOfBoundingPoint;i++) {
-                p1[0] = m_pBoundingPoint[i][0] - intersect_point[0];
-                p1[1] = m_pBoundingPoint[i][1] - intersect_point[1];
-                p1[2] = m_pBoundingPoint[i][2] - intersect_point[2];
-
-                p2[0] = m_pBoundingPoint[(i+1)%m_NumOfBoundingPoint][0] - intersect_point[0];
-                p2[1] = m_pBoundingPoint[(i+1)%m_NumOfBoundingPoint][1] - intersect_point[1];
-                p2[2] = m_pBoundingPoint[(i+1)%m_NumOfBoundingPoint][2] - intersect_point[2];
-
-                m1 = p1.magnitude(); 
-                m2 = p2.magnitude();
-                if (m1*m2 <= 0.00001){
-                    isinside = true;
-                }
-                else
-                     anglesum += acos(p1.dot(p2)/(m1*m2));
-             }
-            if(std::fabs(anglesum - 2 * M_PI) < 0.00001){
                 isinside = true;
+            }
+            else{
+                // polygon is bound by something
+               for (i=0;i<m_NumOfBoundingPoint;i++) {
+                   p1[0] = m_pBoundingPoint[i][0] - intersect_point[0];
+                   p1[1] = m_pBoundingPoint[i][1] - intersect_point[1];
+                   p1[2] = m_pBoundingPoint[i][2] - intersect_point[2];
 
+                   p2[0] = m_pBoundingPoint[(i+1)%m_NumOfBoundingPoint][0] - intersect_point[0];
+                   p2[1] = m_pBoundingPoint[(i+1)%m_NumOfBoundingPoint][1] - intersect_point[1];
+                   p2[2] = m_pBoundingPoint[(i+1)%m_NumOfBoundingPoint][2] - intersect_point[2];
+
+                   m1 = p1.magnitude(); 
+                   m2 = p2.magnitude();
+                   if (m1*m2 <= 0.00001){
+                       isinside = true;
+                   }
+                   else
+                        anglesum += acos(p1.dot(p2)/(m1*m2));
+                }
+               if(std::fabs(anglesum - 2 * M_PI) < 0.00001){
+                   isinside = true;
+               }    
             }
         }
+        else if(this->m_ePolygonType == ePolygonType_circle){
+            float distance = intersect_point.distance(m_Center);
+            if(distance < m_fRadius || std::fabs(distance - m_fRadius) < 0.0001){
+                //std::cout<<"ss"<<std::endl;
+                isinside = true;
+            }   
+        }  
         if(isinside){
             Attr_Intersection* ret = new Attr_Intersection();
             ret->m_InterpolatedNormal = m_Normal;

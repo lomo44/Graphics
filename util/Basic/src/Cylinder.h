@@ -19,7 +19,7 @@
 class PolygonPlane;
 class Cylinder : public RenderObject {
 public:
-    Cylinder(float _radius, float _height, unsigned int _sample);
+    Cylinder(float _radius, float _height);
     Cylinder(const Cylinder& orig);
     Attr_Intersection* isIntersect(const Line& _l);
     virtual ~Cylinder();

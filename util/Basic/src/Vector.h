@@ -160,6 +160,13 @@ template<class T> class Vector4{
         inline T magnitude(){
             return sqrt(_t[0]* _t[0]+_t[1]*_t[1]+_t[2]*_t[2]);
         }
+        inline T distance(const Vector4<T>& rhs) const{
+            return sqrt((_t[0] - rhs[0]) * (_t[0] - rhs[0]) + 
+                    (_t[1] - rhs[1]) * (_t[1] - rhs[1]) +
+                    (_t[2] - rhs[2]) * (_t[2] - rhs[2]) +
+                    (_t[3] - rhs[3]) * (_t[3] - rhs[3])
+                    );
+        }
         inline void Normalize(){
             T mag = this->magnitude();
             _t[0]/= mag;
