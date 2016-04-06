@@ -9,21 +9,36 @@
 #define LIGHT_H_
 
 #include "Attribute.h"
+#include "Vector.h"
+#include <vector>
 class Ray;
-class Light {
+enum eLightType{
+    eLightType_Pointlight,
+    eLightType_Squarelight
+};   
+class Light {    
 public:
 	Light(){}
 	virtual ~Light(){}
+    eLightType getType(){
+        return m_eLightType;
+    }
 	virtual void shade(Ray& _ray) = 0;
+    virtual std::vector<Vector4f> getVisibleSamplePoint() = 0;
     int m_iID;
-	Attr_Lighting m_LightingAttribute;
+    eLightType m_eLightType;
+    Attr_PointLight m_LightingAttribute;
 };
 
 class PointLight : public Light{
 public:
 	~PointLight();
-	PointLight(Attr_Lighting _attr);
+	PointLight(Attr_PointLight _attr);
 	void shade(Ray& _ray);
+    std::vector<Vector4f> getVisibleSamplePoint(){
+        std::vector<Vector4f> ret;
+        ret.push_back(m_LightingAttribute.m_LightPosition);
+    } 
 private:
 };
 

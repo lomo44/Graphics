@@ -101,6 +101,14 @@ Attr_Intersection* MeshObject::isIntersect(const Line& _l){
 				m_Attribute.m_Normallist[m_Attribute.m_Trianglelist[triangle_index].m_V1[2]-1],
 				m_Attribute.m_Normallist[m_Attribute.m_Trianglelist[triangle_index].m_V2[2]-1],
 				m_Attribute.m_Normallist[m_Attribute.m_Trianglelist[triangle_index].m_V3[2]-1],_bbray);
+        norm.Normalize();
+        /*if(m_Attribute.m_ObjectMaterial->m_bHasTexture && m_Attribute.m_iTextureCount > 0){
+            Vector4f Texture = Triangle::Interpolate_Barycentric(
+            m_Attribute.m_Texturelist[m_Attribute.m_Trianglelist[triangle_index].m_V1[1]-1],
+            m_Attribute.m_Texturelist[m_Attribute.m_Trianglelist[triangle_index].m_V2[1]-1],
+            m_Attribute.m_Texturelist[m_Attribute.m_Trianglelist[triangle_index].m_V3[1]-1],_bbray);
+            ret->m_IntersectionColor = m_Attribute.m_ObjectMaterial->getTextureColor(Texture[0],Texture[1]);
+        }*/
         Vector4f norm1 = Triangle::getPlanarNormal(
                 m_Attribute.m_Vertexlist[m_Attribute.m_Trianglelist[triangle_index].m_V1[0]-1],
 				m_Attribute.m_Vertexlist[m_Attribute.m_Trianglelist[triangle_index].m_V2[0]-1],

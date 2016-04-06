@@ -51,7 +51,7 @@ void RayTracer::ExpandRayTracingTree(){
         if(intsec!=NULL){
             inte++;
             tempray->m_pIntersectionProperties = intsec;
-            
+            tempray->m_color += intsec->m_IntersectionColor;
             std::vector<Ray*> reflectray = tempray->reflect(intsec->m_PlanarNormal);  
             Ray* refractray = tempray->refract(intsec->m_PlanarNormal,NULL);
             if(tempray->m_bShadowEnabled){
@@ -210,7 +210,7 @@ void RayTracer::ExtractRayListToPixelBuffer(){
 	/** TODO:
 	 * Modify this part to implement anti-aliasing
 	 */
-	unsigned int anti_aliasing_limit = 1;
+	unsigned int anti_aliasing_limit = this->m_pRenderAttribute->m_iAntiAliasingScale;
 	unsigned int anti_aliasing_counter = 0;
 	unsigned int pixel_counter = 0;
 	float R = 0.0;
@@ -225,10 +225,9 @@ void RayTracer::ExtractRayListToPixelBuffer(){
 			R = R / anti_aliasing_limit * 255;
 			G = G / anti_aliasing_limit * 255;
 			B = B / anti_aliasing_limit * 255;
-            if(R!=0 && G != 0 && B != 0)
+            //if(R!=0 && G != 0 && B != 0)
             //std::cout<<int(R)<<" "<<int(G)<<" "<<int(B)<<std::endl;
             //int ID = m_RayList[i]->m_iID;
-            // TODO: Bug here
 			m_pPixelBuffer->m_Rbuffer[pixel_counter] = int(R);
 			m_pPixelBuffer->m_Gbuffer[pixel_counter] = int(G);
 			m_pPixelBuffer->m_Bbuffer[pixel_counter] = int(B);
@@ -261,4 +260,48 @@ void RayTracer::CalculateShadow(Ray* _ray){
             _ray->setBlockedLight(i,false);
         }
     }
+}
+
+Attr_TextureBuffer* RayTracer::LoadTexture(std::string filename){
+    Attr_TextureBuffer* texture = new Attr_TextureBuffer();
+    char* name = new char[filename.length()+1];
+    strcpy(name,filename.c_str());
+    int i;
+    FILE* f = fopen(name, "rb");
+
+    if(f == NULL)
+        throw "Argument Exception";
+
+    unsigned char info[54];
+    fread(info, sizeof(unsigned char), 54, f); // read the 54-byte header
+
+    // extract image height and width from header
+    width = *(int*)&info[18];
+    int height = *(int*)&info[22];
+
+    std::cout << std::endl;
+    std::cout << "  Name: " << filename << std::endl;
+    std::cout << " Width: " << width << std::endl;
+    std::cout << "Height: " << height << std::endl;
+
+    int row_padded = (width*3 + 3) & (~3);
+    unsigned char* data = new unsigned char[row_padded];
+    unsigned char tmp;
+
+    for(int i = 0; i < height; i++)
+    {
+        fread(data, sizeof(unsigned char), row_padded, f);
+        for(int j = 0; j < width*3; j += 3)
+        {
+            // Convert (B, G, R) to (R, G, B)
+            tmp = data[j];
+            data[j] = data[j+2];
+            data[j+2] = tmp;
+
+            std::cout << "R: "<< (int)data[j] << " G: " << (int)data[j+1]<< " B: " << (int)data[j+2]<< std::endl;
+        }
+    }
+
+    fclose(f);
+    //return data;
 }

@@ -37,7 +37,7 @@ int main(int argc, char** argv) {
     temp.Transpose().print();*/
     //fin.Print();
     //std::cout<<fin<<std::endl;
-    
+    RayTracer newtracer;
     OBJParser* newparser  = new OBJParser();
     //newparser->parsefile("/home/john/Code/Graphics/model/chair.obj");
     newparser->parsefile("/homes/l/lizhuan1/NetBeansProjects/Graphics/model/chair.obj");
@@ -46,7 +46,7 @@ int main(int argc, char** argv) {
     Attr_Material* gold = new Attr_Material("gold",Vector4f(0.3,0.3,0.3),
     		Vector4f(0.75164, 0.60648, 0.22648),Vector4f(0.628281, 0.555802, 0.366065),51.2,
     		0,eMaterialType_opague);
-    
+    gold->m_pTexturePixelBuffer = newtracer.LoadTexture("/homes/l/lizhuan1/NetBeansProjects/Graphics/texture/wood.bmp");
     Attr_Material* red_glossy = new Attr_Material("gold",Vector4f(0.3,0.1,0.3),
         Vector4f(0.75164, 0.1, 0.22648),Vector4f(0.628281, 0.1, 0.366065),51.2,
         0,eMaterialType_opague);
@@ -59,9 +59,15 @@ int main(int argc, char** argv) {
     Attr_Material* white_mirror = new Attr_Material("white_mirror", Vector4f(0.3,0.3,0.3),
             Vector4f(0.6,0.6,0.6),Vector4f(0.9,0.9,0.9),200,0,eMaterialType_glossy);
     white_mirror->m_iGlossySamepleCount = 20;
-    Attr_Lighting l1;
+      
+    Attr_Material* plain_wood = new Attr_Material("plane",Vector4f(0.3,0.3,0.3),
+            Vector4f(0.9,0.9,0.9),Vector4f(0.9,0.9,0.9),10,0,eMaterialType_rough);
+    //plain_wood->m_pTexturePixelBuffer = newtracer.LoadTexture("/homes/l/lizhuan1/NetBeansProjects/Graphics/texture/wood.bmp");
+    //plain_wood->loadtexture("/homes/l/lizhuan1/NetBeansProjects/Graphics/texture/wood.bmp");
+    
+    Attr_PointLight l1;
     Cylinder* newcylinder = new Cylinder(1.0,3);
-    newcylinder->m_MaterialAttr = metal;
+    newcylinder->m_MaterialAttr = red_glossy;
     l1.m_AmbientColor = Vector4f(0.9,0.9,0.9);
     l1.m_DefuseColor = Vector4f(0.9,0.9,0.9);
     l1.m_SpecularColor = Vector4f(0.9,0.9,0.9);
@@ -76,12 +82,12 @@ int main(int argc, char** argv) {
     out2->rotate(eRotationalY,90);
     out2->getTransform().print();
     out2->getInvTransform().print();
-    out2->changeMaterial(red_glossy);
+    out2->changeMaterial(plain_wood);
     
-    RayTracer newtracer;
+    
     newtracer.addLight(newlight);
     newtracer.addObject(out);
-    //newtracer.addObject(out2);
+    newtracer.addObject(out2);
     newtracer.addObject(baseplane);
     newtracer.addObject(newcylinder);
     

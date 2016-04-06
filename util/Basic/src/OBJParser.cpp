@@ -89,7 +89,7 @@ void OBJParser::parsefile(std::string filepath){
                     	}   
                         _list.push_back(v);
                     }
-                    std::cout<<std::endl;
+                    //std::cout<<std::endl;
                     if(_list.size() == 3){
                     	Triangle f1;
                     	f1.m_V1 = _list[0];

@@ -92,7 +92,7 @@ public:
     		const Vector4f& _barry){
         //std::cout<<"wow"<<std::endl;
         Vector4f ret = _a * _barry[0] + _b * _barry[1] + _c * _barry[2];
-        ret.Normalize();
+        //ret.Normalize();
     	return ret;
         //std::cout<<"wow"<<std::endl;
     }

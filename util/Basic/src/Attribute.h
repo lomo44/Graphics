@@ -7,36 +7,66 @@
 
 #ifndef ATTRIBUTE_H_
 #define ATTRIBUTE_H_
-#include <string>
+#include <cstring>
+#include <assert.h>
 #include "Face.h"
+#include "bmp_io.h"
+
 
 enum eMaterialType{
 	eMaterialType_opague,
 	eMaterialType_transparent,
     eMaterialType_glossy,
+    eMaterialType_rough
 };
+
+
+
+struct Attr_PixelBuffer{
+	long unsigned int m_iWidth;
+	long int m_iHeight;
+	unsigned char* m_Rbuffer;
+	unsigned char* m_Gbuffer;
+	unsigned char* m_Bbuffer;
+};
+
+typedef Attr_PixelBuffer Attr_TextureBuffer;
 
 struct Attr_Material{
 	Attr_Material(std::string name, Vector4f ambient, Vector4f diffuse, Vector4f specular, float exp,
 			float refractiveIndex, eMaterialType _type) :
 			m_MaterialName(name),m_AmbientColor(ambient), m_DefuseColor(diffuse), m_SpecularColor(specular),
-			m_fSpecularWeight(exp),m_fRefractiveIndex(refractiveIndex),m_eMaterialType(_type) {}
-	std::string m_MaterialName;
+			m_fSpecularWeight(exp),m_fRefractiveIndex(refractiveIndex),m_eMaterialType(_type),m_pTexturePixelBuffer(NULL),
+            m_bHasTexture(false){}
+    std::string m_MaterialName;
 	Vector4f m_AmbientColor;
 	Vector4f m_DefuseColor;
 	Vector4f m_SpecularColor;
 	double m_fSpecularWeight;
 	double m_fRefractiveIndex;
     int m_iGlossySamepleCount;
+    bool m_bHasTexture;
+    Attr_TextureBuffer* m_pTexturePixelBuffer;
 	eMaterialType m_eMaterialType;
 };
 
-struct Attr_Lighting{
+struct Attr_PointLight{
 	// TODO: Add Lightning Properties
 	Vector4f m_DefuseColor;
 	Vector4f m_AmbientColor;
 	Vector4f m_SpecularColor;
 	Vector4f m_LightPosition;
+};
+
+struct Attr_SquareLight{
+    Vector4f m_DefuseColor;
+	Vector4f m_AmbientColor;
+	Vector4f m_SpecularColor;
+	Vector4f m_LightPosition;
+    Vector4f m_Normal;
+    Vector4f m_;
+    Vector4f m_fLength;
+    unsigned int m_iSampleSize;
 };
 
 struct Attr_MeshObject{
@@ -55,6 +85,7 @@ struct Attr_Intersection{
 	Vector4f m_InterpolatedNormal;
     Vector4f m_PlanarNormal;
 	Vector4f m_IntersectionPoint;
+    Vector4f m_IntersectionColor;
 	float m_fIntersectionAngle;
 	Attr_Material* m_Material;
 	double m_distance; // t
@@ -79,11 +110,20 @@ struct Attr_Render{
     Vector4f m_EnvironmentAmbient;
 };
 
-struct Attr_PixelBuffer{
-	int m_iWidth;
-	int m_iHeight;
-	unsigned char* m_Rbuffer;
-	unsigned char* m_Gbuffer;
-	unsigned char* m_Bbuffer;
-};
+            
+/*public:
+    void loadtexture(std::string filename){
+        
+    }
+    Vector4f getTextureColor(float _u, float v){
+        std::cout<<_u<<std::endl;
+        unsigned int x = (unsigned int)(_u * m_pTexturePixelBuffer->m_iWidth);
+        unsigned int y = (unsigned int)(v * m_pTexturePixelBuffer->m_iHeight);
+        unsigned int pixel_num = y * m_pTexturePixelBuffer->m_iWidth + x;
+        //std::cout<<"wow"<<pixel_num<<std::endl;
+        float R = m_pTexturePixelBuffer->m_Rbuffer[pixel_num] / 255;
+        float G = m_pTexturePixelBuffer->m_Gbuffer[pixel_num] / 255;
+        float B = m_pTexturePixelBuffer->m_Bbuffer[pixel_num] / 255;
+        return Vector4f(R,G,B,0);
+    }*/
 #endif /* ATTRIBUTE_H_ */
