@@ -39,8 +39,8 @@ int main(int argc, char** argv) {
     //std::cout<<fin<<std::endl;
     RayTracer newtracer;
     OBJParser* newparser  = new OBJParser();
-    //newparser->parsefile("/home/john/Code/Graphics/model/chair.obj");
-    newparser->parsefile("/homes/l/lizhuan1/NetBeansProjects/Graphics/model/chair.obj");
+    newparser->parsefile("/home/john/Code/Graphics/model/chair.obj");
+    //newparser->parsefile("/homes/l/lizhuan1/NetBeansProjects/Graphics/model/chair.obj");
     MeshObject* out = newparser->getOutputObject();
     //out->print();
     Material* gold = new Material("gold",Vector4f(0.3,0.3,0.3),
@@ -50,7 +50,7 @@ int main(int argc, char** argv) {
     
     Material* red_glossy = new Material("gold",Vector4f(0.3,0.1,0.3),
         Vector4f(0.75164, 0.1, 0.22648),Vector4f(0.628281, 0.1, 0.366065),51.2,
-        0,eMaterialType_opague);
+        0,eMaterialType_glossy);
     red_glossy->m_iGlossySamepleCount = 20;
     
     Material* metal = new Material("metal",Vector4f(0.1,0.1,0.1),
@@ -58,23 +58,35 @@ int main(int argc, char** argv) {
     out->changeMaterial(gold);
     
     Material* white_mirror = new Material("white_mirror", Vector4f(0.3,0.3,0.3),
-            Vector4f(0.6,0.6,0.6),Vector4f(0.9,0.9,0.9),200,0,eMaterialType_glossy);
-    white_mirror->m_iGlossySamepleCount = 20;
+            Vector4f(0.6,0.6,0.6),Vector4f(0.9,0.9,0.9),200,0,eMaterialType_opague);
       
     Material* plain_wood = new Material("plane",Vector4f(0.0,0.0,0.0),
             Vector4f(0.0,0.0,0.0),Vector4f(0.0,0.0,0.0),10,0,eMaterialType_opague);
     //plain_wood->m_pTexturePixelBuffer = newtracer.LoadTexture("/homes/l/lizhuan1/NetBeansProjects/Graphics/texture/wood.bmp");
-    plain_wood->loadTexture("/homes/l/lizhuan1/NetBeansProjects/Graphics/texture/green.bmp");
+    //plain_wood->loadTexture("/homes/l/lizhuan1/NetBeansProjects/Graphics/texture/green.bmp");
+    plain_wood->loadTexture("/home/john/Code/Graphics/texture/green.bmp");
     //plain_wood->m_pTexturePixelBuffer = newtracer.LoadTexture("/homes/l/lizhuan1/NetBeansProjects/Graphics/texture/wood.bmp");
     //plain_wood->m_bHasTexture = true;
     Attr_PointLight l1;
-    Cylinder* newcylinder = new Cylinder(1.0,3);
-    newcylinder->m_MaterialAttr = red_glossy;
     l1.m_AmbientColor = Vector4f(0.9,0.9,0.9);
     l1.m_DefuseColor = Vector4f(0.9,0.9,0.9);
     l1.m_SpecularColor = Vector4f(0.9,0.9,0.9);
     l1.m_LightPosition = Vector4f(0,10,0,1);
+    
+    Attr_AreaLight* l2 = new Attr_AreaLight();
+    l2->m_AmbientColor = Vector4f(0.9,0.9,0.9);
+    l2->m_DefuseColor = Vector4f(0.9,0.9,0.9);
+    l2->m_SpecularColor = Vector4f(0.9,0.9,0.9);
+    l2->m_LightPosition = Vector4f(0,10,0,1);
+    l2->m_Normal = Vector4f(0,-1,0);
+    l2->m_Up = Vector4f(1,0,0);
+    l2->m_fLength = 4.0;
+    l2->m_iSampleSize = 6;
+    
+    Cylinder* newcylinder = new Cylinder(1.0,3);
+    newcylinder->m_MaterialAttr = red_glossy;
     PointLight* newlight = new PointLight(l1);
+    AreaLight* newlight2 = new AreaLight(l2);
     PolygonPlane* baseplane = new PolygonPlane;
     baseplane->setAsInfinitePlane(Vector4f(0,1,0),Vector4f(0,-0,001,0));
     baseplane->m_MaterialAttr = white_mirror;
@@ -86,7 +98,8 @@ int main(int argc, char** argv) {
     out2->changeMaterial(plain_wood);
     
     
-    newtracer.addLight(newlight);
+    //newtracer.addLight(newlight);
+    newtracer.addLight(newlight2);
     newtracer.addObject(out);
     newtracer.addObject(out2);
     newtracer.addObject(baseplane);
@@ -101,7 +114,7 @@ int main(int argc, char** argv) {
     view->m_fFieldOfView = 60;
     render->m_ViewFrustrum = view;
     render->m_iAntiAliasingScale = 1;
-    render->m_iRayTracingDepth = 3;
+    render->m_iRayTracingDepth = 2;
     render->m_iScreenHeight = 200;
     render->m_iScreenWidth = 300;
     render->m_sFileName = "view2.bmp";

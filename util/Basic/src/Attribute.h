@@ -112,7 +112,7 @@ struct Attr_AreaLight{
 	Vector4f m_LightPosition;
     Vector4f m_Normal;
     Vector4f m_Up;
-    Vector4f m_fLength;
+    float m_fLength;
     unsigned int m_iSampleSize;
 };
 

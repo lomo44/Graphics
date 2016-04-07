@@ -19,7 +19,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <cmath>
-
+#include <stdlib.h>
 // 3d affine vectors
 template<class T> class Vector4{
     public:
@@ -172,6 +172,15 @@ template<class T> class Vector4{
             _t[0]/= mag;
             _t[1]/= mag;
             _t[2]/= mag;
+        }
+        inline void Randomize(const Vector4<T>& m_v1, const Vector4<T>& m_v2,
+                const Vector4<T>& m_v3, float limit){
+            float random_x = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/limit/2)) - limit;
+            float random_y = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/limit/2)) - limit;
+            float random_z = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/limit/2)) - limit;
+            *this += m_v1 * random_x;
+            *this += m_v2 * random_y;
+            *this += m_v3 * random_z;
         }
         inline void Print() const{
             std::cout<<_t[0]<<"|"<<_t[1]<<"|"<<_t[2]<<"|"<<_t[3]<<"|"<<std::endl;

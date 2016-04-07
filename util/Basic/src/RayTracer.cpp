@@ -243,12 +243,12 @@ void RayTracer::ExtractRayListToPixelBuffer(){
 void RayTracer::CalculateShadow(Ray* _ray){
     // Assume ray has an intersection point;
     //std::cout<<"www"<<std::endl;
-    // TODO:: bug
     for(unsigned int i =0 ; i < m_LightList.size(); i++){
         std::vector<Vector4f> visiblesample = m_LightList[i]->getVisibleSamplePoint();
         float lightintensity = 0.0;
+        //std::cout<<visiblesample.size()<<std::endl;
         for(unsigned int j = 0; j < visiblesample.size();j++){
-            Vector4f ptolight = visiblesample[i] -  _ray->m_pIntersectionProperties->
+            Vector4f ptolight = visiblesample[j] -  _ray->m_pIntersectionProperties->
                     m_IntersectionPoint;
             //ptolight.Print();
             ptolight.Normalize();
@@ -257,11 +257,12 @@ void RayTracer::CalculateShadow(Ray* _ray){
             _testray.m_StartPoint = _ray->m_pIntersectionProperties->m_IntersectionPoint + (float)0.0001 * 
                     _ray->m_pIntersectionProperties->m_PlanarNormal;
             bool intersect = checkIntersection(_testray);
-            if(intersect){
+            if(!intersect){
                 lightintensity+=1.0;
             }
         }
-        lightintensity /= (float)visiblesample.size();
+        lightintensity /= (float)(visiblesample.size());
+        //std::cout<<lightintensity<<" "<<visiblesample.size()<<std::endl;
         _ray->setBlockedLight(i,lightintensity);
     }
 }

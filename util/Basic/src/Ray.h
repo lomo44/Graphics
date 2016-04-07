@@ -66,9 +66,9 @@ public:
         assert(limit > 0.0);
         // Test for vector;
         assert(_x[3] ==0 && _y[3] == 0 && _z[3] == 0);
-        float random_x = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/limit));
-        float random_y = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/limit));
-        float random_z = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/limit));
+        float random_x = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/limit/2)) - limit;
+        float random_y = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/limit/2)) - limit;
+        float random_z = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/limit/2)) - limit;
         this->m_RayLine.m_Direction += random_x * _x;
         this->m_RayLine.m_Direction += random_y * _y;
         this->m_RayLine.m_Direction += random_z * _z;
