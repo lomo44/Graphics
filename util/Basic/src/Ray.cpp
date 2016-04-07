@@ -29,7 +29,7 @@ Ray::~Ray() {
 	// TODO Auto-generated destructor stub
 }
 float Ray::CalculateReflectance(const Vector4f& normal,
-			const Vector4f& incident, Attr_Material* from, Attr_Material* to){
+			const Vector4f& incident, Material* from, Material* to){
 	float n1,n2;
 	if(from == NULL)
 		n1 = 1;
@@ -97,7 +97,7 @@ std::vector<Ray*>& Ray::reflect(const Vector4f& norm){
     return m_pReflectedRayList;
 }
 
-Ray* Ray::refract(const Vector4f& norm, Attr_Material* _from){
+Ray* Ray::refract(const Vector4f& norm, Material* _from){
 	if(m_pIntersectionProperties != NULL && m_iRecursiveTime > 1){
         if(this->m_pIntersectionProperties->m_Material->m_eMaterialType==eMaterialType_opague)
 			return NULL;
@@ -135,27 +135,30 @@ Ray* Ray::refract(const Vector4f& norm, Attr_Material* _from){
 	}
 }
 
-void Ray::RecursiveCollapse(Ray* ray){   
+void Ray::RecursiveCollapse(Ray* ray){
 	if(ray->hasReflectedRay() || ray->hasRefractedRay()){
             if(ray->hasReflectedRay()){
                 Vector4f tempcolor;
                 float total_intensity = 0.0;
                 /**sum up the weighted average of the reflected ray*/
-                for(unsigned int i = 0;i < m_pReflectedRayList.size();i++){
-                    Ray* tempray = m_pReflectedRayList[i];
-                    RecursiveCollapse(tempray);
-                    tempcolor += tempray->getColor();
-                    total_intensity += tempray->m_fLightIntensity;
-                    delete tempray;
+                for(unsigned int i = 0;i < ray->m_pReflectedRayList.size();i++){
+                    assert(ray->m_pReflectedRayList[i]!=ray);
+                    RecursiveCollapse(ray->m_pReflectedRayList[i]);
                 }
+                for(unsigned int i =0; i < ray->m_pReflectedRayList.size();i++){
+                    tempcolor += ray->m_pReflectedRayList[i]->getColor();
+                    total_intensity += ray->m_pReflectedRayList[i]->m_fLightIntensity;
+                    delete ray->m_pReflectedRayList[i];
+                }
+                ray->m_pReflectedRayList.clear();
                 tempcolor /= total_intensity;
-                m_color *= tempcolor;
-                m_color.clamp(1.0);
+                ray->m_color *= tempcolor;
+                ray->m_color.clamp(1.0);
             }
-            if(m_pRefractedRay != NULL){
-                RecursiveCollapse(m_pRefractedRay);
-                m_color *= m_pRefractedRay->m_fLightIntensity * m_pRefractedRay->m_color;
-                delete m_pRefractedRay;
+            if(ray->m_pRefractedRay != NULL){
+                RecursiveCollapse(ray->m_pRefractedRay);
+                ray->m_color *= ray->m_pRefractedRay->m_fLightIntensity * ray->m_pRefractedRay->m_color;
+                delete ray->m_pRefractedRay;
             }
 	}
 }

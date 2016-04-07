@@ -32,12 +32,59 @@ struct Attr_PixelBuffer{
 
 typedef Attr_PixelBuffer Attr_TextureBuffer;
 
-struct Attr_Material{
-	Attr_Material(std::string name, Vector4f ambient, Vector4f diffuse, Vector4f specular, float exp,
+class Material{
+public:
+	Material(std::string name, Vector4f ambient, Vector4f diffuse, Vector4f specular, float exp,
 			float refractiveIndex, eMaterialType _type) :
 			m_MaterialName(name),m_AmbientColor(ambient), m_DefuseColor(diffuse), m_SpecularColor(specular),
 			m_fSpecularWeight(exp),m_fRefractiveIndex(refractiveIndex),m_eMaterialType(_type),m_pTexturePixelBuffer(NULL),
             m_bHasTexture(false){}
+public:
+    inline void loadTexture(std::string filename){
+        char* name = new char[filename.length()+1];
+        strcpy(name,filename.c_str());
+        long unsigned int* width = new long unsigned int();
+        long int* height = new long int();
+
+        unsigned char** Rbuffer = new unsigned char*();
+        unsigned char** Gbuffer = new unsigned char*();
+        unsigned char** Bbuffer = new unsigned char*();
+        
+        /*unsigned char** Rbuffer = NULL;
+        unsigned char** Gbuffer = NULL;
+        unsigned char** Bbuffer = NULL;*/
+
+        bool error = bmp_read(name,width,height,Rbuffer,Gbuffer,Bbuffer);
+        if(error){
+            std::cout<<"Texture Open Fail"<<std::endl;
+        }
+        else{
+            std::cout<<"Texture open success"<<std::endl;
+            Attr_TextureBuffer* texture = new Attr_TextureBuffer();
+            texture->m_Bbuffer = *Bbuffer;
+            texture->m_Gbuffer = *Gbuffer;
+            texture->m_Rbuffer = *Rbuffer;
+            texture->m_iHeight = *height;
+            texture->m_iWidth = *width;
+            m_pTexturePixelBuffer = texture;
+            m_bHasTexture = true;
+        }
+    }
+    Vector4f getTextureColor(float _u, float v){
+        //std::cout<<_u<<std::endl;
+        unsigned int x = (unsigned int)(_u * m_pTexturePixelBuffer->m_iWidth);
+        unsigned int y = (unsigned int)(v * m_pTexturePixelBuffer->m_iHeight);
+        unsigned int pixel_num = y * m_pTexturePixelBuffer->m_iWidth + x;
+        float R = m_pTexturePixelBuffer->m_Rbuffer[pixel_num] / 255.0;
+        float G = m_pTexturePixelBuffer->m_Gbuffer[pixel_num] / 255.0;
+        float B = m_pTexturePixelBuffer->m_Bbuffer[pixel_num] / 255.0;
+        Vector4f ret;
+        ret[0] = R;
+        ret[1] = G;
+        ret[2] = B;
+        //ret.Print();
+        return ret;
+    }
     std::string m_MaterialName;
 	Vector4f m_AmbientColor;
 	Vector4f m_DefuseColor;
@@ -78,7 +125,7 @@ struct Attr_MeshObject{
 	int m_iVertexCount;
 	int m_iTextureCount;
 	int m_iTriangleCount;
-	Attr_Material* m_ObjectMaterial;
+	Material* m_ObjectMaterial;
 };
 
 struct Attr_Intersection{
@@ -87,7 +134,7 @@ struct Attr_Intersection{
 	Vector4f m_IntersectionPoint;
     Vector4f m_IntersectionColor;
 	float m_fIntersectionAngle;
-	Attr_Material* m_Material;
+	Material* m_Material;
 	double m_distance; // t
 };
 

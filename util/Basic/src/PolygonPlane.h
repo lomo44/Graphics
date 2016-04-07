@@ -18,7 +18,8 @@
 
 enum ePolygonType{
     ePolygonType_simple,
-    ePolygonType_circle
+    ePolygonType_circle,
+    ePolygonType_infiniteplane,
 };
 
 class Line;
@@ -28,9 +29,10 @@ public:
     PolygonPlane(const PolygonPlane& orig);
     void setAsPolygon(const Vector4f& _normal, Vector4f* _list, int _vertexcount);
     void setAsCircle(const Vector4f& _normal,const Vector4f& _center, float _radius);
+    void setAsInfinitePlane(const Vector4f& _normal, const Vector4f& _center);
     Attr_Intersection* isIntersect(const Line& _l);
     virtual ~PolygonPlane();
-    Attr_Material* m_MaterialAttr;
+    Material* m_MaterialAttr;
     Vector4f m_Normal;
     float m_fd;
 private:

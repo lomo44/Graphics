@@ -45,6 +45,12 @@ void PolygonPlane::setAsCircle(const Vector4f& _normal, const Vector4f& _center,
     m_fd = m_Normal.dot(_center);
 }
 
+void PolygonPlane::setAsInfinitePlane(const Vector4f& _normal, const Vector4f& _center){
+    this->m_ePolygonType = ePolygonType_infiniteplane;
+    m_Normal = _normal;
+    m_Center = _center;
+    m_fd = m_Normal.dot(_center);
+}
 
 Attr_Intersection* PolygonPlane::isIntersect(const Line& _l){
     float t = (m_fd - m_Normal.dot(_l.m_StartPoint))/m_Normal.dot(_l.m_Direction);
@@ -89,7 +95,10 @@ Attr_Intersection* PolygonPlane::isIntersect(const Line& _l){
                 //std::cout<<"ss"<<std::endl;
                 isinside = true;
             }   
-        }  
+        }
+        else if(this->m_ePolygonType == ePolygonType_infiniteplane){
+            isinside = true;
+        }
         if(isinside){
             Attr_Intersection* ret = new Attr_Intersection();
             ret->m_InterpolatedNormal = m_Normal;

@@ -29,7 +29,6 @@ public:
         _light->m_iID = m_LightList.size();
 		m_LightList.push_back(_light);
 	}
-    Attr_TextureBuffer* LoadTexture(std::string filename);
 private:
 	void InitializePixelBuffer(int _width, int _height);
 	void InitializeRayList();

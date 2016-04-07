@@ -20,7 +20,7 @@ public:
     Ray();
     virtual ~Ray();
     std::vector<Ray*>& reflect(const Vector4f& norm);
-    Ray* refract(const Vector4f& norm, Attr_Material* _from);
+    Ray* refract(const Vector4f& norm, Material* _from);
     inline void CollapseRayTracingTree(){
         RecursiveCollapse(this);
     }
@@ -56,7 +56,7 @@ public:
         m_color = _color;
     }
     static float CalculateReflectance(const Vector4f& normal,
-			const Vector4f& incident, Attr_Material* from, Attr_Material* to);
+			const Vector4f& incident, Material* from, Material* to);
     inline Vector4f getColor(){
         return m_fLightIntensity * m_color;
     }
@@ -89,7 +89,7 @@ public:
     int m_iNumOfLighting;
     bool* m_bLightingList;
 private:
-	void RecursiveCollapse(Ray* ray);
+	static void RecursiveCollapse(Ray* ray);
 	Ray* m_pPriorRay;
 	std::vector<Ray*> m_pReflectedRayList;
 	Ray* m_pRefractedRay;

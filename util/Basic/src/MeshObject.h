@@ -28,7 +28,7 @@ public:
     MeshObject(Attr_MeshObject& _attr);
     ~MeshObject();
     void printMeshObjectInfo();
-    void changeMaterial(Attr_Material* _m);
+    void changeMaterial(Material* _m);
     MeshObject* clone();
     Attr_Intersection* isIntersect(const Line& _l);
 private:

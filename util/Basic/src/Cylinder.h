@@ -23,7 +23,7 @@ public:
     Cylinder(const Cylinder& orig);
     Attr_Intersection* isIntersect(const Line& _l);
     virtual ~Cylinder();
-    Attr_Material* m_MaterialAttr;
+    Material* m_MaterialAttr;
 private:
     float m_fRadius;
     float m_fHeight;
