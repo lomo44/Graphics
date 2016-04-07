@@ -36,21 +36,21 @@ public:
     inline void enableShadow(unsigned int _numoplightsrc){
         m_bShadowEnabled = true;
         m_iNumOfLighting = _numoplightsrc;
-        m_bLightingList = new bool[_numoplightsrc];
+        m_pLightingIntensity = new float[_numoplightsrc];
         for(unsigned int i =0 ; i < _numoplightsrc ; i++){
-            m_bLightingList[i] = false;
+            m_pLightingIntensity[i] = 0.0;
         }
     }
     inline void disableShadow(){
         m_bShadowEnabled = false;
     }
-    inline void setBlockedLight(unsigned int _num, bool _bool){
+    inline void setBlockedLight(unsigned int _num, float intensity){
         assert(_num < m_iNumOfLighting && _num >= 0);
-        m_bLightingList[_num] = _bool;
+        m_pLightingIntensity[_num] = intensity;
     }
     inline bool checkBlockedLight(unsigned int _num){
         assert(_num < m_iNumOfLighting && _num >= 0);
-        return m_bLightingList[_num];
+        return m_pLightingIntensity[_num];
     }
     inline bool setAmbientColor(const Vector4f& _color){
         m_color = _color;
@@ -58,7 +58,7 @@ public:
     static float CalculateReflectance(const Vector4f& normal,
 			const Vector4f& incident, Material* from, Material* to);
     inline Vector4f getColor(){
-        return m_fLightIntensity * m_color;
+        return m_fReflectionIntensity * m_color;
     }
     // Jitter the ray, return the direction of the jittered ray;
     inline Vector4f& jitter(const Vector4f& _x, const Vector4f& _y, const Vector4f& _z, float limit){
@@ -82,12 +82,12 @@ public:
     bool m_bShadowEnabled;
 	Attr_Intersection* m_pIntersectionProperties;
 	int m_iID;
-	float m_fLightIntensity;
+	float m_fReflectionIntensity;
     int m_iRecursiveTime;
     
     // if the ray can be shade by light 1, then m_bLightingList[1] = true;
     int m_iNumOfLighting;
-    bool* m_bLightingList;
+    float* m_pLightingIntensity;
 private:
 	static void RecursiveCollapse(Ray* ray);
 	Ray* m_pPriorRay;

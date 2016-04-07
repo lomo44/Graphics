@@ -105,13 +105,13 @@ struct Attr_PointLight{
 	Vector4f m_LightPosition;
 };
 
-struct Attr_SquareLight{
+struct Attr_AreaLight{
     Vector4f m_DefuseColor;
 	Vector4f m_AmbientColor;
 	Vector4f m_SpecularColor;
 	Vector4f m_LightPosition;
     Vector4f m_Normal;
-    Vector4f m_;
+    Vector4f m_Up;
     Vector4f m_fLength;
     unsigned int m_iSampleSize;
 };

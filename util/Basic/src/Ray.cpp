@@ -22,7 +22,7 @@ Ray::Ray(Ray* _prior,Line _line, int _time) {
 	this->m_pRefractedRay = NULL;
 	this->m_pIntersectionProperties = NULL;
 	this->m_iID = -1;
-	this->m_fLightIntensity = 1.0;
+	this->m_fReflectionIntensity = 1.0;
 }
 
 Ray::~Ray() {
@@ -67,7 +67,7 @@ std::vector<Ray*>& Ray::reflect(const Vector4f& norm){
                 else{
                     newray->disableShadow();
                 }
-                newray->m_fLightIntensity = reflectance;
+                newray->m_fReflectionIntensity = 1.0;
                 newray->m_iID = -1;
                 this->m_pReflectedRayList.push_back(newray); 
             }
@@ -87,7 +87,7 @@ std::vector<Ray*>& Ray::reflect(const Vector4f& norm){
                         newray->disableShadow();
                     }
                     Vector4f newdir = newray->jitter(horizontal,projection,this->m_pIntersectionProperties->m_PlanarNormal,0.6);
-                    newray->m_fLightIntensity = newdir.dot(ref_dir.m_Direction);
+                    newray->m_fReflectionIntensity = newdir.dot(ref_dir.m_Direction);
                     newray->m_iID = -1;
                     this->m_pReflectedRayList.push_back(newray);
                     // TODO: add glossy reflection here.
@@ -147,7 +147,7 @@ void Ray::RecursiveCollapse(Ray* ray){
                 }
                 for(unsigned int i =0; i < ray->m_pReflectedRayList.size();i++){
                     tempcolor += ray->m_pReflectedRayList[i]->getColor();
-                    total_intensity += ray->m_pReflectedRayList[i]->m_fLightIntensity;
+                    total_intensity += ray->m_pReflectedRayList[i]->m_fReflectionIntensity;
                     delete ray->m_pReflectedRayList[i];
                 }
                 ray->m_pReflectedRayList.clear();
@@ -157,7 +157,7 @@ void Ray::RecursiveCollapse(Ray* ray){
             }
             if(ray->m_pRefractedRay != NULL){
                 RecursiveCollapse(ray->m_pRefractedRay);
-                ray->m_color *= ray->m_pRefractedRay->m_fLightIntensity * ray->m_pRefractedRay->m_color;
+                ray->m_color *= ray->m_pRefractedRay->m_fReflectionIntensity * ray->m_pRefractedRay->m_color;
                 delete ray->m_pRefractedRay;
             }
 	}

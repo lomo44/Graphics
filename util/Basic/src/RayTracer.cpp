@@ -243,21 +243,25 @@ void RayTracer::ExtractRayListToPixelBuffer(){
 void RayTracer::CalculateShadow(Ray* _ray){
     // Assume ray has an intersection point;
     //std::cout<<"www"<<std::endl;
+    // TODO:: bug
     for(unsigned int i =0 ; i < m_LightList.size(); i++){
-        Vector4f ptolight = m_LightList[i]->m_LightingAttribute.m_LightPosition - 
-                _ray->m_pIntersectionProperties->m_IntersectionPoint;
-        //ptolight.Print();
-        ptolight.Normalize();
-        Line _testray;
-        _testray.m_Direction = ptolight;
-        _testray.m_StartPoint = _ray->m_pIntersectionProperties->m_IntersectionPoint + (float)0.0001 * 
-                _ray->m_pIntersectionProperties->m_PlanarNormal;
-        bool intersect = checkIntersection(_testray);
-        if(intersect == true){
-            _ray->setBlockedLight(i,true);
+        std::vector<Vector4f> visiblesample = m_LightList[i]->getVisibleSamplePoint();
+        float lightintensity = 0.0;
+        for(unsigned int j = 0; j < visiblesample.size();j++){
+            Vector4f ptolight = visiblesample[i] -  _ray->m_pIntersectionProperties->
+                    m_IntersectionPoint;
+            //ptolight.Print();
+            ptolight.Normalize();
+            Line _testray;
+            _testray.m_Direction = ptolight;
+            _testray.m_StartPoint = _ray->m_pIntersectionProperties->m_IntersectionPoint + (float)0.0001 * 
+                    _ray->m_pIntersectionProperties->m_PlanarNormal;
+            bool intersect = checkIntersection(_testray);
+            if(intersect){
+                lightintensity+=1.0;
+            }
         }
-        else{
-            _ray->setBlockedLight(i,false);
-        }
+        lightintensity /= (float)visiblesample.size();
+        _ray->setBlockedLight(i,lightintensity);
     }
 }
