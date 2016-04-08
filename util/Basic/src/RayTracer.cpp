@@ -46,7 +46,7 @@ void RayTracer::initial_hw_factor(int h, int w, double fov)
 Color RayTracer::anti_aliasing(Ray _ray)
 {
     Color col;
-    Point3D img_plane(-1);
+    Point3D img_plane(0,0,-1);
     
     int w = get_width();
     int h = get_height();
@@ -55,22 +55,22 @@ Color RayTracer::anti_aliasing(Ray _ray)
     
     for (int li = -1; li<2; li++) {
         if (li == 0) {
-            img_plane.a = (-double(w)/2 + 0.5)/_factor;
-            img_plane.b = (-double(h)/2 + 0.5)/_factor;
+            img_plane[0] = (-double(w)/2 + 0.5)/_factor;
+            img_plane[1] = (-double(h)/2 + 0.5)/_factor;
             col = col + anti_aliasing_helper(img_plane, m_ViewToWorld,yes);
             continue;
         }
         for (int zhuang = -1; zhuang<2; zhuang++) {
             if (zhuang != 0) {
-                img_plane.a = (-double(w)/2 + 0.5 + li*0.25)/_factor;
-                img_plane.b = (-double(h)/2 + 0.5 + zhuang*0.25)/_factor;
+                img_plane[0] = (-double(w)/2 + 0.5 + li*0.25)/_factor;
+                img_plane[1] = (-double(h)/2 + 0.5 + zhuang*0.25)/_factor;
                 col = col + anti_aliasing_helper(img_plane, m_ViewToWorld, yes);
             }
             
         }
     }
     
-    col = 0.2 * col;
+    col = 0.2f * col;
     
     return col;
 }
@@ -81,7 +81,7 @@ Color RayTracer::anti_aliasing_helper(Point3D imgp, Matrix4f vw, bool intersect)
     
     if (intersect) {
         Point3D origin(0,0,0);
-        Ray ray;
+        //Ray ray;
         
         //set up ray orgin
         //ray.origin = vw * origin;
@@ -97,7 +97,7 @@ Color RayTracer::anti_aliasing_helper(Point3D imgp, Matrix4f vw, bool intersect)
         
         // make col equals ray's color
         // IMP: operator =, still has problem
-        col = ray.m_color;
+        //col = ray.m_color;
     }
     
     return col;
@@ -314,9 +314,9 @@ void RayTracer::ExtractRayListToPixelBuffer(){
 	for(unsigned int i = 0; i < m_RayList.size();i++){
             if (antiAliasing) {
                 Color col = anti_aliasing(*m_RayList[i]);
-                R = col.R;
-                G = col.G;
-                B = col.B;
+                R = col[0];
+                G = col[1];
+                B = col[2];
                 m_pPixelBuffer->m_Rbuffer[pixel_counter] = int(R);
                 m_pPixelBuffer->m_Gbuffer[pixel_counter] = int(G);
                 m_pPixelBuffer->m_Bbuffer[pixel_counter] = int(B);

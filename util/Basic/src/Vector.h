@@ -116,10 +116,10 @@ template<class T> class Vector4{
             return ret;
         }
         inline Vector4<T>& operator*=(T scalar){
-            *this[0] *= scalar;
-            *this[1] *= scalar;
-            *this[2] *= scalar;
-            *this[3] *= scalar;
+            (*this)[0] *= scalar;
+            (*this)[1] *= scalar;
+            (*this)[2] *= scalar;
+            (*this)[3] *= scalar;
             return *this;
         }
         inline Vector4<T>& operator*=(const Vector4<T>& vec){
@@ -209,6 +209,7 @@ template<class T> inline Vector4<T> operator * (const T lhs, const Vector4<T>& r
 typedef Vector4<float> Vector4f;
 typedef Vector4<double> Vector4d;
 typedef Vector4<int> Vector4i;
-
+typedef Vector4<float> Color;
+typedef Vector4<float> Point3D;
 
 #endif /* VECTOR_H */
