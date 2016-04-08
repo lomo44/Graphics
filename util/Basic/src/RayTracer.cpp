@@ -117,35 +117,11 @@ void RayTracer::InitializeRayList(){
 			/** ToDO:
 			 * Need to implement anti-aliasing, random sampling.
 			 */
-            
-            for (int li = -1; li<2; li++) {
-                if (li == 0) {
-                    imagePlane[0] = (-double(_width)/2 + 0.5)/factor;
-                    imagePlane[1] = (-double(_height)/2 + 0.5)/factor;
-                    imagePlane[2] = -1;
-                    Vector4f _dir (imagePlane[0],imagePlane[1],imagePlane[2]);
-                    Vector4f dir = this->m_ViewToWorld * _dir;
-                    origin = this->m_ViewToWorld * origin;;
-                    Line newrayline;
-                    newrayline.m_Direction = dir;
-                    newrayline.m_StartPoint = origin;
-                    Ray* newray = new Ray(NULL,newrayline,this->m_pRenderAttribute->m_iRayTracingDepth);
-                    newray->m_iID = i*_height + j;
-                    if(this->m_pRenderAttribute->m_bShadowEnable){
-                        //std::cout<<this->m_LightList.size()<<std::endl;
-                        newray->enableShadow(this->m_LightList.size());
-                    }
-                    else{
-                        newray->disableShadow();
-                    }
-                    m_RayBuffer.push(newray);
-                    m_RayList.push_back(newray);
-                    continue;
-                }
-                for (int zhuang = -1; zhuang<2; zhuang++) {
-                    if (zhuang != 0) {
-                        imagePlane[0] = (-double(_width)/2 + 0.5 + li*0.25)/factor;
-                        imagePlane[1] = (-double(_height)/2 + 0.5 + zhuang*0.25)/factor;
+            if(antiAliasing){
+                    for (int li = -1; li<2; li++) {
+                    if (li == 0) {
+                        imagePlane[0] = (-double(_width)/2 + 0.5)/factor;
+                        imagePlane[1] = (-double(_height)/2 + 0.5)/factor;
                         imagePlane[2] = -1;
                         Vector4f _dir (imagePlane[0],imagePlane[1],imagePlane[2]);
                         Vector4f dir = this->m_ViewToWorld * _dir;
@@ -164,31 +140,59 @@ void RayTracer::InitializeRayList(){
                         }
                         m_RayBuffer.push(newray);
                         m_RayList.push_back(newray);
+                        continue;
                     }
-                    
+                    for (int zhuang = -1; zhuang<2; zhuang++) {
+                        if (zhuang != 0) {
+                            imagePlane[0] = (-double(_width)/2 + 0.5 + li*0.25)/factor;
+                            imagePlane[1] = (-double(_height)/2 + 0.5 + zhuang*0.25)/factor;
+                            imagePlane[2] = -1;
+                            Vector4f _dir (imagePlane[0],imagePlane[1],imagePlane[2]);
+                            Vector4f dir = this->m_ViewToWorld * _dir;
+                            origin = this->m_ViewToWorld * origin;;
+                            Line newrayline;
+                            newrayline.m_Direction = dir;
+                            newrayline.m_StartPoint = origin;
+                            Ray* newray = new Ray(NULL,newrayline,this->m_pRenderAttribute->m_iRayTracingDepth);
+                            newray->m_iID = i*_height + j;
+                            if(this->m_pRenderAttribute->m_bShadowEnable){
+                                //std::cout<<this->m_LightList.size()<<std::endl;
+                                newray->enableShadow(this->m_LightList.size());
+                            }
+                            else{
+                                newray->disableShadow();
+                            }
+                            m_RayBuffer.push(newray);
+                            m_RayList.push_back(newray);
+                        }
+
+                    }
                 }
             }
+            else{
+                imagePlane[0] = (-double(_width)/2 + 0.5 + j)/factor;
+    			imagePlane[1] = (-double(_height)/2 + 0.5 + i)/factor;
+    			imagePlane[2] = -1;
+    			Vector4f _dir (imagePlane[0],imagePlane[1],imagePlane[2]);
+    			Vector4f dir = this->m_ViewToWorld * _dir;
+    			origin = this->m_ViewToWorld * origin;;
+    			Line newrayline;
+    			newrayline.m_Direction = dir;
+    			newrayline.m_StartPoint = origin;
+    			Ray* newray = new Ray(NULL,newrayline,this->m_pRenderAttribute->m_iRayTracingDepth);
+                newray->m_iID = i*_height + j;
+                if(this->m_pRenderAttribute->m_bShadowEnable){
+                    //std::cout<<this->m_LightList.size()<<std::endl;
+                    newray->enableShadow(this->m_LightList.size());
+                }
+                else{
+                    newray->disableShadow();
+                }
+    			m_RayBuffer.push(newray);
+    			m_RayList.push_back(newray);
+            }
 
-//			imagePlane[0] = (-double(_width)/2 + 0.5 + j)/factor;
-//			imagePlane[1] = (-double(_height)/2 + 0.5 + i)/factor;
-//			imagePlane[2] = -1;
-//			Vector4f _dir (imagePlane[0],imagePlane[1],imagePlane[2]);
-//			Vector4f dir = this->m_ViewToWorld * _dir;
-//			origin = this->m_ViewToWorld * origin;;
-//			Line newrayline;
-//			newrayline.m_Direction = dir;
-//			newrayline.m_StartPoint = origin;
-//			Ray* newray = new Ray(NULL,newrayline,this->m_pRenderAttribute->m_iRayTracingDepth);
-//            newray->m_iID = i*_height + j;
-//            if(this->m_pRenderAttribute->m_bShadowEnable){
-//                //std::cout<<this->m_LightList.size()<<std::endl;
-//                newray->enableShadow(this->m_LightList.size());
-//            }
-//            else{
-//                newray->disableShadow();
-//            }
-//			m_RayBuffer.push(newray);
-//			m_RayList.push_back(newray);
+//			
 		}
 	}
 	std::cout<<"Ray List Initialize, Total Number Of Ray: "<<m_RayBuffer.size()<<std::endl;
@@ -281,9 +285,9 @@ void RayTracer::ExtractRayListToPixelBuffer(){
                     i++;
                     color_counter++;
                 }
-                R = R/5;
-                G = G/5;
-                B = B/5;
+                R = R*51;
+                G = G*51;
+                B = B*51;
                 m_pPixelBuffer->m_Rbuffer[pixel_counter] = int(R);
                 m_pPixelBuffer->m_Gbuffer[pixel_counter] = int(G);
                 m_pPixelBuffer->m_Bbuffer[pixel_counter] = int(B);

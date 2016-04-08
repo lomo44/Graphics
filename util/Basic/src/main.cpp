@@ -40,7 +40,7 @@ int main(int argc, char** argv) {
     RayTracer newtracer;
     OBJParser* newparser  = new OBJParser();
     //newparser->parsefile("/home/john/Code/Graphics/model/chair.obj");
-    newparser->parsefile("/homes/l/lizhuan1/NetBeansProjects/Graphics/model/man.obj");
+    newparser->parsefile("/homes/l/lizhuan1/NetBeansProjects/Graphics/model/chair.obj");
     MeshObject* out = newparser->getOutputObject();
     //out->print();
     Material* gold = new Material("gold",Vector4f(0.3,0.3,0.3),
@@ -100,9 +100,9 @@ int main(int argc, char** argv) {
     
     
     //newtracer.addLight(newlight);
-    //newtracer.addLight(newlight2);
+    newtracer.addLight(newlight2);
     newtracer.addObject(out);
-    //newtracer.addObject(out2);
+    newtracer.addObject(out2);
     newtracer.addObject(baseplane);
     newtracer.addObject(newcylinder);
     
