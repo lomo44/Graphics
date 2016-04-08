@@ -11,14 +11,16 @@
 #include <cmath>
 #include "light_source.h"
 
+bool specular_mode = true;
+
 void PointLight::shade( Ray3D& ray ) {
-	// TODO: implement this function to fill in values for ray.col 
+	// TODO: implement this function to fill in values for ray.col
 	// using phong shading.  Make sure your vectors are normalized, and
 	// clamp colour values to 1.0.
 	//
-	// It is assumed at this point that the intersection information in ray 
-	// is available.  So be sure that traverseScene() is called on the ray 
-	// before this function.  
+	// It is assumed at this point that the intersection information in ray
+	// is available.  So be sure that traverseScene() is called on the ray
+	// before this function.
 
 	Vector3D LightDirection (this->_pos[0]-ray.intersection.point[0],
 			this->_pos[1]-ray.intersection.point[1],
@@ -44,10 +46,12 @@ void PointLight::shade( Ray3D& ray ) {
 			(ray.intersection.normal.dot(LightDirection)*LightDirection);
 	projection = std::max(0.0,specularDir.dot(LightDirection));
 
-	_ret[0] += _col_specular[0] * projection * ray.intersection.mat->specular[0];
-	_ret[1] += _col_specular[1] * projection * ray.intersection.mat->specular[1];
-	_ret[2] += _col_specular[2] * projection * ray.intersection.mat->specular[2];
-
+	if(specular_mode)
+	{
+		_ret[0] += _col_specular[0] * projection * ray.intersection.mat->specular[0];
+		_ret[1] += _col_specular[1] * projection * ray.intersection.mat->specular[1];
+		_ret[2] += _col_specular[2] * projection * ray.intersection.mat->specular[2];
+	}
 
 	_ret.clamp();
 	ray.col[0] += _ret[0];
@@ -55,4 +59,3 @@ void PointLight::shade( Ray3D& ray ) {
 	ray.col[2] += _ret[2];
 
 }
-
