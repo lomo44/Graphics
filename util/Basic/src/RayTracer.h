@@ -21,6 +21,13 @@ class RayTracer {
 public:
 	RayTracer();
 	virtual ~RayTracer();
+    
+    Matrix4f get_m_vw();
+    float get_factor();
+    int get_height();
+    int get_width();
+
+    
 	void render(Attr_Render* _renderAttribute);
 	void addObject(RenderObject* _obj){
 		m_ObjectList.push_back(_obj);
@@ -30,6 +37,11 @@ public:
 		m_LightList.push_back(_light);
 	}
 private:
+    
+    void initial_hw_factor(int h, int w, double fov);
+    Color anti_aliasing(Ray _ray);
+    Color anti_aliasing_helper(Point3D imgp, Matrix4f vw, bool intersect);
+    
 	void InitializePixelBuffer(int _width, int _height);
 	void InitializeRayList();
 	void InitializeViewToWorldMatrix();
@@ -44,6 +56,11 @@ private:
 	void FlushPixelBuffer();
     
 private:
+    
+    float _factor;
+    int _height;
+    int _width;
+    
 	Matrix4f m_ViewToWorld;
 	std::vector<RenderObject*> m_ObjectList;
 	std::vector<Light*> m_LightList;

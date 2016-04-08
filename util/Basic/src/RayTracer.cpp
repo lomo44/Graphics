@@ -14,6 +14,96 @@
 #include <limits>
 #include <assert.h>
 #include <cmath>
+
+bool antiAliasing = false;
+
+Matrix4f RayTracer::get_m_vw()
+{
+    return  m_ViewToWorld;
+}
+
+float RayTracer::get_factor()
+{
+    return _factor;
+}
+
+int RayTracer::get_height()
+{
+    return _height;
+}
+int RayTracer::get_width()
+{
+    return _width;
+}
+
+void RayTracer::initial_hw_factor(int h, int w, double fov)
+{
+    _height = h;
+    _width = w;
+    _factor = (double(h)/2)/tan(fov*M_PI/360.0);
+}
+
+Color RayTracer::anti_aliasing(Ray _ray)
+{
+    Color col;
+    Point3D img_plane(-1);
+    
+    int w = get_width();
+    int h = get_height();
+    
+    bool yes = checkIntersection(_ray.m_RayLine);
+    
+    for (int li = -1; li<2; li++) {
+        if (li == 0) {
+            img_plane.a = (-double(w)/2 + 0.5)/_factor;
+            img_plane.b = (-double(h)/2 + 0.5)/_factor;
+            col = col + anti_aliasing_helper(img_plane, m_ViewToWorld,yes);
+            continue;
+        }
+        for (int zhuang = -1; zhuang<2; zhuang++) {
+            if (zhuang != 0) {
+                img_plane.a = (-double(w)/2 + 0.5 + li*0.25)/_factor;
+                img_plane.b = (-double(h)/2 + 0.5 + zhuang*0.25)/_factor;
+                col = col + anti_aliasing_helper(img_plane, m_ViewToWorld, yes);
+            }
+            
+        }
+    }
+    
+    col = 0.2 * col;
+    
+    return col;
+}
+
+Color RayTracer::anti_aliasing_helper(Point3D imgp, Matrix4f vw, bool intersect)
+{
+    Color col(0.0,0.0,0.0);
+    
+    if (intersect) {
+        Point3D origin(0,0,0);
+        Ray ray;
+        
+        //set up ray orgin
+        //ray.origin = vw * origin;
+        
+        //set up ray direction
+        //ray.dir = vw * imgp - ray.origin;
+        
+        // normalize direction if needed
+        //ray.dir.normalize();
+        
+        // compute shading
+        // ?
+        
+        // make col equals ray's color
+        // IMP: operator =, still has problem
+        col = ray.m_color;
+    }
+    
+    return col;
+}
+
+
 RayTracer::RayTracer() {
 	// TODO Auto-generated constructor stub
 	m_pPixelBuffer = NULL;
@@ -26,6 +116,11 @@ RayTracer::~RayTracer() {
 
 void RayTracer::render(Attr_Render* _renderAttribute){
 	m_pRenderAttribute = _renderAttribute;
+    
+    this->initial_hw_factor(_renderAttribute->m_iScreenHeight,
+                         _renderAttribute->m_iScreenWidth,
+                         _renderAttribute->m_ViewFrustrum->m_fFieldOfView);
+    
 	this->InitializePixelBuffer(_renderAttribute->m_iScreenWidth,
 			_renderAttribute->m_iScreenHeight);
 	InitializeViewToWorldMatrix();
@@ -217,25 +312,40 @@ void RayTracer::ExtractRayListToPixelBuffer(){
 	float G = 0.0;
 	float B = 0.0;
 	for(unsigned int i = 0; i < m_RayList.size();i++){
-		anti_aliasing_counter++;
-		R += m_RayList[i]->m_color[0];
-		G += m_RayList[i]->m_color[1];
-		B += m_RayList[i]->m_color[2];
-		if(anti_aliasing_counter % anti_aliasing_limit == 0){
-			R = R / anti_aliasing_limit * 255;
-			G = G / anti_aliasing_limit * 255;
-			B = B / anti_aliasing_limit * 255;
-            //if(R!=0 && G != 0 && B != 0)
-            //std::cout<<int(R)<<" "<<int(G)<<" "<<int(B)<<std::endl;
-            //int ID = m_RayList[i]->m_iID;
-			m_pPixelBuffer->m_Rbuffer[pixel_counter] = int(R);
-			m_pPixelBuffer->m_Gbuffer[pixel_counter] = int(G);
-			m_pPixelBuffer->m_Bbuffer[pixel_counter] = int(B);
-            R = 0;
-            G = 0;
-            B = 0;
-            pixel_counter++;
-            anti_aliasing_counter = 0;
+            if (antiAliasing) {
+                Color col = anti_aliasing(*m_RayList[i]);
+                R = col.R;
+                G = col.G;
+                B = col.B;
+                m_pPixelBuffer->m_Rbuffer[pixel_counter] = int(R);
+                m_pPixelBuffer->m_Gbuffer[pixel_counter] = int(G);
+                m_pPixelBuffer->m_Bbuffer[pixel_counter] = int(B);
+                R = 0;
+                G = 0;
+                B = 0;
+                pixel_counter++;
+            }
+            else {
+                    anti_aliasing_counter++;
+                    R += m_RayList[i]->m_color[0];
+                    G += m_RayList[i]->m_color[1];
+                    B += m_RayList[i]->m_color[2];
+                    if(anti_aliasing_counter % anti_aliasing_limit == 0){
+                        R = R / anti_aliasing_limit * 255;
+                        G = G / anti_aliasing_limit * 255;
+                        B = B / anti_aliasing_limit * 255;
+                        //if(R!=0 && G != 0 && B != 0)
+                        //std::cout<<int(R)<<" "<<int(G)<<" "<<int(B)<<std::endl;
+                        //int ID = m_RayList[i]->m_iID;
+                        m_pPixelBuffer->m_Rbuffer[pixel_counter] = int(R);
+                        m_pPixelBuffer->m_Gbuffer[pixel_counter] = int(G);
+                        m_pPixelBuffer->m_Bbuffer[pixel_counter] = int(B);
+                        R = 0;
+                        G = 0;
+                        B = 0;
+                        pixel_counter++;
+                        anti_aliasing_counter = 0;
+            }
 		}
 	}
 }
