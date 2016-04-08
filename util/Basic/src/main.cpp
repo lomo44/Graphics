@@ -116,8 +116,8 @@ int main(int argc, char** argv) {
     render->m_ViewFrustrum = view;
     render->m_iAntiAliasingScale = 1;
     render->m_iRayTracingDepth = 2;
-    render->m_iScreenHeight = 100;
-    render->m_iScreenWidth = 150;
+    render->m_iScreenHeight = 600;
+    render->m_iScreenWidth = 800;
     render->m_sFileName = "view2.bmp";
     render->m_bShadowEnable = true;
     render->m_bEnvironmentAmbientEnable = true;

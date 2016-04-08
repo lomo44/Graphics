@@ -15,7 +15,7 @@
 #include <assert.h>
 #include <cmath>
 
-bool antiAliasing = false;
+bool antiAliasing = true;
 
 RayTracer::RayTracer() {
 	// TODO Auto-generated constructor stub
@@ -111,41 +111,18 @@ void RayTracer::InitializeRayList(){
 		for (int j = 0; j < _width; j++) {
 			// Sets up ray origin and direction in view space,
 			// image plane is at z = -1.
-			Vector4f origin;
-			Vector4f imagePlane;
-            origin[3] = 1;
+
 			/** ToDO:
 			 * Need to implement anti-aliasing, random sampling.
 			 */
             if(antiAliasing){
                     for (int li = -1; li<2; li++) {
-                    if (li == 0) {
-                        imagePlane[0] = (-double(_width)/2 + 0.5)/factor;
-                        imagePlane[1] = (-double(_height)/2 + 0.5)/factor;
-                        imagePlane[2] = -1;
-                        Vector4f _dir (imagePlane[0],imagePlane[1],imagePlane[2]);
-                        Vector4f dir = this->m_ViewToWorld * _dir;
-                        origin = this->m_ViewToWorld * origin;;
-                        Line newrayline;
-                        newrayline.m_Direction = dir;
-                        newrayline.m_StartPoint = origin;
-                        Ray* newray = new Ray(NULL,newrayline,this->m_pRenderAttribute->m_iRayTracingDepth);
-                        newray->m_iID = i*_height + j;
-                        if(this->m_pRenderAttribute->m_bShadowEnable){
-                            //std::cout<<this->m_LightList.size()<<std::endl;
-                            newray->enableShadow(this->m_LightList.size());
-                        }
-                        else{
-                            newray->disableShadow();
-                        }
-                        m_RayBuffer.push(newray);
-                        m_RayList.push_back(newray);
-                        continue;
-                    }
-                    for (int zhuang = -1; zhuang<2; zhuang++) {
-                        if (zhuang != 0) {
-                            imagePlane[0] = (-double(_width)/2 + 0.5 + li*0.25)/factor;
-                            imagePlane[1] = (-double(_height)/2 + 0.5 + zhuang*0.25)/factor;
+                        if (li == 0) {
+                            Vector4f origin;
+                            Vector4f imagePlane;
+                            origin[3] = 1;
+                            imagePlane[0] = (-double(_width)/2 + 0.5+j)/factor;
+                            imagePlane[1] = (-double(_height)/2 + 0.5+i)/factor;
                             imagePlane[2] = -1;
                             Vector4f _dir (imagePlane[0],imagePlane[1],imagePlane[2]);
                             Vector4f dir = this->m_ViewToWorld * _dir;
@@ -165,11 +142,44 @@ void RayTracer::InitializeRayList(){
                             m_RayBuffer.push(newray);
                             m_RayList.push_back(newray);
                         }
+                        else{
+                            for (int zhuang = -1; zhuang<2; zhuang++) {
+                                if (zhuang != 0) {
+                                    Vector4f origin;
+                                    Vector4f imagePlane;
+                                    origin[3] = 1;
+                                    imagePlane[0] = (-double(_width)/2 + 0.5 +j+ li*0.25)/factor;
+                                    imagePlane[1] = (-double(_height)/2 + 0.5 +i+ zhuang*0.25)/factor;
+                                    imagePlane[2] = -1;
+                                    Vector4f _dir (imagePlane[0],imagePlane[1],imagePlane[2]);
+                                    Vector4f dir = this->m_ViewToWorld * _dir;
+                                    origin = this->m_ViewToWorld * origin;;
+                                    Line newrayline;
+                                    newrayline.m_Direction = dir;
+                                    newrayline.m_StartPoint = origin;
+                                    dir.Normalize();
+                                    Ray* newray = new Ray(NULL,newrayline,this->m_pRenderAttribute->m_iRayTracingDepth);
+                                    newray->m_iID = i*_height + j;
+                                    if(this->m_pRenderAttribute->m_bShadowEnable){
+                                        //std::cout<<this->m_LightList.size()<<std::endl;
+                                        newray->enableShadow(this->m_LightList.size());
+                                    }
+                                    else{
+                                        newray->disableShadow();
+                                    }
+                                    m_RayBuffer.push(newray);
+                                    m_RayList.push_back(newray);
+                                }
 
-                    }
+                            }
+                        }
+                    
                 }
             }
             else{
+                Vector4f origin;
+                Vector4f imagePlane;
+                origin[3] = 1;
                 imagePlane[0] = (-double(_width)/2 + 0.5 + j)/factor;
     			imagePlane[1] = (-double(_height)/2 + 0.5 + i)/factor;
     			imagePlane[2] = -1;
@@ -179,6 +189,7 @@ void RayTracer::InitializeRayList(){
     			Line newrayline;
     			newrayline.m_Direction = dir;
     			newrayline.m_StartPoint = origin;
+                dir.Normalize();
     			Ray* newray = new Ray(NULL,newrayline,this->m_pRenderAttribute->m_iRayTracingDepth);
                 newray->m_iID = i*_height + j;
                 if(this->m_pRenderAttribute->m_bShadowEnable){
@@ -276,7 +287,7 @@ void RayTracer::ExtractRayListToPixelBuffer(){
 	float G = 0.0;
 	float B = 0.0;
 	for(unsigned int i = 0; i < m_RayList.size();i++){
-            if (antiAliasing) {
+            /*if (antiAliasing) {
                 int color_counter=0;
                 while (color_counter<5) {
                     R += m_RayList[i]->m_color[0];
@@ -285,9 +296,9 @@ void RayTracer::ExtractRayListToPixelBuffer(){
                     i++;
                     color_counter++;
                 }
-                R = R*51;
-                G = G*51;
-                B = B*51;
+                R = R*51.0;
+                G = G*51.0;
+                B = B*51.0;
                 m_pPixelBuffer->m_Rbuffer[pixel_counter] = int(R);
                 m_pPixelBuffer->m_Gbuffer[pixel_counter] = int(G);
                 m_pPixelBuffer->m_Bbuffer[pixel_counter] = int(B);
@@ -296,15 +307,15 @@ void RayTracer::ExtractRayListToPixelBuffer(){
                 B = 0;
                 pixel_counter++;
             }
-            else {
+            else {*/
                     anti_aliasing_counter++;
                     R += m_RayList[i]->m_color[0];
                     G += m_RayList[i]->m_color[1];
                     B += m_RayList[i]->m_color[2];
-                    if(anti_aliasing_counter % anti_aliasing_limit == 0){
-                        R = R / anti_aliasing_limit * 255;
-                        G = G / anti_aliasing_limit * 255;
-                        B = B / anti_aliasing_limit * 255;
+                    if(anti_aliasing_counter % 5 == 0){
+                        R = R / 5* 255;
+                        G = G / 5 * 255;
+                        B = B / 5 * 255;
                         //if(R!=0 && G != 0 && B != 0)
                         //std::cout<<int(R)<<" "<<int(G)<<" "<<int(B)<<std::endl;
                         //int ID = m_RayList[i]->m_iID;
@@ -316,7 +327,7 @@ void RayTracer::ExtractRayListToPixelBuffer(){
                         B = 0;
                         pixel_counter++;
                         anti_aliasing_counter = 0;
-            }
+            //}
 		}
 	}
 }
