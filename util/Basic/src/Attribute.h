@@ -157,72 +157,72 @@ struct Attr_Render{
     Vector4f m_EnvironmentAmbient;
 };
 
-class Color {
-public:
-    float R;
-    float G;
-    float B;
-    
-    Color()
-    { R=0.0;G=0.0;B=0.0; }
-    
-    Color(float rr, float gg, float bb)
-    { R=rr;G=gg;B=bb; }
-    
-    Color& operator =(const Color& other)
-    {
-        R = other.R; G = other.G; B = other.B;
-        return *this;
-    }
-    
-    Color& operator =(const Vector4f& other)
-    {
-        R = other.[0]; G = other.[1]; B = other.[2];
-        return *this;
-    }
-    
-    Color operator *(const Color& other)
-    {
-        return Color(R*other.R, G*other.G, B*other.B);
-    }
-};
-
-Color operator +(const Color& u, const Color& v)
-{
-    return Color(u.R+v.R, u.G+v.G, u.B+v.B);
-}
-
-Color operator *(double s, const Color& c)
-{
-    return Color(s*c.R, s*c.G, s*c.B);
-}
-
-
-class Point3D {
-public:
-    float a;
-    float b;
-    float c;
-    
-    Point3D () {
-        a=0.0;b=0.0;c=0.0;
-    };
-    
-    Point3D (float aa, float bb, float cc) {
-        a=aa;b=bb;c=cc;
-    };
-    
-    Point3D (float cc) {
-        a=0;b=0;c=cc;
-    };
-    
-    Point3D (Point3D wo, Point3D cao) {
-        a = wo.a*cao.a;
-        b = wo.b*cao.b;
-        c = wo.c*cao.c;
-    }
-    
-};
+//class Color {
+//public:
+//    float R;
+//    float G;
+//    float B;
+//    
+//    Color()
+//    { R=0.0;G=0.0;B=0.0; }
+//    
+//    Color(float rr, float gg, float bb)
+//    { R=rr;G=gg;B=bb; }
+//    
+//    Color& operator =(const Color& other)
+//    {
+//        R = other.R; G = other.G; B = other.B;
+//        return *this;
+//    }
+//    
+//    Color& operator =(const Vector4f& other)
+//    {
+//        R = other[0]; G = other[1]; B = other[2];
+//        return *this;
+//    }
+//    
+//    Color operator *(const Color& other)
+//    {
+//        return Color(R*other.R, G*other.G, B*other.B);
+//    }
+//};
+//
+//Color operator +(const Color& u, const Color& v)
+//{
+//    return Color(u.R+v.R, u.G+v.G, u.B+v.B);
+//}
+//
+//Color operator *(double s, const Color& c)
+//{
+//    return Color(s*c.R, s*c.G, s*c.B);
+//}
+//
+//
+//class Point3D {
+//public:
+//    float a;
+//    float b;
+//    float c;
+//    
+//    Point3D () {
+//        a=0.0;b=0.0;c=0.0;
+//    };
+//    
+//    Point3D (float aa, float bb, float cc) {
+//        a=aa;b=bb;c=cc;
+//    };
+//    
+//    Point3D (float cc) {
+//        a=0;b=0;c=cc;
+//    };
+//    
+//    Point3D (Point3D wo, Point3D cao) {
+//        a = wo.a*cao.a;
+//        b = wo.b*cao.b;
+//        c = wo.c*cao.c;
+//    }
+//    
+//};
 
             
 /*public:
