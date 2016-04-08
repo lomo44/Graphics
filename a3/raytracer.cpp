@@ -19,6 +19,7 @@
 #include <stdint.h>
 
 bool antiAliasing = true;
+bool scene_signature = false;
 
 Raytracer::Raytracer() : _lightSource(NULL) {
 	_root = new SceneDagNode();
@@ -167,6 +168,17 @@ void Raytracer::traverseScene( SceneDagNode* node, Ray3D& ray ) {
 	if (node->obj) {
 		// Perform intersection.
 		if (node->obj->intersect(ray, _worldToModel, _modelToWorld)) {
+			if (scene_signature && node->obj->type == 100)
+			{
+				Colour BLUE(0.0,0.0,1.0);
+				ray.col = BLUE;
+			}
+			if (scene_signature && node->obj->type == 101)
+			{
+				Colour GREEN(0.0,1.0,0.0);
+				ray.col = GREEN;
+			}
+
 			ray.intersection.mat = node->mat;
 		};
 	}
@@ -224,7 +236,8 @@ Colour Raytracer::shadeRay( Ray3D& ray ) {
 	// Don't bother shading if the ray didn't hit
 	// anything.
 	if (!ray.intersection.none) {
-		computeShading(ray);
+		if(!scene_signature)
+		{ computeShading(ray); }
 		col = ray.col;
 	}
 
