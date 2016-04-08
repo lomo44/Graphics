@@ -58,8 +58,8 @@ int main(int argc, char** argv) {
     out->changeMaterial(gold);
     
     Material* white_mirror = new Material("white_mirror", Vector4f(0.3,0.3,0.3),
-            Vector4f(0.6,0.6,0.6),Vector4f(0.9,0.9,0.9),200,0,eMaterialType_opague);
-    //white_mirror->m_iGlossySamepleCount = 40;
+            Vector4f(0.6,0.6,0.6),Vector4f(0.9,0.9,0.9),200,0,eMaterialType_glossy);
+    white_mirror->m_iGlossySamepleCount = 20;
       
     Material* plain_wood = new Material("plane",Vector4f(0.0,0.0,0.0),
             Vector4f(0.0,0.0,0.0),Vector4f(0.0,0.0,0.0),10,0,eMaterialType_opague);
@@ -101,8 +101,8 @@ int main(int argc, char** argv) {
     
     //newtracer.addLight(newlight);
     newtracer.addLight(newlight2);
-    newtracer.addObject(out);
-    newtracer.addObject(out2);
+    //newtracer.addObject(out);
+    //newtracer.addObject(out2);
     newtracer.addObject(baseplane);
     newtracer.addObject(newcylinder);
     
@@ -118,7 +118,7 @@ int main(int argc, char** argv) {
     render->m_iRayTracingDepth = 2;
     render->m_iScreenHeight = 600;
     render->m_iScreenWidth = 800;
-    render->m_sFileName = "view2.bmp";
+    render->m_sFileName = "view3.bmp";
     render->m_bShadowEnable = true;
     render->m_bEnvironmentAmbientEnable = true;
     render->m_EnvironmentAmbient = Vector4f(0.1,0.1,0.1);
